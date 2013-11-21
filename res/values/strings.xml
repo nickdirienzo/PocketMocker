@@ -4,5 +4,9 @@
     <string name="app_name">pocketmocker</string>
     <string name="action_settings">Settings</string>
     <string name="hello_world">Hello world!</string>
-
+    <string name="welcome">Welcome to PocketMocker</string>
+    <string name="edit_lat">Enter Latitude</string>
+    <string name="edit_long">Enter Longitude</string>
+	<string name="submit">Submit</string>
+	
 </resources>

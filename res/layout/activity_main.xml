@@ -9,8 +9,32 @@
     tools:context=".MainActivity" >
 
     <TextView
+        android:id="@+id/welcome"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="@string/hello_world" />
+        android:text="@string/welcome" />
+    
+    <EditText
+        android:id="@+id/edit_lat"
+        android:layout_below="@id/welcome"
+        android:layout_width="fill_parent"
+        android:layout_height="wrap_content"
+        android:hint="@string/edit_lat" />
+    
+    <EditText
+        android:id="@+id/edit_long"
+        android:layout_below="@id/edit_lat"
+        android:layout_width="fill_parent"
+        android:layout_height="wrap_content"
+        android:hint="@string/edit_long" />
+    
+    <Button 
+        android:id="@+id/submit"
+        android:layout_below="@id/edit_long"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="@string/submit"
+        android:onClick="submit" />
+    
 
 </RelativeLayout>
