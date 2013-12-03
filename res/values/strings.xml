@@ -8,5 +8,6 @@
     <string name="edit_lat">Enter Latitude</string>
     <string name="edit_long">Enter Longitude</string>
 	<string name="submit">Submit</string>
+	<string name="mock">Mock</string>
 	
 </resources>
