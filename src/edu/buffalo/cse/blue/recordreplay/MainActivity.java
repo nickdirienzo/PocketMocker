@@ -84,6 +84,7 @@ public class MainActivity extends Activity {
     	if(recording) {
     		Location lastLoc = locationManager.getLastKnownLocation(LocationManager.GPS_PROVIDER);
     		String displayLoc = MainActivity.buildLocationDisplayString(lastLoc);
+    		// TODO: Log location
     		recordButton.setText(R.string.stop_record);
     		locationText.setText(locationPrefix + displayLoc);
     	} else {
