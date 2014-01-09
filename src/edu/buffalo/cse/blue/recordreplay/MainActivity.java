@@ -1,6 +1,5 @@
 package edu.buffalo.cse.blue.recordreplay;
 
-import edu.buffalo.cse.blue.recordreplay.models.DatabaseHandler;
 import android.app.Activity;
 import android.content.Context;
 import android.location.Location;
@@ -10,8 +9,11 @@ import android.os.Bundle;
 import android.util.Log;
 import android.view.Menu;
 import android.view.View;
+import android.widget.ArrayAdapter;
 import android.widget.Button;
+import android.widget.Spinner;
 import android.widget.TextView;
+import edu.buffalo.cse.blue.recordreplay.models.DatabaseHandler;
 
 public class MainActivity extends Activity {
 	
@@ -19,7 +21,9 @@ public class MainActivity extends Activity {
 	
 	private boolean recording = false;
 	private TextView locationText;
+	private Spinner pathSpinner;
 	private String locationPrefix;
+	private String activePathId;
 	
 	private LocationManager locationManager;
 	private DatabaseHandler db;
@@ -33,6 +37,11 @@ public class MainActivity extends Activity {
         locationPrefix = this.getString(R.string.loc_prefix);
         
         db = new DatabaseHandler(this);
+        if(db.getPathCount() == 0) {
+        	pathSpinner = (Spinner) this.findViewById(R.id.pathSpinner);
+        	String[] defaultPath = {this.getString(R.string.default_path)};
+        	pathSpinner.setAdapter(new ArrayAdapter<String>(MainActivity.this, R.id.pathSpinner, defaultPath));
+        }
         
         locationManager = (LocationManager)this.getSystemService(Context.LOCATION_SERVICE);
         locationManager.requestLocationUpdates(LocationManager.GPS_PROVIDER, 0, 0,
@@ -44,7 +53,7 @@ public class MainActivity extends Activity {
     				// Logging only when recording because otherwise it's a huge mess in LogCat
     				Log.v(TAG, "LocatoinChanged. Loc: " + loc.toString());
     				// Do we need to log every location change?
-    				db.insertLocation(loc);
+    				db.insertLocation(loc, activePathId);
 	    			String displayLoc = MainActivity.buildLocationDisplayString(loc);
 	    			locationText.setText(locationPrefix + displayLoc);
 	    			Log.v(TAG, "Location count: " + db.getLocationCount());
@@ -91,7 +100,7 @@ public class MainActivity extends Activity {
     	if(recording) {
     		Location lastLoc = locationManager.getLastKnownLocation(LocationManager.GPS_PROVIDER);
     		String displayLoc = MainActivity.buildLocationDisplayString(lastLoc);
-    		db.insertLocation(lastLoc);
+    		db.insertLocation(lastLoc, activePathId);
     		recordButton.setText(R.string.stop_record);
     		locationText.setText(locationPrefix + displayLoc);
     	} else {

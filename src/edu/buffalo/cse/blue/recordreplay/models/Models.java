@@ -17,6 +17,7 @@ public final class Models  {
 		
 		public static final String TABLE_NAME = "locations";
 		// Columns
+		// From android.location.Locatoin
 		public static final String LOC_PROVIDER = "loc_provider";
 		public static final String LOC_TIME = "loc_time";
 		public static final String LOC_LAT = "loc_lat";
@@ -35,6 +36,8 @@ public final class Models  {
 		// We can serialize the class to JSON, store it as a String in SQLite,
 		// then recreate it from the string
 		public static final String LOC_EXTRAS = "loc_extras";
+		// PocketMocker required columns
+		public static final String LOC_PATH_ID = "loc_path_id";
 		
 		// Helpers
 		public static final String SQL_CREATE_ENTIRES = 
@@ -52,12 +55,29 @@ public final class Models  {
 				Location.LOC_BEARING + REAL + COMMA + 
 				Location.LOC_HAS_ACCURACY + INT + COMMA + 
 				Location.LOC_ACCURACY + REAL + COMMA +
-				Location.LOC_EXTRAS + TEXT +
+				Location.LOC_EXTRAS + TEXT + COMMA +
+				Location.LOC_PATH_ID + INT +
 				" )";
 		
 		public static final String SQL_DELETE_ENTRIES = 
 				"DROP TABLE IF EXISTS " + Location.TABLE_NAME;
 				
+	}
+	
+	public static abstract class Path implements BaseColumns {
+		public static final String TABLE_NAME = "paths";
+		// Columns
+		public static final String PATH_NAME = "path_name";
+		public static final String PATH_CREATION_DATE = "path_creation_date";
+		// Helper queries
+		public static final String SQL_CREATE_TABLE = 
+				"CREATE TABLE " + Path.TABLE_NAME + "( " +
+				Path._ID + INT + PK + COMMA +
+				Path.PATH_NAME + TEXT + COMMA +
+				Path.PATH_CREATION_DATE + TEXT + " )";
+		
+		public static final String SQL_DROP_TABLE = "DROP TABLE IF EXISTS " + Path.TABLE_NAME;
+		
 	}
 
 }

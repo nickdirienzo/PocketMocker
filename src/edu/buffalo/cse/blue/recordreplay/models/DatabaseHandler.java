@@ -4,9 +4,6 @@ import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.Locale;
 
-import org.json.JSONException;
-import org.json.JSONObject;
-
 import android.content.ContentValues;
 import android.content.Context;
 import android.database.Cursor;
@@ -19,7 +16,7 @@ import android.util.Log;
 public class DatabaseHandler extends SQLiteOpenHelper {
 	
 	private static final String TAG = "REC_DB";
-	private static final int DATABASE_VERSION = 1;
+	private static final int DATABASE_VERSION = 2;
 	private static final String DATABASE_NAME = "RecordReplay.db";
 
 	public DatabaseHandler(Context context) {
@@ -28,8 +25,9 @@ public class DatabaseHandler extends SQLiteOpenHelper {
 
 	@Override
 	public void onCreate(SQLiteDatabase db) {
-		Log.v(TAG, "Creating database");
+		Log.v(TAG, "Creating databases");
 		db.execSQL(Models.Location.SQL_CREATE_ENTIRES);
+		db.execSQL(Models.Path.SQL_CREATE_TABLE);
 		Log.v(TAG, "Created database");
 	}
 
@@ -38,6 +36,7 @@ public class DatabaseHandler extends SQLiteOpenHelper {
 		Log.v(TAG, "Deleteing tables.");
 		// For now, since we're not in production, we can just drop our data when we upgrade
 		db.execSQL(Models.Location.SQL_DELETE_ENTRIES);
+		db.execSQL(Models.Path.SQL_DROP_TABLE);
 		// And recreate everything
 		onCreate(db);
 	}
@@ -53,7 +52,7 @@ public class DatabaseHandler extends SQLiteOpenHelper {
 		return b.toString();
 	}
 	
-	public void insertLocation(Location loc) {
+	public void insertLocation(Location loc, String activePathId) {
 		Log.v(TAG, "Inserting locatoin into db.");
 		SQLiteDatabase db = this.getWritableDatabase();
 		ContentValues values = new ContentValues();
@@ -70,6 +69,7 @@ public class DatabaseHandler extends SQLiteOpenHelper {
 		values.put(Models.Location.LOC_HAS_ACCURACY, loc.hasAccuracy());
 		values.put(Models.Location.LOC_ACCURACY, loc.getAccuracy());
 		values.put(Models.Location.LOC_EXTRAS, serializeBundle(loc.getExtras()));
+		values.put(Models.Location.LOC_PATH_ID, activePathId);
 		db.insert(Models.Location.TABLE_NAME, null, values);
 		db.close();
 		Log.v(TAG, "Successfully inserted locatoin into db: " + values.toString());
@@ -78,6 +78,29 @@ public class DatabaseHandler extends SQLiteOpenHelper {
 	public int getLocationCount() {
 		SQLiteDatabase db = this.getReadableDatabase();
 		Cursor cursor = db.rawQuery("SELECT * FROM " + Models.Location.TABLE_NAME, null);
+		int ret = cursor.getCount();
+		cursor.close();
+		return ret;
+	}
+	
+	/**
+	 * Insert a path.
+	 * @param p the path to insert
+	 * @return the rowid of the path
+	 */
+	public long insertPath(Path p) {
+		SQLiteDatabase db = this.getWritableDatabase();
+		ContentValues values = new ContentValues();
+		values.put(Models.Path.PATH_NAME, p.getName());
+		values.put(Models.Path.PATH_CREATION_DATE, transformTimestampToDate(p.getTimestamp()));
+		long ret = db.insert(Models.Path.TABLE_NAME, null, values);
+		db.close();
+		return ret;
+	}
+	
+	public int getPathCount() {
+		SQLiteDatabase db = this.getReadableDatabase();
+		Cursor cursor = db.rawQuery("SELECT * FROM " + Models.Path.TABLE_NAME, null);
 		int ret = cursor.getCount();
 		cursor.close();
 		return ret;
