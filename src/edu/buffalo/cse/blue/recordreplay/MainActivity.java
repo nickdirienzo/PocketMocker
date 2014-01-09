@@ -1,5 +1,6 @@
 package edu.buffalo.cse.blue.recordreplay;
 
+import edu.buffalo.cse.blue.recordreplay.models.DatabaseHandler;
 import android.app.Activity;
 import android.content.Context;
 import android.location.Location;
@@ -21,6 +22,7 @@ public class MainActivity extends Activity {
 	private String locationPrefix;
 	
 	private LocationManager locationManager;
+	private DatabaseHandler db;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -30,6 +32,8 @@ public class MainActivity extends Activity {
         locationText = (TextView)this.findViewById(R.id.locationText);
         locationPrefix = this.getString(R.string.loc_prefix);
         
+        db = new DatabaseHandler(this);
+        
         locationManager = (LocationManager)this.getSystemService(Context.LOCATION_SERVICE);
         locationManager.requestLocationUpdates(LocationManager.GPS_PROVIDER, 0, 0,
         		new LocationListener() {
@@ -37,7 +41,8 @@ public class MainActivity extends Activity {
     		@Override
     		public void onLocationChanged(Location loc) {
     			Log.v(TAG, "LocatoinChanged. Loc: " + loc.toString());
-    			// TODO: Log Locatoin
+    			// Do we need to log every location change?
+    			db.insertLocation(loc);
     			if(recording) {
 	    			String displayLoc = MainActivity.buildLocationDisplayString(loc);
 	    			locationText.setText(locationPrefix + displayLoc);
@@ -84,7 +89,7 @@ public class MainActivity extends Activity {
     	if(recording) {
     		Location lastLoc = locationManager.getLastKnownLocation(LocationManager.GPS_PROVIDER);
     		String displayLoc = MainActivity.buildLocationDisplayString(lastLoc);
-    		// TODO: Log location
+    		db.insertLocation(lastLoc);
     		recordButton.setText(R.string.stop_record);
     		locationText.setText(locationPrefix + displayLoc);
     	} else {
