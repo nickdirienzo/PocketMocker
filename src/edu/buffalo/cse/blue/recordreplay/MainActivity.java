@@ -40,10 +40,10 @@ public class MainActivity extends Activity {
 
     		@Override
     		public void onLocationChanged(Location loc) {
-    			Log.v(TAG, "LocatoinChanged. Loc: " + loc.toString());
-    			// Do we need to log every location change?
-    			db.insertLocation(loc);
     			if(recording) {
+    				Log.v(TAG, "LocatoinChanged. Loc: " + loc.toString());
+    				// Do we need to log every location change?
+    				db.insertLocation(loc);
 	    			String displayLoc = MainActivity.buildLocationDisplayString(loc);
 	    			locationText.setText(locationPrefix + displayLoc);
     			}
