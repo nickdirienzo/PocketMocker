@@ -41,11 +41,13 @@ public class MainActivity extends Activity {
     		@Override
     		public void onLocationChanged(Location loc) {
     			if(recording) {
+    				// Logging only when recording because otherwise it's a huge mess in LogCat
     				Log.v(TAG, "LocatoinChanged. Loc: " + loc.toString());
     				// Do we need to log every location change?
     				db.insertLocation(loc);
 	    			String displayLoc = MainActivity.buildLocationDisplayString(loc);
 	    			locationText.setText(locationPrefix + displayLoc);
+	    			Log.v(TAG, "Location count: " + db.getLocationCount());
     			}
     		}
 

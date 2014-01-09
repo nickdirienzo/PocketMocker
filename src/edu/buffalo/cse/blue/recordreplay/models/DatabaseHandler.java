@@ -4,12 +4,16 @@ import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.Locale;
 
+import org.json.JSONException;
+import org.json.JSONObject;
+
 import android.content.ContentValues;
 import android.content.Context;
+import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
-import android.database.sqlite.SQLiteDatabase.CursorFactory;
 import android.database.sqlite.SQLiteOpenHelper;
 import android.location.Location;
+import android.os.Bundle;
 import android.util.Log;
 
 public class DatabaseHandler extends SQLiteOpenHelper {
@@ -24,11 +28,14 @@ public class DatabaseHandler extends SQLiteOpenHelper {
 
 	@Override
 	public void onCreate(SQLiteDatabase db) {
+		Log.v(TAG, "Creating database");
 		db.execSQL(Models.Location.SQL_CREATE_ENTIRES);
+		Log.v(TAG, "Created database");
 	}
 
 	@Override
 	public void onUpgrade(SQLiteDatabase db, int oldVersion, int newVersion) {
+		Log.v(TAG, "Deleteing tables.");
 		// For now, since we're not in production, we can just drop our data when we upgrade
 		db.execSQL(Models.Location.SQL_DELETE_ENTRIES);
 		// And recreate everything
@@ -39,6 +46,17 @@ public class DatabaseHandler extends SQLiteOpenHelper {
 		SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss", Locale.getDefault());
 		Date date = new Date(timestamp);
 		return dateFormat.format(date);
+	}
+	
+	private void serializeBundle(Bundle b) {
+		JSONObject serialized;
+		try {
+			serialized = new JSONObject(b.toString());
+			Log.v(TAG, serialized.toString());
+		} catch (JSONException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
 	}
 	
 	public void insertLocation(Location loc) {
@@ -57,9 +75,19 @@ public class DatabaseHandler extends SQLiteOpenHelper {
 		values.put(Models.Location.LOC_BEARING, loc.getBearing());
 		values.put(Models.Location.LOC_HAS_ACCURACY, loc.hasAccuracy());
 		values.put(Models.Location.LOC_ACCURACY, loc.getAccuracy());
+		Log.v(TAG, loc.getExtras().toString());
+		serializeBundle(loc.getExtras());
 		db.insert(Models.Location.TABLE_NAME, null, values);
 		db.close();
 		Log.v(TAG, "Successfully inserted locatoin into db.");
+	}
+	
+	public int getLocationCount() {
+		SQLiteDatabase db = this.getReadableDatabase();
+		Cursor cursor = db.rawQuery("SELECT * FROM " + Models.Location.TABLE_NAME, null);
+		int ret = cursor.getCount();
+		cursor.close();
+		return ret;
 	}
 
 }
