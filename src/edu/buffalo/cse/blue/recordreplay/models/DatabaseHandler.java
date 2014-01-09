@@ -48,15 +48,9 @@ public class DatabaseHandler extends SQLiteOpenHelper {
 		return dateFormat.format(date);
 	}
 	
-	private void serializeBundle(Bundle b) {
-		JSONObject serialized;
-		try {
-			serialized = new JSONObject(b.toString());
-			Log.v(TAG, serialized.toString());
-		} catch (JSONException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		}
+	private String serializeBundle(Bundle b) {
+		// TODO: Design a serialization strategy so we can create Bundles from Strings
+		return b.toString();
 	}
 	
 	public void insertLocation(Location loc) {
@@ -75,11 +69,10 @@ public class DatabaseHandler extends SQLiteOpenHelper {
 		values.put(Models.Location.LOC_BEARING, loc.getBearing());
 		values.put(Models.Location.LOC_HAS_ACCURACY, loc.hasAccuracy());
 		values.put(Models.Location.LOC_ACCURACY, loc.getAccuracy());
-		Log.v(TAG, loc.getExtras().toString());
-		serializeBundle(loc.getExtras());
+		values.put(Models.Location.LOC_EXTRAS, serializeBundle(loc.getExtras()));
 		db.insert(Models.Location.TABLE_NAME, null, values);
 		db.close();
-		Log.v(TAG, "Successfully inserted locatoin into db.");
+		Log.v(TAG, "Successfully inserted locatoin into db: " + values.toString());
 	}
 	
 	public int getLocationCount() {
