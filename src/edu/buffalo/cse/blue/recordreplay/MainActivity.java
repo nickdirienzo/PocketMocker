@@ -37,11 +37,6 @@ public class MainActivity extends Activity {
         locationPrefix = this.getString(R.string.loc_prefix);
         
         db = new DatabaseHandler(this);
-        if(db.getPathCount() == 0) {
-        	pathSpinner = (Spinner) this.findViewById(R.id.pathSpinner);
-        	String[] defaultPath = {this.getString(R.string.default_path)};
-        	pathSpinner.setAdapter(new ArrayAdapter<String>(MainActivity.this, R.id.pathSpinner, defaultPath));
-        }
         
         locationManager = (LocationManager)this.getSystemService(Context.LOCATION_SERVICE);
         locationManager.requestLocationUpdates(LocationManager.GPS_PROVIDER, 0, 0,

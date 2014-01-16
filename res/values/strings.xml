@@ -9,5 +9,4 @@
     <string name="loc_placeholder">Will display location data when the recording process begins.</string>
     <string name="loc_prefix">"Current Location: "</string>
     
-    <string name="default_path">Select a Path</string>
 </resources>
