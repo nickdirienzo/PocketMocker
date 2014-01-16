@@ -10,11 +10,11 @@
     tools:context=".MainActivity" >
 
     <Button
+        android:id="@+id/record_button"
         android:layout_width="fill_parent"
         android:layout_height="wrap_content"
-        android:text="@string/record"
-		android:onClick="recordLocation" />
-    
+        android:text="@string/record" />
+        
     <TextView
         android:id="@+id/locationText"
         android:layout_width="fill_parent"

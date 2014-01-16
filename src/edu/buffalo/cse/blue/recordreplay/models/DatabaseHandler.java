@@ -56,6 +56,7 @@ public class DatabaseHandler extends SQLiteOpenHelper {
 		Log.v(TAG, "Inserting locatoin into db.");
 		SQLiteDatabase db = this.getWritableDatabase();
 		ContentValues values = new ContentValues();
+		values.put(Models.Location.LOC_PATH_ID, activePathId);
 		values.put(Models.Location.LOC_PROVIDER, loc.getProvider());
 		values.put(Models.Location.LOC_TIME, transformTimestampToDate(loc.getTime()));
 		values.put(Models.Location.LOC_LAT, loc.getLatitude());
@@ -69,7 +70,6 @@ public class DatabaseHandler extends SQLiteOpenHelper {
 		values.put(Models.Location.LOC_HAS_ACCURACY, loc.hasAccuracy());
 		values.put(Models.Location.LOC_ACCURACY, loc.getAccuracy());
 		values.put(Models.Location.LOC_EXTRAS, serializeBundle(loc.getExtras()));
-		values.put(Models.Location.LOC_PATH_ID, activePathId);
 		db.insert(Models.Location.TABLE_NAME, null, values);
 		db.close();
 		Log.v(TAG, "Successfully inserted locatoin into db: " + values.toString());
