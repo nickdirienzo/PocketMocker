@@ -1,6 +1,8 @@
 package edu.buffalo.cse.blue.recordreplay;
 
+import android.app.ActionBar;
 import android.app.Activity;
+import android.app.Fragment;
 import android.content.Context;
 import android.location.Location;
 import android.location.LocationListener;
@@ -9,9 +11,7 @@ import android.os.Bundle;
 import android.util.Log;
 import android.view.Menu;
 import android.view.View;
-import android.widget.ArrayAdapter;
 import android.widget.Button;
-import android.widget.Spinner;
 import android.widget.TextView;
 import edu.buffalo.cse.blue.recordreplay.models.DatabaseHandler;
 
@@ -21,7 +21,6 @@ public class MainActivity extends Activity {
 	
 	private boolean recording = false;
 	private TextView locationText;
-	private Spinner pathSpinner;
 	private String locationPrefix;
 	private String activePathId;
 	
@@ -32,6 +31,23 @@ public class MainActivity extends Activity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
+        
+        ActionBar actionBar = this.getActionBar();
+        actionBar.setDisplayShowHomeEnabled(false);
+        actionBar.setDisplayShowTitleEnabled(false);
+        actionBar.setNavigationMode(ActionBar.NAVIGATION_MODE_TABS);
+        
+        ActionBar.Tab pathTab, loadTab, recordTab;
+        pathTab = actionBar.newTab().setText(this.getString(R.string.paths_tab));
+        pathTab.setTabListener(new TabListener(new PathFragment()));
+        loadTab = actionBar.newTab().setText(this.getString(R.string.load_paths_tab));
+        loadTab.setTabListener(new TabListener(new LoadFragment()));
+        recordTab = actionBar.newTab().setText(this.getString(R.string.record_path_tab));
+        recordTab.setTabListener(new TabListener(new RecordFragment()));
+        
+        actionBar.addTab(pathTab);
+        actionBar.addTab(loadTab);
+        actionBar.addTab(recordTab);
 
         locationText = (TextView)this.findViewById(R.id.locationText);
         locationPrefix = this.getString(R.string.loc_prefix);
