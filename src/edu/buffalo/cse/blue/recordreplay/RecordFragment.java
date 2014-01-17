@@ -44,7 +44,6 @@ public class RecordFragment extends Fragment implements OnClickListener {
 	 *            the Record Button pressed.
 	 */
 	public void record(View view) {
-		Log.v("MEOW", "YOSUP");
 		Button recordButton = (Button) view;
 		activity.toggleRecording();
 		if (activity.isRecording()) {
