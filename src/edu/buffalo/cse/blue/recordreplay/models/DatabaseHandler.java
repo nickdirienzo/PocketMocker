@@ -27,7 +27,7 @@ public class DatabaseHandler extends SQLiteOpenHelper {
 	public void onCreate(SQLiteDatabase db) {
 		Log.v(TAG, "Creating databases");
 		db.execSQL(Models.Location.SQL_CREATE_ENTIRES);
-		db.execSQL(Models.Path.SQL_CREATE_TABLE);
+		db.execSQL(Models.Objective.SQL_CREATE_TABLE);
 		Log.v(TAG, "Created database");
 	}
 
@@ -36,7 +36,7 @@ public class DatabaseHandler extends SQLiteOpenHelper {
 		Log.v(TAG, "Deleteing tables.");
 		// For now, since we're not in production, we can just drop our data when we upgrade
 		db.execSQL(Models.Location.SQL_DELETE_ENTRIES);
-		db.execSQL(Models.Path.SQL_DROP_TABLE);
+		db.execSQL(Models.Objective.SQL_DROP_TABLE);
 		// And recreate everything
 		onCreate(db);
 	}
@@ -88,19 +88,19 @@ public class DatabaseHandler extends SQLiteOpenHelper {
 	 * @param p the path to insert
 	 * @return the rowid of the path
 	 */
-	public long insertPath(Path p) {
+	public long insertPath(Objective p) {
 		SQLiteDatabase db = this.getWritableDatabase();
 		ContentValues values = new ContentValues();
-		values.put(Models.Path.PATH_NAME, p.getName());
-		values.put(Models.Path.PATH_CREATION_DATE, transformTimestampToDate(p.getTimestamp()));
-		long ret = db.insert(Models.Path.TABLE_NAME, null, values);
+		values.put(Models.Objective.NAME, p.getName());
+		values.put(Models.Objective.CREATED_TIMESTAMP, transformTimestampToDate(p.getTimestamp()));
+		long ret = db.insert(Models.Objective.TABLE_NAME, null, values);
 		db.close();
 		return ret;
 	}
 	
 	public int getPathCount() {
 		SQLiteDatabase db = this.getReadableDatabase();
-		Cursor cursor = db.rawQuery("SELECT * FROM " + Models.Path.TABLE_NAME, null);
+		Cursor cursor = db.rawQuery("SELECT * FROM " + Models.Objective.TABLE_NAME, null);
 		int ret = cursor.getCount();
 		cursor.close();
 		return ret;

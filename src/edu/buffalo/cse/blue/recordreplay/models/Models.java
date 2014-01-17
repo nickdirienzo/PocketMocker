@@ -64,19 +64,21 @@ public final class Models  {
 				
 	}
 	
-	public static abstract class Path implements BaseColumns {
-		public static final String TABLE_NAME = "paths";
+	public static abstract class Objective implements BaseColumns {
+		public static final String TABLE_NAME = "objective";
 		// Columns
-		public static final String PATH_NAME = "path_name";
-		public static final String PATH_CREATION_DATE = "path_creation_date";
+		public static final String NAME = "objective_name";
+		public static final String CREATED_TIMESTAMP = "objective_created_timestamp";
+		public static final String DESCRIPTION = "objective_description";
 		// Helper queries
 		public static final String SQL_CREATE_TABLE = 
-				"CREATE TABLE " + Path.TABLE_NAME + "( " +
-				Path._ID + INT + PK + COMMA +
-				Path.PATH_NAME + TEXT + COMMA +
-				Path.PATH_CREATION_DATE + TEXT + " )";
+				"CREATE TABLE " + Objective.TABLE_NAME + "( " +
+				Objective._ID + INT + PK + COMMA +
+				Objective.NAME + TEXT + COMMA +
+				Objective.CREATED_TIMESTAMP + TEXT + 
+				Objective.DESCRIPTION + TEXT + " )";
 		
-		public static final String SQL_DROP_TABLE = "DROP TABLE IF EXISTS " + Path.TABLE_NAME;
+		public static final String SQL_DROP_TABLE = "DROP TABLE IF EXISTS " + Objective.TABLE_NAME;
 		
 	}
 

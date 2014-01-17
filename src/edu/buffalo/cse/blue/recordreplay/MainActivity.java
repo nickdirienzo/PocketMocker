@@ -24,7 +24,7 @@ public class MainActivity extends Activity {
 	private LocationManager locationManager;
 	private DatabaseHandler db;
 
-	private PathFragment pathFragment = new PathFragment();
+	private ObjectiveFragment objectiveFragment = new ObjectiveFragment();
 	private RecordFragment recordFragment = new RecordFragment();
 	private LoadFragment loadFragment = new LoadFragment();
 
@@ -42,8 +42,8 @@ public class MainActivity extends Activity {
 
 		ActionBar.Tab pathTab, loadTab, recordTab;
 		pathTab = actionBar.newTab()
-				.setText(this.getString(R.string.paths_tab));
-		pathTab.setTabListener(new TabListener(pathFragment));
+				.setText(this.getString(R.string.objective_tab));
+		pathTab.setTabListener(new TabListener(objectiveFragment));
 		loadTab = actionBar.newTab().setText(
 				this.getString(R.string.load_paths_tab));
 		loadTab.setTabListener(new TabListener(loadFragment));
@@ -66,6 +66,7 @@ public class MainActivity extends Activity {
 
 					@Override
 					public void onLocationChanged(Location loc) {
+						Log.v(TAG, "LocationChange, recording: " + recording);
 						if (recording) {
 							// Logging only when recording because otherwise
 							// it's a huge mess in LogCat
@@ -139,7 +140,7 @@ public class MainActivity extends Activity {
 	public LocationManager getLocationManager() {
 		return locationManager;
 	}
-	
+
 	public void setLocationText(TextView view) {
 		locationText = view;
 	}
