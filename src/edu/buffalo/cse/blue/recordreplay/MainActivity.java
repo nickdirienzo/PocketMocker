@@ -55,7 +55,6 @@ public class MainActivity extends Activity {
 		actionBar.addTab(loadTab);
 		actionBar.addTab(recordTab);
 
-		locationText = (TextView) this.findViewById(R.id.locationText);
 		locationPrefix = this.getString(R.string.loc_prefix);
 
 		db = new DatabaseHandler(this);
@@ -139,6 +138,10 @@ public class MainActivity extends Activity {
 
 	public LocationManager getLocationManager() {
 		return locationManager;
+	}
+	
+	public void setLocationText(TextView view) {
+		locationText = view;
 	}
 
 }
