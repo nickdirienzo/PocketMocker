@@ -11,6 +11,7 @@ import android.os.Bundle;
 import android.util.Log;
 import android.view.Menu;
 import android.view.View;
+import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.Button;
 import android.widget.Spinner;
@@ -28,6 +29,7 @@ public class MainActivity extends Activity {
 	private String activePathId;
 
 	private Spinner objectivesSpinner;
+	private boolean spinnerInitFlag;
 
 	private RecordManager recordManager;
 	private ObjectivesManager objectivesManager;
@@ -48,6 +50,7 @@ public class MainActivity extends Activity {
 		dbName = "PocketMocker1.db";
 		db = new Database(this, dbName);
 
+		spinnerInitFlag = false;
 		objectivesSpinner = (Spinner) this
 				.findViewById(R.id.objectives_spinner);
 		List<Objective> objectives = objectivesManager.getObjectives();
@@ -57,8 +60,23 @@ public class MainActivity extends Activity {
 		}
 		ArrayAdapter<String> objectivesSpinnerAdapter = new ArrayAdapter<String>(
 				this, android.R.layout.simple_spinner_item, objectiveNames);
-		objectivesSpinnerAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
+		objectivesSpinnerAdapter
+				.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
 		objectivesSpinner.setAdapter(objectivesSpinnerAdapter);
+		objectivesSpinner
+				.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
+
+					@Override
+					public void onItemSelected(AdapterView<?> adapterView,
+							View view, int i, long l) {
+						Log.v(TAG, "Spinner. Position: " + i);
+					}
+
+					@Override
+					public void onNothingSelected(AdapterView<?> adapterView) {
+						Log.v(TAG, "Spinner nothing.");
+					}
+				});
 
 		locationPrefix = this.getString(R.string.loc_prefix);
 		locationText = (TextView) this.findViewById(R.id.locationText);
