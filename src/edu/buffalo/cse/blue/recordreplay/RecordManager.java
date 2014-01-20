@@ -53,9 +53,9 @@ public class RecordManager {
 	public void record(View view) {
 		toggleRecording();
 		Location lastLoc = prepareToRecord();
-		if (lastLoc != null)
-			activity.getDatabaseHandler().insertLocation(lastLoc,
-					activity.getActivePathId());
+//		if (lastLoc != null)
+//			activity.getDatabaseHandler().insertLocation(lastLoc,
+//					activity.getActivePathId());
 	}
 
 }

@@ -11,8 +11,7 @@ import android.view.Menu;
 import android.view.View;
 import android.widget.Button;
 import android.widget.TextView;
-import edu.buffalo.cse.blue.recordreplay.models.DatabaseHandler;
-
+import edu.buffalo.cse.blue.recordreplay.models.Database;
 public class MainActivity extends Activity {
 
 	private String TAG = "REC";
@@ -24,7 +23,8 @@ public class MainActivity extends Activity {
 
 	private RecordManager recordManager;
 	
-	private DatabaseHandler dbHandler;
+	private Database db;
+	private String dbName;
 
 	private LocationManager locationManager;
 
@@ -34,7 +34,8 @@ public class MainActivity extends Activity {
 		setContentView(R.layout.activity_main);
 
 		recordManager = new RecordManager(this);
-		dbHandler = new DatabaseHandler(this);
+		dbName = "PocketMocker1.db";
+		db = new Database(this, dbName);
 
 		locationPrefix = this.getString(R.string.loc_prefix);
 		locationText = (TextView) this.findViewById(R.id.locationText);
@@ -53,12 +54,12 @@ public class MainActivity extends Activity {
 							Log.v(TAG,
 									"LocatoinChanged. Loc: " + loc.toString());
 							// Do we need to log every location change?
-							dbHandler.insertLocation(loc, activePathId);
+							//dbHandler.insertLocation(loc, activePathId);
 							String displayLoc = MainActivity
 									.buildLocationDisplayString(loc);
 							locationText.setText(locationPrefix + displayLoc);
-							Log.v(TAG, "Location count: "
-									+ dbHandler.getLocationCount());
+//							Log.v(TAG, "Location count: "
+//									+ dbHandler.getLocationCount());
 						}
 					}
 
@@ -93,8 +94,8 @@ public class MainActivity extends Activity {
 		return "(" + loc.getLatitude() + ", " + loc.getLongitude() + ")";
 	}
 	
-	public DatabaseHandler getDatabaseHandler() {
-		return dbHandler;
+	public Database getDatabase() {
+		return db;
 	}
 
 	public String getActivePathId() {
