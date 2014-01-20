@@ -6,6 +6,9 @@ import android.app.DialogFragment;
 import android.content.DialogInterface;
 import android.os.Bundle;
 import android.view.LayoutInflater;
+import android.view.View;
+import android.widget.EditText;
+import edu.buffalo.cse.blue.recordreplay.models.Objective;
 
 public class NewObjectiveDialog extends DialogFragment {
 
@@ -18,21 +21,24 @@ public class NewObjectiveDialog extends DialogFragment {
 		if (b.containsKey(FIRST_KEY)) {
 			first = b.getBoolean(FIRST_KEY);
 		}
-		MainActivity activity = (MainActivity) this.getActivity();
+		final MainActivity activity = (MainActivity) this.getActivity();
 		
 		AlertDialog.Builder builder = new AlertDialog.Builder(activity);
 		builder.setTitle(R.string.objective_dialog_title);
 		LayoutInflater inflater = activity.getLayoutInflater();
-		builder.setView(
-				inflater.inflate(R.layout.create_objective_dialog, null))
+		final View view = inflater.inflate(R.layout.create_objective_dialog, null);
+		builder.setView(view)
 				.setPositiveButton(R.string.create,
 						new DialogInterface.OnClickListener() {
 
 							@Override
 							public void onClick(DialogInterface dialog,
 									int which) {
-								// TODO Auto-generated method stub
-
+								EditText e = (EditText) view.findViewById(R.id.objective_name);
+								Objective o = new Objective();
+								o.setName(e.getText().toString());
+								activity.getDatabase().addObjective(o);
+								activity.populateObjectivesSpinner();
 							}
 						});
 		if (!first) {

@@ -10,7 +10,7 @@ import android.database.sqlite.SQLiteOpenHelper;
 
 public class Database extends SQLiteOpenHelper {
 
-	private static final int DB_VERSION = 1;
+	private static final int DB_VERSION = 2;
 
 	public Database(Context context, String name) {
 		super(context, name, null, DB_VERSION);
@@ -27,7 +27,7 @@ public class Database extends SQLiteOpenHelper {
 	public void onUpgrade(SQLiteDatabase db, int oldVersion, int newVersion) {
 		// Our current policy is wipe and start new.
 		db.execSQL(Objective.DROP_TABLE_CMD);
-		db.execSQL(Recording.CREATE_TABLE_CMD);
+		db.execSQL(Recording.DROP_TABLE_CMD);
 		onCreate(db);
 	}
 	
@@ -38,7 +38,11 @@ public class Database extends SQLiteOpenHelper {
 		values.put(Objective.COL_CREATION_DATE, o.getCreationDateSqlString());
 		values.put(Objective.COL_LAST_MODIFIED_DATE, o.getLastModifiedDateSqlString());
 		// New objectives do not have a recording
-		values.put(Objective.COL_RECORDING, -1);
+		if(o.getRecording() == null) {
+			values.put(Objective.COL_RECORDING, -1);
+		} else {
+			values.put(Objective.COL_RECORDING, o.getRecording().getId());
+		}
 		db.insert(Objective.TABLE_NAME, null, values);
 		db.close();
 	}

@@ -3,7 +3,7 @@ package edu.buffalo.cse.blue.recordreplay.models;
 public class Model {
 
 	// Global constants
-	public static final String INT = " INT";
+	public static final String INT = " INTEGER";
 	public static final String REAL = " REAL";
 	public static final String TEXT = " TEXT";
 	public static final String COMMA = ",";

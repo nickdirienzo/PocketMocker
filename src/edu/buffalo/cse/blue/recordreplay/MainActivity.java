@@ -49,28 +49,12 @@ public class MainActivity extends Activity {
 
 		dbName = "PocketMocker1.db";
 		db = new Database(this, dbName);
+		
+		this.checkFirstTimeUse();
 
 		spinnerInitFlag = false;
 		objectivesSpinner = (Spinner) this
 				.findViewById(R.id.objectives_spinner);
-		List<Objective> objectives = objectivesManager.getObjectives();
-		// No existing objectives besides the mock
-		if(objectives.size() == 1) {
-			NewObjectiveDialog dialog = new NewObjectiveDialog();
-			Bundle b = new Bundle();
-			b.putBoolean(NewObjectiveDialog.FIRST_KEY, true);
-			dialog.setArguments(b);
-			dialog.show(getFragmentManager(), TAG);			
-		}
-		String[] objectiveNames = new String[objectives.size()];
-		for (int i = 0; i < objectiveNames.length; ++i) {
-			objectiveNames[i] = objectives.get(i).getName();
-		}
-		ArrayAdapter<String> objectivesSpinnerAdapter = new ArrayAdapter<String>(
-				this, android.R.layout.simple_spinner_item, objectiveNames);
-		objectivesSpinnerAdapter
-				.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
-		objectivesSpinner.setAdapter(objectivesSpinnerAdapter);
 		objectivesSpinner
 				.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
 
@@ -85,6 +69,7 @@ public class MainActivity extends Activity {
 						Log.v(TAG, "Spinner nothing.");
 					}
 				});
+		this.populateObjectivesSpinner();
 
 		locationPrefix = this.getString(R.string.loc_prefix);
 		locationText = (TextView) this.findViewById(R.id.locationText);
@@ -138,6 +123,31 @@ public class MainActivity extends Activity {
 		getMenuInflater().inflate(R.menu.main, menu);
 		return true;
 	}
+	
+	private void checkFirstTimeUse() {
+		List<Objective> objectives = objectivesManager.getObjectives();
+		// No existing objectives besides the mock
+		if(objectives.size() == 1) {
+			NewObjectiveDialog dialog = new NewObjectiveDialog();
+			Bundle b = new Bundle();
+			b.putBoolean(NewObjectiveDialog.FIRST_KEY, true);
+			dialog.setArguments(b);
+			dialog.show(getFragmentManager(), TAG);			
+		}
+	}
+
+	public void populateObjectivesSpinner() {
+		List<Objective> objectives = objectivesManager.getObjectives();
+		String[] objectiveNames = new String[objectives.size()];
+		for (int i = 0; i < objectiveNames.length; ++i) {
+			objectiveNames[i] = objectives.get(i).getName();
+		}
+		ArrayAdapter<String> objectivesSpinnerAdapter = new ArrayAdapter<String>(
+				this, android.R.layout.simple_spinner_item, objectiveNames);
+		objectivesSpinnerAdapter
+				.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
+		objectivesSpinner.setAdapter(objectivesSpinnerAdapter);
+	}
 
 	public static String buildLocationDisplayString(Location loc) {
 		return "(" + loc.getLatitude() + ", " + loc.getLongitude() + ")";
@@ -162,7 +172,7 @@ public class MainActivity extends Activity {
 	public LocationManager getLocationManager() {
 		return locationManager;
 	}
-	
+
 	public ObjectivesManager getObjectivesManager() {
 		return objectivesManager;
 	}

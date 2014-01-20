@@ -11,7 +11,7 @@ public class Recording extends TimestampModel {
 
 	// SQL Helpers
 	public static final String TABLE_NAME = "recordings";
-	public static final String COL_ID = "id";
+	public static final String COL_ID = "_id";
 	public static final String COL_CREATION_DATE = "creation_date";
 	public static final String CREATE_TABLE_CMD = CREATE_TABLE + TABLE_NAME
 			+ OPEN_PAREN + COL_ID + INT + PK + COMMA + COL_CREATION_DATE + TEXT

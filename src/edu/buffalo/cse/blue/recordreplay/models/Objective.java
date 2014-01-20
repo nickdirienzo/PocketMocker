@@ -12,7 +12,7 @@ public class Objective extends TimestampModel {
 
 	// SQL Column Helpers
 	public static final String TABLE_NAME = "objectives";
-	public static final String COL_ID = "id";
+	public static final String COL_ID = "_id";
 	public static final int COL_ID_INDEX = 0;
 	public static final String COL_NAME = "name";
 	public static final int COL_NAME_INDEX = 1;
@@ -34,7 +34,11 @@ public class Objective extends TimestampModel {
 	public static final String DROP_TABLE_CMD = dropTable(TABLE_NAME);
 	public static final String SELECT_ALL = "SELECT * FROM " + TABLE_NAME;
 
-	public Objective() {}
+	public Objective() {
+		name = "";
+		creationDate = new Date();
+		lastModifiedDate = creationDate;
+	}
 	
 	public Objective(long id, String name, Recording recording) {
 		this.id = id;
