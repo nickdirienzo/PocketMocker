@@ -2,6 +2,7 @@ package edu.buffalo.cse.blue.recordreplay.models;
 
 import java.util.ArrayList;
 
+import android.content.ContentValues;
 import android.content.Context;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
@@ -28,6 +29,18 @@ public class Database extends SQLiteOpenHelper {
 		db.execSQL(Objective.DROP_TABLE_CMD);
 		db.execSQL(Recording.CREATE_TABLE_CMD);
 		onCreate(db);
+	}
+	
+	public void addObjective(Objective o) {
+		SQLiteDatabase db = this.getWritableDatabase();
+		ContentValues values = new ContentValues();
+		values.put(Objective.COL_NAME, o.getName());
+		values.put(Objective.COL_CREATION_DATE, o.getCreationDateSqlString());
+		values.put(Objective.COL_LAST_MODIFIED_DATE, o.getLastModifiedDateSqlString());
+		// New objectives do not have a recording
+		values.put(Objective.COL_RECORDING, -1);
+		db.insert(Objective.TABLE_NAME, null, values);
+		db.close();
 	}
 
 	public ArrayList<Objective> getObjectives() {

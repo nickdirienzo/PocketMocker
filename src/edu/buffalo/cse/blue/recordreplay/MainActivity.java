@@ -54,6 +54,14 @@ public class MainActivity extends Activity {
 		objectivesSpinner = (Spinner) this
 				.findViewById(R.id.objectives_spinner);
 		List<Objective> objectives = objectivesManager.getObjectives();
+		// No existing objectives besides the mock
+		if(objectives.size() == 1) {
+			NewObjectiveDialog dialog = new NewObjectiveDialog();
+			Bundle b = new Bundle();
+			b.putBoolean(NewObjectiveDialog.FIRST_KEY, true);
+			dialog.setArguments(b);
+			dialog.show(getFragmentManager(), TAG);			
+		}
 		String[] objectiveNames = new String[objectives.size()];
 		for (int i = 0; i < objectiveNames.length; ++i) {
 			objectiveNames[i] = objectives.get(i).getName();
@@ -153,6 +161,10 @@ public class MainActivity extends Activity {
 
 	public LocationManager getLocationManager() {
 		return locationManager;
+	}
+	
+	public ObjectivesManager getObjectivesManager() {
+		return objectivesManager;
 	}
 
 	public void updateLocationText(Location loc) {

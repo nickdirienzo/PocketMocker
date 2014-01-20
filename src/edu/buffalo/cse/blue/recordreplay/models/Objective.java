@@ -80,7 +80,7 @@ public class Objective extends TimestampModel {
 		return lastModifiedDate;
 	}
 	
-	public String getLastModifiedDateString() {
+	public String getLastModifiedDateSqlString() {
 		return this.serializeDateToSqlString(lastModifiedDate);
 	}
 
@@ -92,7 +92,7 @@ public class Objective extends TimestampModel {
 		lastModifiedDate = this.serializeSqlStringToDate(s);
 	}
 
-	public Recording getRecordings() {
+	public Recording getRecording() {
 		return recording;
 	}
 

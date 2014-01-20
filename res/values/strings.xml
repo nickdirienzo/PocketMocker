@@ -3,11 +3,15 @@
 
     <string name="app_name">RecordReplay</string>
     <string name="action_settings">Settings</string>
-    
     <string name="record">Record Location</string>
-    <string name="stop_record">Stop Recording</string>    
+    <string name="stop_record">Stop Recording</string>
     <string name="loc_placeholder">Will display location data when the recording process begins.</string>
     <string name="loc_prefix">"Current Location: "</string>
-    
     <string name="objectives">Objectives you\'ve created:</string>
+    <string name="objective_name">Objective Name</string>
+    <string name="objective_dialog_detail">It seems to be your first time using PocketMocker. Before using PocketMocker, you must create a new mocking objective.</string>
+    <string name="objective_dialog_title">Create Objective</string>
+    <string name="create">Create</string>
+    <string name="cancel">Cancel</string>
+
 </resources>
