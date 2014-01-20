@@ -13,5 +13,5 @@
     <string name="load_paths_tab">Load</string>
     <string name="record_path_tab">Record</string>
     
-    <string name="objective_detail">Select your active objective.</string>
+    <string name="objective_detail">Objectives you've created:</string>
 </resources>
