@@ -9,9 +9,5 @@
     <string name="loc_placeholder">Will display location data when the recording process begins.</string>
     <string name="loc_prefix">"Current Location: "</string>
     
-    <string name="objective_tab">Objectives</string>
-    <string name="load_paths_tab">Load</string>
-    <string name="record_path_tab">Record</string>
-    
-    <string name="objective_detail">Objectives you've created:</string>
+    <string name="objectives">Objectives you\'ve created:</string>
 </resources>

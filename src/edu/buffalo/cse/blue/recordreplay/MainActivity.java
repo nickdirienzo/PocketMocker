@@ -1,6 +1,5 @@
 package edu.buffalo.cse.blue.recordreplay;
 
-import android.app.ActionBar;
 import android.app.Activity;
 import android.content.Context;
 import android.location.Location;
@@ -9,6 +8,8 @@ import android.location.LocationManager;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.Menu;
+import android.view.View;
+import android.widget.Button;
 import android.widget.TextView;
 import edu.buffalo.cse.blue.recordreplay.models.DatabaseHandler;
 
@@ -16,46 +17,28 @@ public class MainActivity extends Activity {
 
 	private String TAG = "REC";
 
-	private RecordReplayApplication app;
-
 	private TextView locationText;
+	private Button recordButton;
 	private String locationPrefix;
 	private String activePathId;
 
-	private LocationManager locationManager;
+	private RecordManager recordManager;
+	
+	private DatabaseHandler dbHandler;
 
-	private ObjectiveFragment objectiveFragment = new ObjectiveFragment();
-	private RecordFragment recordFragment = new RecordFragment();
-	private LoadFragment loadFragment = new LoadFragment();
+	private LocationManager locationManager;
 
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
 		setContentView(R.layout.activity_main);
-	
-		app = (RecordReplayApplication) this.getApplicationContext();	
 
-		ActionBar actionBar = this.getActionBar();
-		actionBar.setDisplayShowHomeEnabled(false);
-		actionBar.setDisplayShowTitleEnabled(false);
-		actionBar.setNavigationMode(ActionBar.NAVIGATION_MODE_TABS);
-
-		ActionBar.Tab pathTab, loadTab, recordTab;
-		pathTab = actionBar.newTab().setText(
-				this.getString(R.string.objective_tab));
-		pathTab.setTabListener(new TabListener(objectiveFragment));
-		loadTab = actionBar.newTab().setText(
-				this.getString(R.string.load_paths_tab));
-		loadTab.setTabListener(new TabListener(loadFragment));
-		recordTab = actionBar.newTab().setText(
-				this.getString(R.string.record_path_tab));
-		recordTab.setTabListener(new TabListener(recordFragment));
-
-		actionBar.addTab(pathTab);
-		actionBar.addTab(loadTab);
-		actionBar.addTab(recordTab);
+		recordManager = new RecordManager(this);
+		dbHandler = new DatabaseHandler(this);
 
 		locationPrefix = this.getString(R.string.loc_prefix);
+		locationText = (TextView) this.findViewById(R.id.locationText);
+		recordButton = (Button) this.findViewById(R.id.record_button);
 
 		locationManager = (LocationManager) this
 				.getSystemService(Context.LOCATION_SERVICE);
@@ -66,19 +49,19 @@ public class MainActivity extends Activity {
 					public void onLocationChanged(Location loc) {
 						Log.v(TAG,
 								"LocationChange, recording: "
-										+ app.isRecording());
-						if (app.isRecording()) {
+										+ recordManager.isRecording());
+						if (recordManager.isRecording()) {
 							// Logging only when recording because otherwise
 							// it's a huge mess in LogCat
 							Log.v(TAG,
 									"LocatoinChanged. Loc: " + loc.toString());
 							// Do we need to log every location change?
-							app.getDatabase().insertLocation(loc, activePathId);
+							dbHandler.insertLocation(loc, activePathId);
 							String displayLoc = MainActivity
 									.buildLocationDisplayString(loc);
 							locationText.setText(locationPrefix + displayLoc);
-							Log.v(TAG,
-									"Location count: " + app.getDatabase().getLocationCount());
+							Log.v(TAG, "Location count: "
+									+ dbHandler.getLocationCount());
 						}
 					}
 
@@ -113,8 +96,8 @@ public class MainActivity extends Activity {
 		return "(" + loc.getLatitude() + ", " + loc.getLongitude() + ")";
 	}
 	
-	public RecordReplayApplication getApp() {
-		return app;
+	public DatabaseHandler getDatabaseHandler() {
+		return dbHandler;
 	}
 
 	public String getActivePathId() {
@@ -133,9 +116,29 @@ public class MainActivity extends Activity {
 		return locationManager;
 	}
 
-	// This is stupid.
-	public void setLocationText(TextView view) {
-		locationText = view;
+	public void updateLocationText(Location loc) {
+		String displayLoc = MainActivity.buildLocationDisplayString(loc);
+		locationText.setText(getLocationPrefix() + displayLoc);
+	}
+	
+	public void updateLocationText(String s) {
+		locationText.setText(s);
+	}
+	
+	public void resetLocationText() {
+		locationText.setText(this.getString(R.string.loc_placeholder));
+	}
+
+	public void toggleRecordingButton() {
+		if(recordManager.isRecording()) {
+			recordButton.setText(R.string.stop_record);
+		} else {
+			recordButton.setText(R.string.record);
+		}
+	}
+
+	public void recordButtonClicked(View v) {
+		recordManager.record(v);
 	}
 
 }
