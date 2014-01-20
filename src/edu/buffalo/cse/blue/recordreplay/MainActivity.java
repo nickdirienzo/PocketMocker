@@ -16,13 +16,13 @@ public class MainActivity extends Activity {
 
 	private String TAG = "REC";
 
-	private boolean recording;
+	private RecordReplayApplication app;
+
 	private TextView locationText;
 	private String locationPrefix;
 	private String activePathId;
 
 	private LocationManager locationManager;
-	private DatabaseHandler db;
 
 	private ObjectiveFragment objectiveFragment = new ObjectiveFragment();
 	private RecordFragment recordFragment = new RecordFragment();
@@ -32,8 +32,8 @@ public class MainActivity extends Activity {
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
 		setContentView(R.layout.activity_main);
-
-		recording = false;
+	
+		app = (RecordReplayApplication) this.getApplicationContext();	
 
 		ActionBar actionBar = this.getActionBar();
 		actionBar.setDisplayShowHomeEnabled(false);
@@ -41,8 +41,8 @@ public class MainActivity extends Activity {
 		actionBar.setNavigationMode(ActionBar.NAVIGATION_MODE_TABS);
 
 		ActionBar.Tab pathTab, loadTab, recordTab;
-		pathTab = actionBar.newTab()
-				.setText(this.getString(R.string.objective_tab));
+		pathTab = actionBar.newTab().setText(
+				this.getString(R.string.objective_tab));
 		pathTab.setTabListener(new TabListener(objectiveFragment));
 		loadTab = actionBar.newTab().setText(
 				this.getString(R.string.load_paths_tab));
@@ -57,8 +57,6 @@ public class MainActivity extends Activity {
 
 		locationPrefix = this.getString(R.string.loc_prefix);
 
-		db = new DatabaseHandler(this);
-
 		locationManager = (LocationManager) this
 				.getSystemService(Context.LOCATION_SERVICE);
 		locationManager.requestLocationUpdates(LocationManager.GPS_PROVIDER, 0,
@@ -66,19 +64,21 @@ public class MainActivity extends Activity {
 
 					@Override
 					public void onLocationChanged(Location loc) {
-						Log.v(TAG, "LocationChange, recording: " + recording);
-						if (recording) {
+						Log.v(TAG,
+								"LocationChange, recording: "
+										+ app.isRecording());
+						if (app.isRecording()) {
 							// Logging only when recording because otherwise
 							// it's a huge mess in LogCat
 							Log.v(TAG,
 									"LocatoinChanged. Loc: " + loc.toString());
 							// Do we need to log every location change?
-							db.insertLocation(loc, activePathId);
+							app.getDatabase().insertLocation(loc, activePathId);
 							String displayLoc = MainActivity
 									.buildLocationDisplayString(loc);
 							locationText.setText(locationPrefix + displayLoc);
 							Log.v(TAG,
-									"Location count: " + db.getLocationCount());
+									"Location count: " + app.getDatabase().getLocationCount());
 						}
 					}
 
@@ -112,17 +112,9 @@ public class MainActivity extends Activity {
 	public static String buildLocationDisplayString(Location loc) {
 		return "(" + loc.getLatitude() + ", " + loc.getLongitude() + ")";
 	}
-
-	public void toggleRecording() {
-		recording = !recording;
-	}
-
-	public boolean isRecording() {
-		return recording;
-	}
-
-	public DatabaseHandler getDatabase() {
-		return db;
+	
+	public RecordReplayApplication getApp() {
+		return app;
 	}
 
 	public String getActivePathId() {
@@ -141,6 +133,7 @@ public class MainActivity extends Activity {
 		return locationManager;
 	}
 
+	// This is stupid.
 	public void setLocationText(TextView view) {
 		locationText = view;
 	}
