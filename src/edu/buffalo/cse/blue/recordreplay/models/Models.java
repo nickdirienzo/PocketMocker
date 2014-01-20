@@ -1,18 +1,10 @@
 package edu.buffalo.cse.blue.recordreplay.models;
 
-import android.provider.BaseColumns;
-
+// TODO: Remove this class.
 public final class Models  {
 	
-	// Global constants
-	private static final String INT = " INT";
-	private static final String REAL = " REAL";
-	private static final String TEXT = " TEXT";
-	private static final String COMMA = ",";
-	private static final String PK = " PRIMARY KEY";
-	
 	public Models() {}
-	
+	/*
 	public static abstract class Location implements BaseColumns {
 		
 		public static final String TABLE_NAME = "locations";
@@ -80,6 +72,6 @@ public final class Models  {
 		
 		public static final String SQL_DROP_TABLE = "DROP TABLE IF EXISTS " + Objective.TABLE_NAME;
 		
-	}
+	}*/
 
 }

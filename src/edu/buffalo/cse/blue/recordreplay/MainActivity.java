@@ -47,9 +47,6 @@ public class MainActivity extends Activity {
 
 					@Override
 					public void onLocationChanged(Location loc) {
-						Log.v(TAG,
-								"LocationChange, recording: "
-										+ recordManager.isRecording());
 						if (recordManager.isRecording()) {
 							// Logging only when recording because otherwise
 							// it's a huge mess in LogCat
