@@ -16,7 +16,7 @@ import android.util.Log;
 public class DatabaseHandler extends SQLiteOpenHelper {
 	
 	private static final String TAG = "REC_DB";
-	private static final int DATABASE_VERSION = 2;
+	private static final int DATABASE_VERSION = 3;
 	private static final String DATABASE_NAME = "RecordReplay.db";
 
 	public DatabaseHandler(Context context) {

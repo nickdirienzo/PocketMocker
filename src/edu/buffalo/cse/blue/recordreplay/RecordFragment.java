@@ -86,7 +86,6 @@ public class RecordFragment extends Fragment implements OnClickListener {
 
 	@Override
 	public void onClick(View v) {
-		Log.v(TAG, "HI");
 		record(v);
 	}
 
