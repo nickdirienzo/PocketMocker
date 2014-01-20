@@ -1,5 +1,7 @@
 package edu.buffalo.cse.blue.recordreplay;
 
+import java.util.List;
+
 import android.app.Activity;
 import android.content.Context;
 import android.location.Location;
@@ -9,9 +11,13 @@ import android.os.Bundle;
 import android.util.Log;
 import android.view.Menu;
 import android.view.View;
+import android.widget.ArrayAdapter;
 import android.widget.Button;
+import android.widget.Spinner;
 import android.widget.TextView;
 import edu.buffalo.cse.blue.recordreplay.models.Database;
+import edu.buffalo.cse.blue.recordreplay.models.Objective;
+
 public class MainActivity extends Activity {
 
 	private String TAG = "REC";
@@ -21,8 +27,11 @@ public class MainActivity extends Activity {
 	private String locationPrefix;
 	private String activePathId;
 
+	private Spinner objectivesSpinner;
+
 	private RecordManager recordManager;
-	
+	private ObjectivesManager objectivesManager;
+
 	private Database db;
 	private String dbName;
 
@@ -34,8 +43,22 @@ public class MainActivity extends Activity {
 		setContentView(R.layout.activity_main);
 
 		recordManager = new RecordManager(this);
+		objectivesManager = new ObjectivesManager(this);
+
 		dbName = "PocketMocker1.db";
 		db = new Database(this, dbName);
+
+		objectivesSpinner = (Spinner) this
+				.findViewById(R.id.objectives_spinner);
+		List<Objective> objectives = objectivesManager.getObjectives();
+		String[] objectiveNames = new String[objectives.size()];
+		for (int i = 0; i < objectiveNames.length; ++i) {
+			objectiveNames[i] = objectives.get(i).getName();
+		}
+		ArrayAdapter<String> objectivesSpinnerAdapter = new ArrayAdapter<String>(
+				this, android.R.layout.simple_spinner_item, objectiveNames);
+		objectivesSpinnerAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
+		objectivesSpinner.setAdapter(objectivesSpinnerAdapter);
 
 		locationPrefix = this.getString(R.string.loc_prefix);
 		locationText = (TextView) this.findViewById(R.id.locationText);
@@ -54,12 +77,12 @@ public class MainActivity extends Activity {
 							Log.v(TAG,
 									"LocatoinChanged. Loc: " + loc.toString());
 							// Do we need to log every location change?
-							//dbHandler.insertLocation(loc, activePathId);
+							// dbHandler.insertLocation(loc, activePathId);
 							String displayLoc = MainActivity
 									.buildLocationDisplayString(loc);
 							locationText.setText(locationPrefix + displayLoc);
-//							Log.v(TAG, "Location count: "
-//									+ dbHandler.getLocationCount());
+							// Log.v(TAG, "Location count: "
+							// + dbHandler.getLocationCount());
 						}
 					}
 
@@ -93,7 +116,7 @@ public class MainActivity extends Activity {
 	public static String buildLocationDisplayString(Location loc) {
 		return "(" + loc.getLatitude() + ", " + loc.getLongitude() + ")";
 	}
-	
+
 	public Database getDatabase() {
 		return db;
 	}
@@ -118,17 +141,17 @@ public class MainActivity extends Activity {
 		String displayLoc = MainActivity.buildLocationDisplayString(loc);
 		locationText.setText(getLocationPrefix() + displayLoc);
 	}
-	
+
 	public void updateLocationText(String s) {
 		locationText.setText(s);
 	}
-	
+
 	public void resetLocationText() {
 		locationText.setText(this.getString(R.string.loc_placeholder));
 	}
 
 	public void toggleRecordingButton() {
-		if(recordManager.isRecording()) {
+		if (recordManager.isRecording()) {
 			recordButton.setText(R.string.stop_record);
 		} else {
 			recordButton.setText(R.string.record);
