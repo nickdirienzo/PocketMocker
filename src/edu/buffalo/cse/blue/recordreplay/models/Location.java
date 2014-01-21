@@ -162,7 +162,7 @@ public class Location extends TimestampModel {
 	/**
 	 * @return the hasAltitude
 	 */
-	public boolean isHasAltitude() {
+	public boolean hasAltitude() {
 		return hasAltitude;
 	}
 
@@ -190,7 +190,7 @@ public class Location extends TimestampModel {
 	/**
 	 * @return the hasSpeed
 	 */
-	public boolean isHasSpeed() {
+	public boolean hasSpeed() {
 		return hasSpeed;
 	}
 
@@ -218,7 +218,7 @@ public class Location extends TimestampModel {
 	/**
 	 * @return the hasBearing
 	 */
-	public boolean isHasBearing() {
+	public boolean hasBearing() {
 		return hasBearing;
 	}
 
@@ -246,7 +246,7 @@ public class Location extends TimestampModel {
 	/**
 	 * @return the hasAccuracy
 	 */
-	public boolean isHasAccuracy() {
+	public boolean hasAccuracy() {
 		return hasAccuracy;
 	}
 
