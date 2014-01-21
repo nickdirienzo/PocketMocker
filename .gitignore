@@ -26,3 +26,6 @@ proguard/
 # Eclipse things
 .classpath
 .project
+
+# Mac OS things
+.DS_Store

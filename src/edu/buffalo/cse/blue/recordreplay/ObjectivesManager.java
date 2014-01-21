@@ -10,16 +10,22 @@ public class ObjectivesManager {
 	private MainActivity activity;
 	private ArrayList<Objective> objectives;
 	private Objective addNewObjectiveMock;
+	private String mockObjectiveString;
 	
 	public ObjectivesManager(MainActivity a) {
 		activity = a;
-		addNewObjectiveMock = new Objective(-1, "Add New Objective...", null);
+		mockObjectiveString = "Add New Objective...";
+		addNewObjectiveMock = new Objective(-1, mockObjectiveString, null);
 	}
 	
 	public List<Objective> getObjectives() {
 		objectives = activity.getDatabase().getObjectives();
 		objectives.add(addNewObjectiveMock);
 		return objectives;
+	}
+	
+	public String getMockObjectiveString() {
+		return mockObjectiveString;
 	}
 
 }
