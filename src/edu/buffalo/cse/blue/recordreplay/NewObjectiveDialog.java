@@ -37,8 +37,7 @@ public class NewObjectiveDialog extends DialogFragment {
 						EditText e = (EditText) view.findViewById(R.id.objective_name);
 						Objective o = new Objective();
 						o.setName(e.getText().toString());
-						activity.getDatabase().addObjective(o);
-						activity.populateObjectivesSpinner();
+						activity.addObjectiveToSpinner(o);
 					}
 				});
 		if (!first) {

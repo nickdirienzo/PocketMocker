@@ -18,6 +18,7 @@ import android.widget.Spinner;
 import android.widget.TextView;
 import edu.buffalo.cse.blue.recordreplay.models.Database;
 import edu.buffalo.cse.blue.recordreplay.models.Objective;
+import edu.buffalo.cse.blue.recordreplay.models.ObjectivesManager;
 
 public class MainActivity extends Activity {
 
@@ -44,11 +45,11 @@ public class MainActivity extends Activity {
 		super.onCreate(savedInstanceState);
 		setContentView(R.layout.activity_main);
 
-		recordManager = new RecordManager(this);
-		objectivesManager = new ObjectivesManager(this);
-
 		dbName = "PocketMocker1.db";
 		db = new Database(this, dbName);
+		
+		recordManager = new RecordManager(this);
+		objectivesManager = new ObjectivesManager(db);
 
 		this.checkFirstTimeUse();
 
@@ -208,6 +209,11 @@ public class MainActivity extends Activity {
 
 	public void recordButtonClicked(View v) {
 		recordManager.record(v);
+	}
+
+	public void addObjectiveToSpinner(Objective o) {
+		objectivesManager.addObjective(o);
+		populateObjectivesSpinner();		
 	}
 
 }
