@@ -1,4 +1,4 @@
-package edu.buffalo.cse.blue.recordreplay;
+package edu.buffalo.cse.blue.pocketmocker;
 
 import java.util.List;
 
@@ -16,9 +16,9 @@ import android.widget.ArrayAdapter;
 import android.widget.Button;
 import android.widget.Spinner;
 import android.widget.TextView;
-import edu.buffalo.cse.blue.recordreplay.models.Database;
-import edu.buffalo.cse.blue.recordreplay.models.Objective;
-import edu.buffalo.cse.blue.recordreplay.models.ObjectivesManager;
+import edu.buffalo.cse.blue.pocketmocker.models.Database;
+import edu.buffalo.cse.blue.pocketmocker.models.Objective;
+import edu.buffalo.cse.blue.pocketmocker.models.ObjectivesManager;
 
 public class MainActivity extends Activity {
 

@@ -1,4 +1,4 @@
-package edu.buffalo.cse.blue.recordreplay;
+package edu.buffalo.cse.blue.pocketmocker;
 
 import android.app.AlertDialog;
 import android.app.Dialog;
@@ -8,7 +8,7 @@ import android.os.Bundle;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.widget.EditText;
-import edu.buffalo.cse.blue.recordreplay.models.Objective;
+import edu.buffalo.cse.blue.pocketmocker.models.Objective;
 
 public class NewObjectiveDialog extends DialogFragment {
 

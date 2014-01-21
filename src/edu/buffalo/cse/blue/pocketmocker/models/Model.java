@@ -1,4 +1,4 @@
-package edu.buffalo.cse.blue.recordreplay.models;
+package edu.buffalo.cse.blue.pocketmocker.models;
 
 public class Model {
 

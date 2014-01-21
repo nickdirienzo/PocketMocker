@@ -1,4 +1,4 @@
-package edu.buffalo.cse.blue.recordreplay;
+package edu.buffalo.cse.blue.pocketmocker;
 
 import android.location.Location;
 import android.location.LocationManager;
