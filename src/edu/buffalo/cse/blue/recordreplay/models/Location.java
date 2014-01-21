@@ -75,4 +75,228 @@ public class Location extends TimestampModel {
 	
 	public Location() {}
 
+	/**
+	 * @return the id
+	 */
+	public long getId() {
+		return id;
+	}
+
+	/**
+	 * @param id the id to set
+	 */
+	public void setId(long id) {
+		this.id = id;
+	}
+
+	/**
+	 * @return the creationDate
+	 */
+	public Date getCreationDate() {
+		return creationDate;
+	}
+
+	/**
+	 * @param creationDate the creationDate to set
+	 */
+	public void setCreationDate(Date creationDate) {
+		this.creationDate = creationDate;
+	}
+
+	/**
+	 * @return the recording
+	 */
+	public Recording getRecording() {
+		return recording;
+	}
+
+	/**
+	 * @param recording the recording to set
+	 */
+	public void setRecording(Recording recording) {
+		this.recording = recording;
+	}
+
+	/**
+	 * @return the timestamp
+	 */
+	public long getTimestamp() {
+		return timestamp;
+	}
+
+	/**
+	 * @param timestamp the timestamp to set
+	 */
+	public void setTimestamp(long timestamp) {
+		this.timestamp = timestamp;
+	}
+
+	/**
+	 * @return the longitude
+	 */
+	public double getLongitude() {
+		return longitude;
+	}
+
+	/**
+	 * @param longitude the longitude to set
+	 */
+	public void setLongitude(double longitude) {
+		this.longitude = longitude;
+	}
+
+	/**
+	 * @return the latitude
+	 */
+	public double getLatitude() {
+		return latitude;
+	}
+
+	/**
+	 * @param latitude the latitude to set
+	 */
+	public void setLatitude(double latitude) {
+		this.latitude = latitude;
+	}
+
+	/**
+	 * @return the hasAltitude
+	 */
+	public boolean isHasAltitude() {
+		return hasAltitude;
+	}
+
+	/**
+	 * @param hasAltitude the hasAltitude to set
+	 */
+	public void setHasAltitude(boolean hasAltitude) {
+		this.hasAltitude = hasAltitude;
+	}
+
+	/**
+	 * @return the altitude
+	 */
+	public double getAltitude() {
+		return altitude;
+	}
+
+	/**
+	 * @param altitude the altitude to set
+	 */
+	public void setAltitude(double altitude) {
+		this.altitude = altitude;
+	}
+
+	/**
+	 * @return the hasSpeed
+	 */
+	public boolean isHasSpeed() {
+		return hasSpeed;
+	}
+
+	/**
+	 * @param hasSpeed the hasSpeed to set
+	 */
+	public void setHasSpeed(boolean hasSpeed) {
+		this.hasSpeed = hasSpeed;
+	}
+
+	/**
+	 * @return the speed
+	 */
+	public float getSpeed() {
+		return speed;
+	}
+
+	/**
+	 * @param speed the speed to set
+	 */
+	public void setSpeed(float speed) {
+		this.speed = speed;
+	}
+
+	/**
+	 * @return the hasBearing
+	 */
+	public boolean isHasBearing() {
+		return hasBearing;
+	}
+
+	/**
+	 * @param hasBearing the hasBearing to set
+	 */
+	public void setHasBearing(boolean hasBearing) {
+		this.hasBearing = hasBearing;
+	}
+
+	/**
+	 * @return the bearing
+	 */
+	public float getBearing() {
+		return bearing;
+	}
+
+	/**
+	 * @param bearing the bearing to set
+	 */
+	public void setBearing(float bearing) {
+		this.bearing = bearing;
+	}
+
+	/**
+	 * @return the hasAccuracy
+	 */
+	public boolean isHasAccuracy() {
+		return hasAccuracy;
+	}
+
+	/**
+	 * @param hasAccuracy the hasAccuracy to set
+	 */
+	public void setHasAccuracy(boolean hasAccuracy) {
+		this.hasAccuracy = hasAccuracy;
+	}
+
+	/**
+	 * @return the accuracy
+	 */
+	public float getAccuracy() {
+		return accuracy;
+	}
+
+	/**
+	 * @param accuracy the accuracy to set
+	 */
+	public void setAccuracy(float accuracy) {
+		this.accuracy = accuracy;
+	}
+
+	/**
+	 * @return the provider
+	 */
+	public String getProvider() {
+		return provider;
+	}
+
+	/**
+	 * @param provider the provider to set
+	 */
+	public void setProvider(String provider) {
+		this.provider = provider;
+	}
+
+	/**
+	 * @return the extras
+	 */
+	public String getExtras() {
+		return extras;
+	}
+
+	/**
+	 * @param extras the extras to set
+	 */
+	public void setExtras(String extras) {
+		this.extras = extras;
+	}
+
 }
