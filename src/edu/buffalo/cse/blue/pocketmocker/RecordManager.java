@@ -21,12 +21,13 @@ public class RecordManager {
 	public Location prepareToRecord() {
 		activity.toggleRecordingButton();
 		if (recording) {
-			Location lastLoc = activity.getLocationManager()
-					.getLastKnownLocation(LocationManager.GPS_PROVIDER);
+			Location lastLoc = activity.getLocationManager().getLastKnownLocation(
+					LocationManager.GPS_PROVIDER);
 			if (lastLoc == null) {
-				Log.v(TAG, "LT: " + activity.getLocationText());
 				activity.updateLocationText("Waiting for location...");
 			} else {
+				activity.getMockLocationManager().addLocation(lastLoc,
+						activity.getCurrentRecordingId());
 				activity.updateLocationText(lastLoc);
 			}
 			return lastLoc;
@@ -53,9 +54,9 @@ public class RecordManager {
 	public void record(View view) {
 		toggleRecording();
 		Location lastLoc = prepareToRecord();
-//		if (lastLoc != null)
-//			activity.getDatabaseHandler().insertLocation(lastLoc,
-//					activity.getActivePathId());
+		// if (lastLoc != null)
+		// activity.getDatabaseHandler().insertLocation(lastLoc,
+		// activity.getActivePathId());
 	}
 
 }

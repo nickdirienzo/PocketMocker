@@ -8,7 +8,9 @@ public class Objective extends TimestampModel {
 	private String name;
 	private Date creationDate;
 	private Date lastModifiedDate;
-	private Recording recording;
+	private long recordingId;
+	
+	public static final long UNKNOWN_ID = -1;
 
 	// SQL Column Helpers
 	public static final String TABLE_NAME = "objectives";
@@ -35,16 +37,18 @@ public class Objective extends TimestampModel {
 			COL_LAST_MODIFIED_DATE, COL_RECORDING };
 
 	public Objective() {
-		name = "";
-		creationDate = new Date();
-		lastModifiedDate = creationDate;
+		this.id = Objective.UNKNOWN_ID;
+		this.name = "";
+		this.creationDate = new Date();
+		this.lastModifiedDate = creationDate;
+		this.recordingId = Objective.UNKNOWN_ID;
 	}
 
-	public Objective(long id, String name, Recording recording) {
+	public Objective(long id, String name, long recordingId) {
 		this.id = id;
 		this.name = name;
 		this.creationDate = new Date();
-		this.recording = recording;
+		this.recordingId = recordingId;
 		this.lastModifiedDate = creationDate;
 	}
 
@@ -96,12 +100,12 @@ public class Objective extends TimestampModel {
 		lastModifiedDate = this.serializeSqlStringToDate(s);
 	}
 
-	public Recording getRecording() {
-		return recording;
+	public long getRecordingId() {
+		return recordingId;
 	}
 
-	public void setRecording(Recording recording) {
-		this.recording = recording;
+	public void setRecordingId(long recordingId) {
+		this.recordingId = recordingId;
 	}
 
 }

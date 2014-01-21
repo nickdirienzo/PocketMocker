@@ -2,12 +2,14 @@ package edu.buffalo.cse.blue.pocketmocker.models;
 
 import java.util.Date;
 
-public class Location extends TimestampModel {
+import android.location.Location;
+
+public class MockLocation extends TimestampModel {
 
 	private long id;
 	private Date creationDate;
-	private Recording recording;
-	private android.location.Location location;
+	private long recordingId;
+	private Location realLocation;
 
 	public static final String TABLE_NAME = "locations";
 	// SQL Columns
@@ -50,7 +52,7 @@ public class Location extends TimestampModel {
 			+ REFS + Recording.TABLE_NAME + OPEN_PAREN + Recording.COL_ID + CLOSE_PAREN;
 	public static final String CREATE_TABLE_CMD = CREATE_TABLE + TABLE_NAME + OPEN_PAREN + COL_ID
 			+ INT + PK + COMMA + COL_CREATION_DATE + TEXT + COMMA + COL_RECORDING + INT + COMMA
-			+ COL_TIMESTAMP + TEXT + COMMA + COL_LONGITUDE + REAL + COMMA + COL_LATITUDE + REAL
+			+ COL_TIMESTAMP + INT + COMMA + COL_LONGITUDE + REAL + COMMA + COL_LATITUDE + REAL
 			+ COMMA + COL_HAS_ALTITUDE + INT + COMMA + COL_ALTITUDE + REAL + COMMA + COL_HAS_SPEED
 			+ INT + COMMA + COL_SPEED + REAL + COMMA + COL_HAS_BEARING + INT + COMMA + COL_BEARING
 			+ REAL + COMMA + COL_HAS_ACCURACY + INT + COMMA + COL_ACCURACY + REAL + COMMA
@@ -59,7 +61,14 @@ public class Location extends TimestampModel {
 	public static final String DROP_TABLE_CMD = dropTable(TABLE_NAME);
 	public static final String SELECT_ALL = "SELECT * FROM " + TABLE_NAME;
 
-	public Location() {
+	public MockLocation() {
+		this.creationDate = new Date();
+	}
+	
+	public MockLocation(Location l, long recId) {
+		this.creationDate = new Date();
+		this.realLocation = l;
+		this.recordingId = recId;
 	}
 
 	/**
@@ -84,6 +93,10 @@ public class Location extends TimestampModel {
 		return creationDate;
 	}
 
+	public String getCreationDateSqlString() {
+		return this.serializeDateToSqlString(creationDate);
+	}
+
 	/**
 	 * @param creationDate
 	 *            the creationDate to set
@@ -95,24 +108,24 @@ public class Location extends TimestampModel {
 	/**
 	 * @return the recording
 	 */
-	public Recording getRecording() {
-		return recording;
+	public long getRecordingId() {
+		return recordingId;
 	}
 
 	/**
 	 * @param recording
 	 *            the recording to set
 	 */
-	public void setRecording(Recording recording) {
-		this.recording = recording;
+	public void setRecordingId(long recId) {
+		this.recordingId = recId;
 	}
 
-	public android.location.Location getLocation() {
-		return location;
+	public Location getRealLocation() {
+		return realLocation;
 	}
 
-	public void setLocation(android.location.Location location) {
-		this.location = location;
+	public void setRealLocation(Location location) {
+		this.realLocation = location;
 	}
 
 }

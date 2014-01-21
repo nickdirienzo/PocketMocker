@@ -1,16 +1,12 @@
 package edu.buffalo.cse.blue.pocketmocker.models;
 
-import java.util.ArrayList;
-
-import android.content.ContentValues;
 import android.content.Context;
-import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteOpenHelper;
 
 public class Database extends SQLiteOpenHelper {
 
-	private static final int DB_VERSION = 2;
+	private static final int DB_VERSION = 1;
 
 	public Database(Context context, String name) {
 		super(context, name, null, DB_VERSION);
@@ -21,6 +17,7 @@ public class Database extends SQLiteOpenHelper {
 	public void onCreate(SQLiteDatabase db) {
 		db.execSQL(Objective.CREATE_TABLE_CMD);
 		db.execSQL(Recording.CREATE_TABLE_CMD);
+		db.execSQL(MockLocation.CREATE_TABLE_CMD);
 	}
 
 	@Override
@@ -28,6 +25,7 @@ public class Database extends SQLiteOpenHelper {
 		// Our current policy is wipe and start new.
 		db.execSQL(Objective.DROP_TABLE_CMD);
 		db.execSQL(Recording.DROP_TABLE_CMD);
+		db.execSQL(MockLocation.DROP_TABLE_CMD);
 		onCreate(db);
 	}
 

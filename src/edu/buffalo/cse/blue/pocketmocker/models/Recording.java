@@ -7,7 +7,7 @@ public class Recording extends TimestampModel {
 
 	private long id;
 	private Date creationDate;
-	private ArrayList<Location> locations;
+	private ArrayList<MockLocation> locations;
 
 	// SQL Helpers
 	public static final String TABLE_NAME = "recordings";
@@ -18,7 +18,11 @@ public class Recording extends TimestampModel {
 			+ CLOSE_PAREN;
 	public static final String DROP_TABLE_CMD = dropTable(TABLE_NAME);
 
-	public Recording(long id, ArrayList<Location> locations) {
+	public Recording() {
+		this.creationDate = new Date();
+	}
+	
+	public Recording(long id, ArrayList<MockLocation> locations) {
 		this.id = id;
 		this.creationDate = new Date();
 		this.locations = locations;
@@ -36,7 +40,7 @@ public class Recording extends TimestampModel {
 		return creationDate;
 	}
 
-	public String getCreationDateString() {
+	public String getCreationDateSqlString() {
 		return this.serializeDateToSqlString(creationDate);
 	}
 
@@ -44,11 +48,11 @@ public class Recording extends TimestampModel {
 		creationDate = d;
 	}
 
-	public ArrayList<Location> getLocations() {
+	public ArrayList<MockLocation> getLocations() {
 		return locations;
 	}
 
-	public void setLocations(ArrayList<Location> locations) {
+	public void setLocations(ArrayList<MockLocation> locations) {
 		this.locations = locations;
 	}
 }

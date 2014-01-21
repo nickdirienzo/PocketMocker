@@ -1,7 +1,5 @@
 package edu.buffalo.cse.blue.pocketmocker;
 
-import java.util.List;
-
 import android.app.Activity;
 import android.content.Context;
 import android.location.Location;
@@ -17,7 +15,7 @@ import android.widget.Button;
 import android.widget.Spinner;
 import android.widget.TextView;
 import edu.buffalo.cse.blue.pocketmocker.models.Database;
-import edu.buffalo.cse.blue.pocketmocker.models.Objective;
+import edu.buffalo.cse.blue.pocketmocker.models.MockLocationManager;
 import edu.buffalo.cse.blue.pocketmocker.models.ObjectivesManager;
 
 public class MainActivity extends Activity {
@@ -27,13 +25,14 @@ public class MainActivity extends Activity {
 	private TextView locationText;
 	private Button recordButton;
 	private String locationPrefix;
-	private String activePathId;
+	private long currentRecordingId;
 
 	private Spinner objectivesSpinner;
 	private boolean spinnerInitFlag;
 
 	private RecordManager recordManager;
 	private ObjectivesManager objectivesManager;
+	private MockLocationManager mockLocationManager;
 
 	private Database db;
 	private String dbName;
@@ -45,11 +44,12 @@ public class MainActivity extends Activity {
 		super.onCreate(savedInstanceState);
 		setContentView(R.layout.activity_main);
 
-		dbName = "PocketMocker1.db";
+		dbName = "PocketMocker.db";
 		db = new Database(this, dbName);
-		
+
 		recordManager = new RecordManager(this);
-		objectivesManager = new ObjectivesManager(db);
+		objectivesManager = new ObjectivesManager(this);
+		mockLocationManager = new MockLocationManager(db);
 
 		this.checkFirstTimeUse();
 
@@ -92,9 +92,8 @@ public class MainActivity extends Activity {
 						if (recordManager.isRecording()) {
 							// Logging only when recording because otherwise
 							// it's a huge mess in LogCat
-							Log.v(TAG, "LocatoinChanged. Loc: " + loc.toString());
-							// Do we need to log every location change?
-							// dbHandler.insertLocation(loc, activePathId);
+							Log.v(TAG, "LocatoinChanged.");
+							mockLocationManager.addLocation(loc, currentRecordingId);
 							String displayLoc = MainActivity.buildLocationDisplayString(loc);
 							locationText.setText(locationPrefix + displayLoc);
 							// Log.v(TAG, "Location count: "
@@ -134,9 +133,9 @@ public class MainActivity extends Activity {
 	}
 
 	private void checkFirstTimeUse() {
-		List<Objective> objectives = objectivesManager.getObjectives();
-		// No existing objectives besides the mock
-		if (objectives.size() == 1) {
+		// No existing objectives besides the mock, so we can assume it's the
+		// first time the user is using the app.
+		if (objectivesManager.getObjectives().size() == 1) {
 			NewObjectiveDialog dialog = new NewObjectiveDialog();
 			Bundle b = new Bundle();
 			b.putBoolean(NewObjectiveDialog.FIRST_KEY, true);
@@ -146,13 +145,8 @@ public class MainActivity extends Activity {
 	}
 
 	public void populateObjectivesSpinner() {
-		List<Objective> objectives = objectivesManager.getObjectives();
-		String[] objectiveNames = new String[objectives.size()];
-		for (int i = 0; i < objectiveNames.length; ++i) {
-			objectiveNames[i] = objectives.get(i).getName();
-		}
 		ArrayAdapter<String> objectivesSpinnerAdapter = new ArrayAdapter<String>(this,
-				android.R.layout.simple_spinner_item, objectiveNames);
+				android.R.layout.simple_spinner_item, objectivesManager.getObjectivesNames());
 		objectivesSpinnerAdapter
 				.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
 		objectivesSpinner.setAdapter(objectivesSpinnerAdapter);
@@ -165,9 +159,13 @@ public class MainActivity extends Activity {
 	public Database getDatabase() {
 		return db;
 	}
-
-	public String getActivePathId() {
-		return activePathId;
+	
+	public void setCurrentRecordingId(long i) {
+		this.currentRecordingId = i;
+	}
+	
+	public long getCurrentRecordingId() {
+		return this.currentRecordingId;
 	}
 
 	public TextView getLocationText() {
@@ -184,6 +182,10 @@ public class MainActivity extends Activity {
 
 	public ObjectivesManager getObjectivesManager() {
 		return objectivesManager;
+	}
+	
+	public MockLocationManager getMockLocationManager() {
+		return mockLocationManager;
 	}
 
 	public void updateLocationText(Location loc) {
@@ -209,11 +211,6 @@ public class MainActivity extends Activity {
 
 	public void recordButtonClicked(View v) {
 		recordManager.record(v);
-	}
-
-	public void addObjectiveToSpinner(Objective o) {
-		objectivesManager.addObjective(o);
-		populateObjectivesSpinner();		
 	}
 
 }
