@@ -22,24 +22,24 @@ public class Objective extends TimestampModel {
 	public static final int COL_LAST_MODIFIED_DATE_INDEX = 3;
 	public static final String COL_RECORDING = "rec_id";
 	public static final int COL_RECORDING_INDEX = 4;
-	public static final String COL_RECORDING_FK = FK + OPEN_PAREN
-			+ COL_RECORDING + CLOSE_PAREN + REFS + Recording.TABLE_NAME
-			+ OPEN_PAREN + Recording.COL_ID + CLOSE_PAREN;
+	public static final String COL_RECORDING_FK = FK + OPEN_PAREN + COL_RECORDING + CLOSE_PAREN
+			+ REFS + Recording.TABLE_NAME + OPEN_PAREN + Recording.COL_ID + CLOSE_PAREN;
 	// SQL Query Helpers
-	public static final String CREATE_TABLE_CMD = CREATE_TABLE + TABLE_NAME
-			+ OPEN_PAREN + COL_ID + INT + PK + COMMA + COL_NAME
-			+ TEXT + COMMA + COL_CREATION_DATE + TEXT + COMMA
-			+ COL_LAST_MODIFIED_DATE + TEXT + COMMA + COL_RECORDING + INT
-			+ COMMA + COL_RECORDING_FK + CLOSE_PAREN;
+	public static final String CREATE_TABLE_CMD = CREATE_TABLE + TABLE_NAME + OPEN_PAREN + COL_ID
+			+ INT + PK + COMMA + COL_NAME + TEXT + COMMA + COL_CREATION_DATE + TEXT + COMMA
+			+ COL_LAST_MODIFIED_DATE + TEXT + COMMA + COL_RECORDING + INT + COMMA
+			+ COL_RECORDING_FK + CLOSE_PAREN;
 	public static final String DROP_TABLE_CMD = dropTable(TABLE_NAME);
 	public static final String SELECT_ALL = "SELECT * FROM " + TABLE_NAME;
+	public static final String[] ALL_COLS = { COL_ID, COL_NAME, COL_CREATION_DATE,
+			COL_LAST_MODIFIED_DATE, COL_RECORDING };
 
 	public Objective() {
 		name = "";
 		creationDate = new Date();
 		lastModifiedDate = creationDate;
 	}
-	
+
 	public Objective(long id, String name, Recording recording) {
 		this.id = id;
 		this.name = name;
@@ -67,7 +67,7 @@ public class Objective extends TimestampModel {
 	public Date getCreationDate() {
 		return creationDate;
 	}
-	
+
 	public String getCreationDateSqlString() {
 		return this.serializeDateToSqlString(creationDate);
 	}
@@ -75,7 +75,7 @@ public class Objective extends TimestampModel {
 	public void setCreationDate(Date d) {
 		creationDate = d;
 	}
-	
+
 	public void setCreationDate(String s) {
 		creationDate = this.serializeSqlStringToDate(s);
 	}
@@ -83,7 +83,7 @@ public class Objective extends TimestampModel {
 	public Date getLastModifiedDate() {
 		return lastModifiedDate;
 	}
-	
+
 	public String getLastModifiedDateSqlString() {
 		return this.serializeDateToSqlString(lastModifiedDate);
 	}
@@ -91,7 +91,7 @@ public class Objective extends TimestampModel {
 	public void setLastModifiedDate(Date d) {
 		lastModifiedDate = d;
 	}
-	
+
 	public void setLastModifiedDate(String s) {
 		lastModifiedDate = this.serializeSqlStringToDate(s);
 	}

@@ -30,7 +30,7 @@ public class Database extends SQLiteOpenHelper {
 		db.execSQL(Recording.DROP_TABLE_CMD);
 		onCreate(db);
 	}
-	
+
 	public void addObjective(Objective o) {
 		SQLiteDatabase db = this.getWritableDatabase();
 		ContentValues values = new ContentValues();
@@ -38,13 +38,29 @@ public class Database extends SQLiteOpenHelper {
 		values.put(Objective.COL_CREATION_DATE, o.getCreationDateSqlString());
 		values.put(Objective.COL_LAST_MODIFIED_DATE, o.getLastModifiedDateSqlString());
 		// New objectives do not have a recording
-		if(o.getRecording() == null) {
+		if (o.getRecording() == null) {
 			values.put(Objective.COL_RECORDING, -1);
 		} else {
 			values.put(Objective.COL_RECORDING, o.getRecording().getId());
 		}
 		db.insert(Objective.TABLE_NAME, null, values);
 		db.close();
+	}
+
+	public Objective getObjectiveByName(String name) {
+		SQLiteDatabase db = this.getReadableDatabase();
+		Objective objective = null;
+		Cursor cursor = db.query(Objective.TABLE_NAME, Objective.ALL_COLS, Objective.COL_NAME
+				+ "=?", null, null, null, null);
+		if (cursor != null) {
+			cursor.moveToFirst();
+		}
+		objective = new Objective();
+		objective.setId(Long.parseLong(cursor.getString(Objective.COL_ID_INDEX)));
+		objective.setName(cursor.getString(Objective.COL_NAME_INDEX));
+		objective.setCreationDate(cursor.getString(Objective.COL_CREATION_DATE_INDEX));
+		objective.setLastModifiedDate(cursor.getString(Objective.COL_LAST_MODIFIED_DATE_INDEX));
+		return objective;
 	}
 
 	public ArrayList<Objective> getObjectives() {
@@ -54,11 +70,9 @@ public class Database extends SQLiteOpenHelper {
 		if (cursor.moveToFirst()) {
 			do {
 				Objective objective = new Objective();
-				objective.setId(Long.parseLong(cursor
-						.getString(Objective.COL_ID_INDEX)));
+				objective.setId(Long.parseLong(cursor.getString(Objective.COL_ID_INDEX)));
 				objective.setName(cursor.getString(Objective.COL_NAME_INDEX));
-				objective.setCreationDate(cursor
-						.getString(Objective.COL_CREATION_DATE_INDEX));
+				objective.setCreationDate(cursor.getString(Objective.COL_CREATION_DATE_INDEX));
 				objective.setLastModifiedDate(cursor
 						.getString(Objective.COL_LAST_MODIFIED_DATE_INDEX));
 				// TODO: Get recording
