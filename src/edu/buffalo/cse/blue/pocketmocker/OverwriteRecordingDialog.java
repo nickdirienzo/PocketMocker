@@ -14,7 +14,7 @@ public class OverwriteRecordingDialog extends DialogFragment {
 		AlertDialog.Builder builder = new AlertDialog.Builder(getActivity());
 		String message = this.getString(R.string.overwrite_recording_question);
 		Bundle b = this.getArguments();
-		message.replace("objective", b.getString("objective"));
+		message = message.replace("objective", b.getString("objective"));
 		builder.setMessage(message)
 				.setPositiveButton(R.string.ok, new DialogInterface.OnClickListener() {
 
