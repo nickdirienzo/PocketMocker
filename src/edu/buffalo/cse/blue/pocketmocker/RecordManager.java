@@ -18,7 +18,7 @@ public class RecordManager {
 		recording = false;
 	}
 
-	public Location prepareToRecord() {
+	public void prepareToRecord() {
 		activity.toggleRecordingButton();
 		if (recording) {
 			Location lastLoc = activity.getLocationManager().getLastKnownLocation(
@@ -30,10 +30,8 @@ public class RecordManager {
 						activity.getCurrentRecordingId());
 				activity.updateLocationText(lastLoc);
 			}
-			return lastLoc;
 		} else {
 			activity.resetLocationText();
-			return null;
 		}
 	}
 
@@ -52,11 +50,14 @@ public class RecordManager {
 	 *            the Record Button pressed.
 	 */
 	public void record(View view) {
-		toggleRecording();
-		Location lastLoc = prepareToRecord();
-		// if (lastLoc != null)
-		// activity.getDatabaseHandler().insertLocation(lastLoc,
-		// activity.getActivePathId());
+		Log.v(MainActivity.TAG, "Checking if objective (" + activity.getSelectedObjectiveName()
+				+ ") already has a recording.");
+		if (activity.getObjectivesManager().hasExistingRecording(
+				activity.getSelectedObjectiveName())) {
+			Log.v(MainActivity.TAG, "This objective already has a recording.");
+		} else {
+			toggleRecording();
+			prepareToRecord();
+		}
 	}
-
 }

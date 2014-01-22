@@ -17,10 +17,11 @@ import android.widget.TextView;
 import edu.buffalo.cse.blue.pocketmocker.models.Database;
 import edu.buffalo.cse.blue.pocketmocker.models.MockLocationManager;
 import edu.buffalo.cse.blue.pocketmocker.models.ObjectivesManager;
+import edu.buffalo.cse.blue.pocketmocker.models.RecordingManager;
 
 public class MainActivity extends Activity {
 
-	private String TAG = "REC";
+	public static final String TAG = "REC";
 
 	private TextView locationText;
 	private Button recordButton;
@@ -33,6 +34,7 @@ public class MainActivity extends Activity {
 	private RecordManager recordManager;
 	private ObjectivesManager objectivesManager;
 	private MockLocationManager mockLocationManager;
+	private RecordingManager recordingManager;
 
 	private Database db;
 	private String dbName;
@@ -49,7 +51,8 @@ public class MainActivity extends Activity {
 
 		recordManager = new RecordManager(this);
 		objectivesManager = new ObjectivesManager(this);
-		mockLocationManager = new MockLocationManager(db);
+		mockLocationManager = new MockLocationManager(this);
+		recordingManager = new RecordingManager(this);
 
 		this.checkFirstTimeUse();
 
@@ -151,6 +154,10 @@ public class MainActivity extends Activity {
 				.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
 		objectivesSpinner.setAdapter(objectivesSpinnerAdapter);
 	}
+	
+	public String getSelectedObjectiveName() {
+		return objectivesSpinner.getSelectedItem().toString();
+	}
 
 	public static String buildLocationDisplayString(Location loc) {
 		return "(" + loc.getLatitude() + ", " + loc.getLongitude() + ")";
@@ -186,6 +193,10 @@ public class MainActivity extends Activity {
 	
 	public MockLocationManager getMockLocationManager() {
 		return mockLocationManager;
+	}
+	
+	public RecordingManager getRecordingManager() {
+		return recordingManager;
 	}
 
 	public void updateLocationText(Location loc) {

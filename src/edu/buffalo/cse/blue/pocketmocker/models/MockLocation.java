@@ -104,6 +104,10 @@ public class MockLocation extends TimestampModel {
 	public void setCreationDate(Date creationDate) {
 		this.creationDate = creationDate;
 	}
+	
+	public void setCreationDate(String sqlStringDate) {
+		this.creationDate = this.serializeSqlStringToDate(sqlStringDate);
+	}
 
 	/**
 	 * @return the recording

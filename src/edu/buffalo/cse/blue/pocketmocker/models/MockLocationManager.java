@@ -1,21 +1,23 @@
 package edu.buffalo.cse.blue.pocketmocker.models;
 
+import java.util.ArrayList;
+
 import android.content.ContentValues;
+import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 import android.location.Location;
+import edu.buffalo.cse.blue.pocketmocker.MainActivity;
 
-public class MockLocationManager {
+public class MockLocationManager extends ModelManager {
 
-	private Database db;
-
-	public MockLocationManager(Database d) {
-		db = d;
+	public MockLocationManager(MainActivity a) {
+		super(a);
 	}
 
 	public void addLocation(Location l, long currentRecordingId) {
 		MockLocation m = new MockLocation(l, currentRecordingId);
-		
-		SQLiteDatabase sql = db.getWritableDatabase();
+
+		SQLiteDatabase sql = activity.getDatabase().getWritableDatabase();
 		ContentValues values = new ContentValues();
 		Location realLoc = m.getRealLocation();
 		values.put(MockLocation.COL_CREATION_DATE, m.getCreationDateSqlString());
@@ -36,5 +38,45 @@ public class MockLocationManager {
 		values.put(MockLocation.COL_PROVIDER, realLoc.getProvider());
 		sql.insert(MockLocation.TABLE_NAME, null, values);
 		sql.close();
+	}
+
+	public ArrayList<MockLocation> getMockLocationsForRecording(long recId) {
+		ArrayList<MockLocation> mockLocations = new ArrayList<MockLocation>();
+		SQLiteDatabase sql = activity.getDatabase().getReadableDatabase();
+		String query = MockLocation.SELECT_ALL + " WHERE " + MockLocation.COL_RECORDING + " = '"
+				+ recId + "'";
+		Cursor cursor = sql.rawQuery(query, null);
+		if (cursor.moveToFirst()) {
+			do {
+				MockLocation ml = new MockLocation();
+				ml.setId(getLong(cursor, MockLocation.COL_ID_INDEX));
+				ml.setCreationDate(cursor.getString(MockLocation.COL_CREATION_DATE_INDEX));
+				ml.setRecordingId(getLong(cursor, MockLocation.COL_RECORDING_INDEX));
+
+				String provider = cursor.getString(MockLocation.COL_PROVIDER_INDEX);
+				Location loc = new Location(provider);
+				loc.setTime(getLong(cursor, MockLocation.COL_TIMESTAMP_INDEX));
+				loc.setLongitude(getDouble(cursor, MockLocation.COL_LONGITUDE_INDEX));
+				loc.setLatitude(getDouble(cursor, MockLocation.COL_LATITUDE_INDEX));
+				if (isTrue(cursor, MockLocation.COL_HAS_ALTITUDE_INDEX)) {
+					loc.setAltitude(getDouble(cursor, MockLocation.COL_ALTITUDE_INDEX));
+				}
+				if (isTrue(cursor, MockLocation.COL_HAS_SPEED_INDEX)) {
+					loc.setSpeed(getFloat(cursor, MockLocation.COL_SPEED_INDEX));
+				}
+				if (isTrue(cursor, MockLocation.COL_HAS_BEARING_INDEX)) {
+					loc.setBearing(getFloat(cursor, MockLocation.COL_BEARING_INDEX));
+				}
+				if (isTrue(cursor, MockLocation.COL_HAS_ACCURACY_INDEX)) {
+					loc.setAccuracy(getFloat(cursor, MockLocation.COL_ACCURACY_INDEX));
+				}
+				// TODO: Create Bundle from a String and set it on our real
+				// Location
+				ml.setRealLocation(loc);
+				mockLocations.add(ml);
+			} while (cursor.moveToNext());
+		}
+		sql.close();
+		return mockLocations;
 	}
 }
