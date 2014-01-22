@@ -2,6 +2,7 @@ package edu.buffalo.cse.blue.pocketmocker;
 
 import android.location.Location;
 import android.location.LocationManager;
+import android.os.Bundle;
 import android.util.Log;
 import android.view.View;
 
@@ -54,7 +55,7 @@ public class RecordManager {
 				+ ") already has a recording.");
 		if (activity.getObjectivesManager().hasExistingRecording(
 				activity.getSelectedObjectiveName())) {
-			Log.v(MainActivity.TAG, "This objective already has a recording.");
+			activity.showOverwriteRecordingDialog();
 		} else {
 			toggleRecording();
 			prepareToRecord();

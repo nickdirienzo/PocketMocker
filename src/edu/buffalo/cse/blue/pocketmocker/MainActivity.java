@@ -224,4 +224,16 @@ public class MainActivity extends Activity {
 		recordManager.record(v);
 	}
 
+	public void showOverwriteRecordingDialog() {
+		OverwriteRecordingDialog dialog = new OverwriteRecordingDialog();
+		Bundle b = new Bundle();
+		b.putString("objective", this.getSelectedObjectiveName());
+		dialog.setArguments(b);
+		dialog.show(this.getFragmentManager(), TAG);
+	}
+	
+	public void overwriteRecording() {
+		Log.v(TAG, "To implement");
+	}
+
 }

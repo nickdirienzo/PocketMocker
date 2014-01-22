@@ -13,5 +13,6 @@
     <string name="objective_dialog_title">Create Objective</string>
     <string name="create">Create</string>
     <string name="cancel">Cancel</string>
-
+    <string name="overwrite_recording_question">Are you sure you want to overwrite the recording for <b>objective</b>?</string>
+	<string name="ok">OK</string>
 </resources>
