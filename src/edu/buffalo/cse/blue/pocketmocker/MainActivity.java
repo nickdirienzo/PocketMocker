@@ -1,5 +1,7 @@
 package edu.buffalo.cse.blue.pocketmocker;
 
+import java.util.Date;
+
 import android.app.Activity;
 import android.content.Context;
 import android.location.Location;
@@ -16,7 +18,9 @@ import android.widget.Spinner;
 import android.widget.TextView;
 import edu.buffalo.cse.blue.pocketmocker.models.Database;
 import edu.buffalo.cse.blue.pocketmocker.models.MockLocationManager;
+import edu.buffalo.cse.blue.pocketmocker.models.Objective;
 import edu.buffalo.cse.blue.pocketmocker.models.ObjectivesManager;
+import edu.buffalo.cse.blue.pocketmocker.models.Recording;
 import edu.buffalo.cse.blue.pocketmocker.models.RecordingManager;
 
 public class MainActivity extends Activity {
@@ -154,7 +158,7 @@ public class MainActivity extends Activity {
 				.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
 		objectivesSpinner.setAdapter(objectivesSpinnerAdapter);
 	}
-	
+
 	public String getSelectedObjectiveName() {
 		return objectivesSpinner.getSelectedItem().toString();
 	}
@@ -166,11 +170,11 @@ public class MainActivity extends Activity {
 	public Database getDatabase() {
 		return db;
 	}
-	
+
 	public void setCurrentRecordingId(long i) {
 		this.currentRecordingId = i;
 	}
-	
+
 	public long getCurrentRecordingId() {
 		return this.currentRecordingId;
 	}
@@ -190,11 +194,11 @@ public class MainActivity extends Activity {
 	public ObjectivesManager getObjectivesManager() {
 		return objectivesManager;
 	}
-	
+
 	public MockLocationManager getMockLocationManager() {
 		return mockLocationManager;
 	}
-	
+
 	public RecordingManager getRecordingManager() {
 		return recordingManager;
 	}
@@ -231,9 +235,13 @@ public class MainActivity extends Activity {
 		dialog.setArguments(b);
 		dialog.show(this.getFragmentManager(), TAG);
 	}
-	
+
 	public void overwriteRecording() {
-		Log.v(TAG, "To implement");
+		long recId = recordingManager.addRecording(new Recording());
+		Objective o = objectivesManager.getObjectiveByName(this.getSelectedObjectiveName());
+		o.setRecordingId(recId);
+		o.setLastModifiedDate(new Date());
+		objectivesManager.updateObjective(o);
 	}
 
 }

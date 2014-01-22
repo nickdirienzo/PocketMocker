@@ -43,6 +43,19 @@ public class ObjectivesManager extends ModelManager {
 		sql.close();
 	}
 
+	public void updateObjective(Objective o) {
+		ContentValues values = new ContentValues();
+		values.put(Objective.COL_NAME, o.getName());
+		values.put(Objective.COL_CREATION_DATE, o.getCreationDateSqlString());
+		values.put(Objective.COL_LAST_MODIFIED_DATE, o.getLastModifiedDateSqlString());
+		values.put(Objective.COL_RECORDING, o.getRecordingId());
+		SQLiteDatabase sql = activity.getDatabase().getWritableDatabase();
+		sql.update(Objective.TABLE_NAME, values, Objective.COL_ID + "=?",
+				new String[] { String.valueOf(o.getId()) });
+		sql.close();
+		Log.v(MainActivity.TAG, "Updated objective " + o.getId());
+	}
+
 	public Objective getObjectiveByName(String name) {
 		SQLiteDatabase sql = activity.getDatabase().getReadableDatabase();
 		Objective objective;
