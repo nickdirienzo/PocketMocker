@@ -16,7 +16,6 @@ import android.widget.ArrayAdapter;
 import android.widget.Button;
 import android.widget.Spinner;
 import android.widget.TextView;
-import edu.buffalo.cse.blue.pocketmocker.models.Database;
 import edu.buffalo.cse.blue.pocketmocker.models.MockLocationManager;
 import edu.buffalo.cse.blue.pocketmocker.models.Objective;
 import edu.buffalo.cse.blue.pocketmocker.models.ObjectivesManager;
@@ -26,22 +25,21 @@ import edu.buffalo.cse.blue.pocketmocker.models.RecordingManager;
 public class MainActivity extends Activity {
 
 	public static final String TAG = "REC";
+	
+	private PocketMockerApplication app;
 
 	private TextView locationText;
 	private Button recordButton;
 	private String locationPrefix;
-	private long currentRecordingId;
 
 	private Spinner objectivesSpinner;
 	private boolean spinnerInitFlag;
-
-	private RecordManager recordManager;
+	
 	private ObjectivesManager objectivesManager;
-	private MockLocationManager mockLocationManager;
 	private RecordingManager recordingManager;
-
-	private Database db;
-	private String dbName;
+	private MockLocationManager mockLocationManager;
+	
+	private RecordManager recordManager;
 
 	private LocationManager locationManager;
 
@@ -49,13 +47,12 @@ public class MainActivity extends Activity {
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
 		setContentView(R.layout.activity_main);
-
-		db = new Database(this);
-
+		app = (PocketMockerApplication) getApplicationContext();
+		
+		objectivesManager = ObjectivesManager.getInstance(getApplicationContext());
+		recordingManager = RecordingManager.getInstance(getApplicationContext());
+		mockLocationManager = MockLocationManager.getInstance(getApplicationContext());
 		recordManager = new RecordManager(this);
-		objectivesManager = new ObjectivesManager(this);
-		mockLocationManager = new MockLocationManager(this);
-		recordingManager = new RecordingManager(this);
 
 		this.checkFirstTimeUse();
 
@@ -99,7 +96,7 @@ public class MainActivity extends Activity {
 							// Logging only when recording because otherwise
 							// it's a huge mess in LogCat
 							Log.v(TAG, "LocatoinChanged.");
-							mockLocationManager.addLocation(loc, currentRecordingId);
+							mockLocationManager.addLocation(loc);
 							String displayLoc = MainActivity.buildLocationDisplayString(loc);
 							locationText.setText(locationPrefix + displayLoc);
 							// Log.v(TAG, "Location count: "
@@ -166,16 +163,12 @@ public class MainActivity extends Activity {
 		return "(" + loc.getLatitude() + ", " + loc.getLongitude() + ")";
 	}
 
-	public Database getDatabase() {
-		return db;
-	}
-
 	public void setCurrentRecordingId(long i) {
-		this.currentRecordingId = i;
+		app.setCurrentRecordingId(i);
 	}
 
 	public long getCurrentRecordingId() {
-		return this.currentRecordingId;
+		return app.getCurrentRecordingId();
 	}
 
 	public TextView getLocationText() {

@@ -4,18 +4,31 @@ import java.util.ArrayList;
 import java.util.List;
 
 import android.content.ContentValues;
+import android.content.Context;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 import android.util.Log;
 import edu.buffalo.cse.blue.pocketmocker.MainActivity;
+import edu.buffalo.cse.blue.pocketmocker.PocketMockerApplication;
 
 public class ObjectivesManager extends ModelManager {
+	
+	private static ObjectivesManager sInstance;
 
+	private PocketMockerApplication app;
 	private Objective addNewObjectiveMock;
 	private String mockObjectiveString;
 
-	public ObjectivesManager(MainActivity a) {
-		super(a);
+	public static ObjectivesManager getInstance(Context c) {
+		if(sInstance == null) {
+			sInstance = new ObjectivesManager(c);
+		}
+		return sInstance;
+	}
+	
+	private ObjectivesManager(Context c) {
+		super(c);
+		app = (PocketMockerApplication) c;
 		mockObjectiveString = "Add New Objective...";
 		addNewObjectiveMock = new Objective(Objective.UNKNOWN_ID, mockObjectiveString,
 				Objective.UNKNOWN_ID);
@@ -32,13 +45,13 @@ public class ObjectivesManager extends ModelManager {
 		values.put(Objective.COL_LAST_MODIFIED_DATE, o.getLastModifiedDateSqlString());
 		// New objectives do not have a recording
 		if (o.getRecordingId() == -1) {
-			long recId = activity.getRecordingManager().addRecording(new Recording());
+			long recId = RecordingManager.getInstance(app).addRecording(new Recording());
 			values.put(Objective.COL_RECORDING, recId);
-			activity.setCurrentRecordingId(recId);
+			app.setCurrentRecordingId(recId);
 		} else {
 			values.put(Objective.COL_RECORDING, o.getRecordingId());
 		}
-		SQLiteDatabase sql = activity.getDatabase().getWritableDatabase();
+		SQLiteDatabase sql = db.getWritableDatabase();
 		sql.insert(Objective.TABLE_NAME, null, values);
 		sql.close();
 	}
@@ -49,7 +62,7 @@ public class ObjectivesManager extends ModelManager {
 		values.put(Objective.COL_CREATION_DATE, o.getCreationDateSqlString());
 		values.put(Objective.COL_LAST_MODIFIED_DATE, o.getLastModifiedDateSqlString());
 		values.put(Objective.COL_RECORDING, o.getRecordingId());
-		SQLiteDatabase sql = activity.getDatabase().getWritableDatabase();
+		SQLiteDatabase sql = db.getWritableDatabase();
 		sql.update(Objective.TABLE_NAME, values, Objective.COL_ID + "=?",
 				new String[] { String.valueOf(o.getId()) });
 		sql.close();
@@ -57,7 +70,7 @@ public class ObjectivesManager extends ModelManager {
 	}
 
 	public Objective getObjectiveByName(String name) {
-		SQLiteDatabase sql = activity.getDatabase().getReadableDatabase();
+		SQLiteDatabase sql = db.getReadableDatabase();
 		Objective objective;
 		Cursor cursor = sql.query(Objective.TABLE_NAME, Objective.ALL_COLS, Objective.COL_NAME
 				+ "=?", new String[] { name }, null, null, null);
@@ -76,7 +89,7 @@ public class ObjectivesManager extends ModelManager {
 
 	public ArrayList<Objective> getObjectives() {
 		ArrayList<Objective> objectives = new ArrayList<Objective>();
-		SQLiteDatabase sql = activity.getDatabase().getWritableDatabase();
+		SQLiteDatabase sql = db.getWritableDatabase();
 		Cursor cursor = sql.rawQuery(Objective.SELECT_ALL, null);
 		if (cursor.moveToFirst()) {
 			do {
@@ -108,7 +121,7 @@ public class ObjectivesManager extends ModelManager {
 		Objective o = this.getObjectiveByName(objectiveName);
 		Log.v(MainActivity.TAG, "Looking up locations for (Objective " + o.getId() + ") recording "
 				+ o.getRecordingId());
-		return activity.getRecordingManager().hasLocations(o.getRecordingId());
+		return RecordingManager.getInstance(app).hasLocations(o.getRecordingId());
 	}
 
 }

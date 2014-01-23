@@ -3,21 +3,33 @@ package edu.buffalo.cse.blue.pocketmocker.models;
 import java.util.ArrayList;
 
 import android.content.ContentValues;
+import android.content.Context;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 import android.location.Location;
-import edu.buffalo.cse.blue.pocketmocker.MainActivity;
+import edu.buffalo.cse.blue.pocketmocker.PocketMockerApplication;
 
 public class MockLocationManager extends ModelManager {
-
-	public MockLocationManager(MainActivity a) {
-		super(a);
+	
+	private static MockLocationManager sInstance;
+	private PocketMockerApplication app;
+	
+	public static MockLocationManager getInstance(Context c) {
+		if(sInstance == null) {
+			sInstance = new MockLocationManager(c);
+		}
+		return sInstance;
+	}
+	
+	private MockLocationManager(Context c) {
+		super(c);
+		app = (PocketMockerApplication) c;
 	}
 
-	public void addLocation(Location l, long currentRecordingId) {
-		MockLocation m = new MockLocation(l, currentRecordingId);
+	public void addLocation(Location l) {
+		MockLocation m = new MockLocation(l, app.getCurrentRecordingId());
 
-		SQLiteDatabase sql = activity.getDatabase().getWritableDatabase();
+		SQLiteDatabase sql = db.getWritableDatabase();
 		ContentValues values = new ContentValues();
 		Location realLoc = m.getRealLocation();
 		values.put(MockLocation.COL_CREATION_DATE, m.getCreationDateSqlString());
@@ -42,7 +54,7 @@ public class MockLocationManager extends ModelManager {
 
 	public ArrayList<MockLocation> getMockLocationsForRecording(long recId) {
 		ArrayList<MockLocation> mockLocations = new ArrayList<MockLocation>();
-		SQLiteDatabase sql = activity.getDatabase().getReadableDatabase();
+		SQLiteDatabase sql = db.getReadableDatabase();
 		String query = MockLocation.SELECT_ALL + " WHERE " + MockLocation.COL_RECORDING + " = '"
 				+ recId + "'";
 		Cursor cursor = sql.rawQuery(query, null);

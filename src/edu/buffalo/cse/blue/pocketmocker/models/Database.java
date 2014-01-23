@@ -8,9 +8,17 @@ public class Database extends SQLiteOpenHelper {
 
 	private static final int DB_VERSION = 1;
 	private static final String DB_NAME = "PocketMocker.db";
+	
+	private static Database sInstance;
+	
+	public static Database getInstance(Context c) {
+		if(sInstance == null) {
+			sInstance = new Database(c.getApplicationContext());
+		}
+		return sInstance;
+	}
 
-
-	public Database(Context context) {
+	private Database(Context context) {
 		super(context, DB_NAME, null, DB_VERSION);
 	}
 

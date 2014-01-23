@@ -1,14 +1,14 @@
 package edu.buffalo.cse.blue.pocketmocker.models;
 
+import android.content.Context;
 import android.database.Cursor;
-import edu.buffalo.cse.blue.pocketmocker.MainActivity;
 
-public class ModelManager {
+public abstract class ModelManager {
 	
-	protected MainActivity activity;
-	
-	public ModelManager(MainActivity a) {
-		activity = a;
+	protected Database db;
+		
+	protected ModelManager(Context c) {
+		db = Database.getInstance(c);
 	}
 	
 	protected boolean isTrue(Cursor c, int index) {

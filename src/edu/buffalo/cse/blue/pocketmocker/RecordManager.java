@@ -2,7 +2,6 @@ package edu.buffalo.cse.blue.pocketmocker;
 
 import android.location.Location;
 import android.location.LocationManager;
-import android.os.Bundle;
 import android.util.Log;
 import android.view.View;
 
@@ -27,8 +26,7 @@ public class RecordManager {
 			if (lastLoc == null) {
 				activity.updateLocationText("Waiting for location...");
 			} else {
-				activity.getMockLocationManager().addLocation(lastLoc,
-						activity.getCurrentRecordingId());
+				activity.getMockLocationManager().addLocation(lastLoc);
 				activity.updateLocationText(lastLoc);
 			}
 		} else {
