@@ -50,8 +50,7 @@ public class MainActivity extends Activity {
 		super.onCreate(savedInstanceState);
 		setContentView(R.layout.activity_main);
 
-		dbName = "PocketMocker.db";
-		db = new Database(this, dbName);
+		db = new Database(this);
 
 		recordManager = new RecordManager(this);
 		objectivesManager = new ObjectivesManager(this);

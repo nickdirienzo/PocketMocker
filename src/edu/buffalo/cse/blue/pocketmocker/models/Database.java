@@ -7,10 +7,11 @@ import android.database.sqlite.SQLiteOpenHelper;
 public class Database extends SQLiteOpenHelper {
 
 	private static final int DB_VERSION = 1;
+	private static final String DB_NAME = "PocketMocker.db";
 
-	public Database(Context context, String name) {
-		super(context, name, null, DB_VERSION);
-		// TODO Auto-generated constructor stub
+
+	public Database(Context context) {
+		super(context, DB_NAME, null, DB_VERSION);
 	}
 
 	@Override
