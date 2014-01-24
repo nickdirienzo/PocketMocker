@@ -97,7 +97,7 @@ public class MainActivity extends Activity {
 							// it's a huge mess in LogCat
 							Log.v(TAG, "LocatoinChanged.");
 							mockLocationManager.addLocation(loc);
-							String displayLoc = MainActivity.buildLocationDisplayString(loc);
+							String displayLoc = app.buildLocationDisplayString(loc);
 							locationText.setText(locationPrefix + displayLoc);
 							// Log.v(TAG, "Location count: "
 							// + dbHandler.getLocationCount());
@@ -159,10 +159,6 @@ public class MainActivity extends Activity {
 		return objectivesSpinner.getSelectedItem().toString();
 	}
 
-	public static String buildLocationDisplayString(Location loc) {
-		return "(" + loc.getLatitude() + ", " + loc.getLongitude() + ")";
-	}
-
 	public void setCurrentRecordingId(long i) {
 		app.setCurrentRecordingId(i);
 	}
@@ -196,7 +192,7 @@ public class MainActivity extends Activity {
 	}
 
 	public void updateLocationText(Location loc) {
-		String displayLoc = MainActivity.buildLocationDisplayString(loc);
+		String displayLoc = app.buildLocationDisplayString(loc);
 		locationText.setText(getLocationPrefix() + displayLoc);
 	}
 

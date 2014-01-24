@@ -10,20 +10,23 @@ import android.location.Location;
 import edu.buffalo.cse.blue.pocketmocker.PocketMockerApplication;
 
 public class MockLocationManager extends ModelManager {
-	
+
 	private static MockLocationManager sInstance;
 	private PocketMockerApplication app;
-	
+
+	private ArrayList<MockLocation> mockLocations;
+
 	public static MockLocationManager getInstance(Context c) {
-		if(sInstance == null) {
+		if (sInstance == null) {
 			sInstance = new MockLocationManager(c);
 		}
 		return sInstance;
 	}
-	
+
 	private MockLocationManager(Context c) {
 		super(c);
 		app = (PocketMockerApplication) c;
+		mockLocations = new ArrayList<MockLocation>();
 	}
 
 	public void addLocation(Location l) {
@@ -91,4 +94,20 @@ public class MockLocationManager extends ModelManager {
 		sql.close();
 		return mockLocations;
 	}
+
+	public MockLocation getNext() {
+		if (mockLocations.size() == 0) {
+			mockLocations = getMockLocationsForRecording(app.getCurrentRecordingId());
+		}	
+		if (hasNext()) {
+			return mockLocations.remove(0);
+		} else {
+			return null;
+		}
+	}
+
+	private boolean hasNext() {
+		return mockLocations.size() != 0;
+	}
+
 }
