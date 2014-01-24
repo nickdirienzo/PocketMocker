@@ -1,5 +1,6 @@
 package edu.buffalo.cse.blue.pocketmocker;
 
+import android.annotation.SuppressLint;
 import android.app.Activity;
 import android.content.ComponentName;
 import android.content.Context;
@@ -16,7 +17,7 @@ import android.view.View;
 
 public class TestMockerServiceActivity extends Activity {
 
-	private final String TAG = MockerService.TAG;
+	private final String TAG = MockerService.TAG + "_ACT";
 	private Messenger messengerService = null;
 	private boolean isServiceBound;
 
@@ -44,6 +45,7 @@ public class TestMockerServiceActivity extends Activity {
 		Bundle data = new Bundle();
 		data.putString("MSG", "YOSUPDUDE");
 		msg.setData(data);
+		msg.replyTo = messenger;
 		try {
 			messengerService.send(msg);
 			Log.v(TAG, "Message sent.");
@@ -52,10 +54,11 @@ public class TestMockerServiceActivity extends Activity {
 		}
 	}
 
+	@SuppressLint("HandlerLeak")
 	class IncomingHandler extends Handler {
 		@Override
 		public void handleMessage(Message msg) {
-			Log.v(TAG, msg.toString());
+			Log.v(TAG, "Message received: " + msg.toString());
 		}
 	}
 
