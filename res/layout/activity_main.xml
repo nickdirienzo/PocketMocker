@@ -39,5 +39,12 @@
         android:layout_height="wrap_content"
         android:paddingTop="@dimen/activity_vertical_margin"
         android:text="@string/loc_placeholder" />
-
+    
+    <Button
+        android:id="@+id/test_mock_service"
+        android:layout_width="fill_parent"
+        android:layout_height="wrap_content"
+        android:text="@string/test_mock_service"
+        android:onClick="openTestMockerServiceActivity" />
+    
 </LinearLayout>

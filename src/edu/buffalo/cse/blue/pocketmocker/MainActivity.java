@@ -4,6 +4,7 @@ import java.util.Date;
 
 import android.app.Activity;
 import android.content.Context;
+import android.content.Intent;
 import android.location.Location;
 import android.location.LocationListener;
 import android.location.LocationManager;
@@ -230,6 +231,11 @@ public class MainActivity extends Activity {
 		o.setRecordingId(recId);
 		o.setLastModifiedDate(new Date());
 		objectivesManager.updateObjective(o);
+	}
+	
+	public void openTestMockerServiceActivity(View view) {
+		Intent intent = new Intent(this, TestMockerServiceActivity.class);
+		this.startActivity(intent);
 	}
 
 }

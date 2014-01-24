@@ -26,13 +26,13 @@ public class TestMockerServiceActivity extends Activity {
 		super.onCreate(savedInstanceState);
 		setContentView(R.layout.test_mocker_service_activity);
 	}
-	
+
 	@Override
 	public void onDestroy() {
 		super.onDestroy();
 		this.doUnbindService();
 	}
-	
+
 	@Override
 	public void onResume() {
 		super.onResume();
@@ -81,12 +81,12 @@ public class TestMockerServiceActivity extends Activity {
 	};
 
 	private void doBindService() {
-		this.bindService(new Intent(TestMockerServiceActivity.this, MockerService.class),
-				connection, Context.BIND_AUTO_CREATE);
+		this.bindService(new Intent("edu.buffalo.cse.blue.pocketmocker.MockerService"), connection,
+				Context.BIND_AUTO_CREATE);
 		isServiceBound = true;
 		Log.v(TAG, "Binding to mocker service");
 	}
-	
+
 	private void doUnbindService() {
 		this.unbindService(connection);
 		isServiceBound = false;

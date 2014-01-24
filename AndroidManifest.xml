@@ -18,7 +18,7 @@
         android:label="@string/app_name"
         android:theme="@style/AppTheme" >
         <activity
-            android:name="edu.buffalo.cse.blue.pocketmocker.TestMockerServiceActivity"
+            android:name="edu.buffalo.cse.blue.pocketmocker.MainActivity"
             android:label="@string/app_name"
             android:screenOrientation="portrait" >
             <intent-filter>
@@ -27,11 +27,20 @@
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
+        <activity
+            android:name="edu.buffalo.cse.blue.pocketmocker.TestMockerServiceActivity"
+            android:label="@string/app_name"
+            android:screenOrientation="portrait"
+            android:parentActivityName="edu.buffalo.cse.blue.pocketmocker.MainActivity" >
+            <meta-data
+                android:name="android.support.PARENT_ACTIVITY"
+                android:value="edu.buffalo.cse.blue.pocketmocker.MainActivity" />
+        </activity>
 
         <service
             android:name="edu.buffalo.cse.blue.pocketmocker.MockerService"
-            android:process="edu.buffalo.cse.blue.pocketmocker.MockerProcess"
-            android:exported="false" >
+            android:exported="false"
+            android:process="edu.buffalo.cse.blue.pocketmocker.MockerProcess" >
             <intent-filter>
                 <action android:name="edu.buffalo.cse.blue.pocketmocker.MockerService" >
                 </action>
