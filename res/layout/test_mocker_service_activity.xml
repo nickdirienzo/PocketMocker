@@ -3,18 +3,18 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:orientation="vertical" >
-    
-    <EditText 
+
+    <EditText
         android:id="@+id/test_message"
         android:layout_width="fill_parent"
         android:layout_height="wrap_content"
-        android:hint="@string/send_message"/>
+        android:hint="@string/send_message" />
 
-    <Button 
+    <Button
         android:id="@+id/pass_message"
         android:layout_width="fill_parent"
         android:layout_height="wrap_content"
-        android:text="@string/send_message"
-        android:onClick="sendMessage" />
+        android:onClick="sendMessage"
+        android:text="@string/send_message" />
 
 </LinearLayout>

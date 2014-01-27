@@ -50,7 +50,7 @@ public class MockerService extends Service {
 			if (app.isReplaying()) {
 				MockLocation mockLoc = mockLocationManager.getNext();
 				if (mockLoc == null) {
-					app.setIsReplaying(app.DO_NOT_REPLAY);
+					app.setIsReplaying(PocketMockerApplication.DO_NOT_REPLAY);
 				} else {
 					Log.v(TAG,
 							"Location to return: "
