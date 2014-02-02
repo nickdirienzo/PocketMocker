@@ -2,7 +2,7 @@
 # Using exported data from http://www.geoplaner.com
 import argparse
 import datetime
-import subprocess
+import os
 import time
 import xml.dom.minidom
 
@@ -11,9 +11,11 @@ LAT_INDEX = 0
 LONG_INDEX = 1
 ALT_INDEX = 1
 OUTSIDE_DAVIS_WALK_ID = 2
+current_id = os.system(' '.join(['adb shell', '"echo \'select count(*) from locations;\' | sqlite3 ' + PM_DB_PATH + '"']))
 
 class MockLocation(object):
-    def __init__(self, lat, lon, alt):
+    def __init__(self, _id, lat, lon, alt):
+        self._id = _id
         ts = time.time()
         self.creation_date = datetime.datetime.fromtimestamp(ts).strftime('%Y-%m-%d %H:%M:%S')
         self.rec_id = OUTSIDE_DAVIS_WALK_ID
@@ -32,10 +34,9 @@ class MockLocation(object):
         self.provider = 'gps'
 
     def get_fields(self):
-       return [self.creation_date, self.rec_id, self.timestamp, self.lon, 
-       self.lat, self.has_alt, self.alt, self.has_speed, self.speed, 
-       self.has_bearing, self.bearing, self.has_acc, self.acc, self.extras, 
-       self.provider]
+        return [self._id, '\\"%s\\"' % self.creation_date, self.rec_id, self.timestamp, self.lon, 
+        self.lat, self.has_alt, self.alt, self.has_speed, self.speed, 
+        self.has_bearing, self.bearing, self.has_acc, self.acc, '\\"%s\\"' % self.extras, '\\"%s\\"' % self.provider]
 
 
 parser = argparse.ArgumentParser(description='Load GPS waypoints exported from http://www.geoplaner.com into the connected Android device\'s PocketMocker database.')
@@ -45,13 +46,15 @@ with open(args.source, 'r') as waypoints:
     dom = xml.dom.minidom.parse(waypoints)
     waypoints = dom.getElementsByTagName('wpt')
     for index, waypoint in enumerate(waypoints):
+        current_id += 1
         lat = waypoint.attributes.item(LAT_INDEX).value
         lon = waypoint.attributes.item(LONG_INDEX).value
         # This whole script is a hack anyway
         alt = waypoint.childNodes[ALT_INDEX].firstChild.data
         print '%s/%s Lat: %s Long: %s Altitude: %s' % (index + 1, len(waypoints), lat, lon, alt)
-        mock = MockLocation(lat, lon, alt)
+        mock = MockLocation(current_id, lat, lon, alt)
         values = ', '.join([str(item) for item in mock.get_fields()])
-        sql = 'insert into locations values (%s)' % values
-        cmd = '"echo %s | sqlite3 %s"' % (sql, PM_DB_PATH)
-        subprocess.call(['adb shell', cmd])
+        sql = 'insert into locations values (%s);' % values
+        cmd = '"echo \'%s\' | sqlite3 %s"' % (sql, PM_DB_PATH)
+        print ' '.join(['adb shell', cmd])
+        os.system(' '.join(['adb shell', cmd]))
