@@ -29,7 +29,7 @@
         </activity>
         <activity
             android:name="edu.buffalo.cse.blue.pocketmocker.TestMockerServiceActivity"
-            android:label="@string/app_name"
+            android:label="edu.buffalo.cse.blue.pocketmocker.TestMockerServiceActivity"
             android:screenOrientation="portrait"
             android:parentActivityName="edu.buffalo.cse.blue.pocketmocker.MainActivity" >
             <meta-data
