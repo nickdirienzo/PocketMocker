@@ -15,6 +15,6 @@
     <string name="cancel">Cancel</string>
     <string name="overwrite_recording_question">Are you sure you want to overwrite the recording for <b>objective</b>?</string>
 	<string name="ok">OK</string>
-	<string name="send_message">Send Message</string>
+	<string name="subscribe">Subscribe</string>
 	<string name="test_mock_service">Test Mock Service</string>
 </resources>

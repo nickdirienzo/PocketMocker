@@ -13,9 +13,11 @@ public class RecordingManager extends ModelManager {
 
 	private static RecordingManager sInstance;
 	private PocketMockerApplication app;
+	private long currentRecordingId;
 
 	public static RecordingManager getInstance(Context c) {
 		if (sInstance == null) {
+			Log.v("REC", "Creating new recording manager");
 			sInstance = new RecordingManager(c);
 		}
 		return sInstance;
@@ -24,6 +26,16 @@ public class RecordingManager extends ModelManager {
 	private RecordingManager(Context c) {
 		super(c);
 		app = (PocketMockerApplication) c;
+	}
+	
+	public void setCurrentRecordingId(long recId) {
+		currentRecordingId = recId;
+		Log.v("REC", "set cur rec id: " + currentRecordingId);
+	}
+	
+	public long getCurrentRecordingId() {
+		Log.v("REC", "get cur rec id: " + currentRecordingId);
+		return currentRecordingId;
 	}
 
 	public long addRecording(Recording r) {

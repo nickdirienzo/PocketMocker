@@ -1,6 +1,7 @@
 package edu.buffalo.cse.blue.pocketmocker;
 
 import java.util.Date;
+import java.util.List;
 
 import android.app.Activity;
 import android.content.Context;
@@ -82,6 +83,11 @@ public class MainActivity extends Activity {
 			}
 		});
 		this.populateObjectivesSpinner();
+		List<Objective> objectives = objectivesManager.getObjectives();
+		if (objectives.size() > 1) {
+			Log.v(TAG, "Setting current rec id to: " + objectives.get(0).getId());
+			recordingManager.setCurrentRecordingId(objectives.get(0).getId());
+		}
 
 		locationPrefix = this.getString(R.string.loc_prefix);
 		locationText = (TextView) this.findViewById(R.id.locationText);
@@ -158,14 +164,6 @@ public class MainActivity extends Activity {
 
 	public String getSelectedObjectiveName() {
 		return objectivesSpinner.getSelectedItem().toString();
-	}
-
-	public void setCurrentRecordingId(long i) {
-		app.setCurrentRecordingId(i);
-	}
-
-	public long getCurrentRecordingId() {
-		return app.getCurrentRecordingId();
 	}
 
 	public TextView getLocationText() {
