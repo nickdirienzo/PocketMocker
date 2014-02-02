@@ -13,15 +13,14 @@ public class Recording extends TimestampModel {
 	public static final String TABLE_NAME = "recordings";
 	public static final String COL_ID = "_id";
 	public static final String COL_CREATION_DATE = "creation_date";
-	public static final String CREATE_TABLE_CMD = CREATE_TABLE + TABLE_NAME
-			+ OPEN_PAREN + COL_ID + INT + PK + COMMA + COL_CREATION_DATE + TEXT
-			+ CLOSE_PAREN;
+	public static final String CREATE_TABLE_CMD = CREATE_TABLE + TABLE_NAME + OPEN_PAREN + COL_ID
+			+ INT + PK + COMMA + COL_CREATION_DATE + TEXT + CLOSE_PAREN;
 	public static final String DROP_TABLE_CMD = dropTable(TABLE_NAME);
 
 	public Recording() {
 		this.creationDate = new Date();
 	}
-	
+
 	public Recording(long id, ArrayList<MockLocation> locations) {
 		this.id = id;
 		this.creationDate = new Date();

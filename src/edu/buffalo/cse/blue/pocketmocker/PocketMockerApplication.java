@@ -2,7 +2,6 @@ package edu.buffalo.cse.blue.pocketmocker;
 
 import android.app.Application;
 import android.location.Location;
-import android.util.Log;
 
 public class PocketMockerApplication extends Application {
 	
