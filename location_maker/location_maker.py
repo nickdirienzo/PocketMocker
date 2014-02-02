@@ -18,7 +18,7 @@ current_id = os.system(' '.join(['adb shell', '"echo \'select count(*) from loca
 class MockLocation(object):
     def __init__(self, _id, lat, lon, alt, time_shift):
         self._id = _id
-        ts = time.time() + time_shift
+        ts = int(time.time() + time_shift)
         self.creation_date = datetime.datetime.fromtimestamp(ts).strftime('%Y-%m-%d %H:%M:%S')
         self.rec_id = OUTSIDE_DAVIS_WALK_ID
         self.timestamp = ts
