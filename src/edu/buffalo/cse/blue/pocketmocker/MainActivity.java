@@ -70,6 +70,8 @@ public class MainActivity extends Activity {
 					// view is initially rendered
 					spinnerInitFlag = true;
 				} else {
+					recordReplayManager.setIsRecording(false);
+					toggleRecordingButton();
 					String selectedText = objectivesSpinner.getSelectedItem().toString();
 					if (selectedText.equals(objectivesManager.getMockObjectiveString())) {
 						displayNewObjectiveDialog();
@@ -253,6 +255,8 @@ public class MainActivity extends Activity {
 		o.setRecordingId(recId);
 		o.setLastModifiedDate(new Date());
 		objectivesManager.updateObjective(o);
+		recordReplayManager.setIsRecording(true);
+		this.toggleRecordingButton();
 	}
 
 	public void openTestMockerServiceActivity(View view) {
