@@ -10,10 +10,10 @@ PM_DB_PATH = '/data/data/edu.buffalo.cse.blue.pocketmocker/databases/PocketMocke
 LAT_INDEX = 0
 LONG_INDEX = 1
 ALT_INDEX = 1
-OUTSIDE_DAVIS_WALK_ID = 1
+OUTSIDE_DAVIS_WALK_ID = 3
 SECONDS = 15
 
-current_id = os.system(' '.join(['adb shell', '"echo \'select count(*) from locations;\' | sqlite3 ' + PM_DB_PATH + '"']))
+current_id = int(os.popen(' '.join(['adb shell', '"echo \'select count(*) from locations;\' | sqlite3 ' + PM_DB_PATH + '"'])).readline())
 
 class MockLocation(object):
     def __init__(self, _id, lat, lon, alt, time_shift):
