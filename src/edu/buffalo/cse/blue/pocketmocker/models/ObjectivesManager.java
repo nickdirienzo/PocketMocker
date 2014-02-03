@@ -9,15 +9,14 @@ import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 import android.util.Log;
 import edu.buffalo.cse.blue.pocketmocker.MainActivity;
-import edu.buffalo.cse.blue.pocketmocker.PocketMockerApplication;
 
 public class ObjectivesManager extends ModelManager {
 	
 	private static ObjectivesManager sInstance;
 
-	private PocketMockerApplication app;
 	private Objective addNewObjectiveMock;
 	private String mockObjectiveString;
+	private RecordingManager recordingManager;
 
 	public static ObjectivesManager getInstance(Context c) {
 		if(sInstance == null) {
@@ -28,7 +27,7 @@ public class ObjectivesManager extends ModelManager {
 	
 	private ObjectivesManager(Context c) {
 		super(c);
-		app = (PocketMockerApplication) c;
+		recordingManager = RecordingManager.getInstance(c);
 		mockObjectiveString = "Add New Objective...";
 		addNewObjectiveMock = new Objective(Objective.UNKNOWN_ID, mockObjectiveString,
 				Objective.UNKNOWN_ID);
@@ -45,9 +44,9 @@ public class ObjectivesManager extends ModelManager {
 		values.put(Objective.COL_LAST_MODIFIED_DATE, o.getLastModifiedDateSqlString());
 		// New objectives do not have a recording
 		if (o.getRecordingId() == -1) {
-			long recId = RecordingManager.getInstance(app).addRecording(new Recording());
+			long recId = recordingManager.addRecording(new Recording());
 			values.put(Objective.COL_RECORDING, recId);
-			app.setCurrentRecordingId(recId);
+			recordingManager.setCurrentRecordingId(recId);
 		} else {
 			values.put(Objective.COL_RECORDING, o.getRecordingId());
 		}
@@ -121,7 +120,7 @@ public class ObjectivesManager extends ModelManager {
 		Objective o = this.getObjectiveByName(objectiveName);
 		Log.v(MainActivity.TAG, "Looking up locations for (Objective " + o.getId() + ") recording "
 				+ o.getRecordingId());
-		return RecordingManager.getInstance(app).hasLocations(o.getRecordingId());
+		return recordingManager.hasLocations(o.getRecordingId());
 	}
 
 }

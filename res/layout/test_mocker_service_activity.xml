@@ -4,17 +4,11 @@
     android:layout_height="match_parent"
     android:orientation="vertical" >
 
-    <EditText
-        android:id="@+id/test_message"
-        android:layout_width="fill_parent"
-        android:layout_height="wrap_content"
-        android:hint="@string/send_message" />
-
     <Button
-        android:id="@+id/pass_message"
+        android:id="@+id/subscribe_button"
         android:layout_width="fill_parent"
         android:layout_height="wrap_content"
-        android:onClick="sendMessage"
-        android:text="@string/send_message" />
+        android:onClick="subscribe"
+        android:text="@string/subscribe" />
 
 </LinearLayout>

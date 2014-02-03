@@ -7,12 +7,12 @@ import android.content.Context;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 import android.location.Location;
-import edu.buffalo.cse.blue.pocketmocker.PocketMockerApplication;
+import android.util.Log;
 
 public class MockLocationManager extends ModelManager {
 
 	private static MockLocationManager sInstance;
-	private PocketMockerApplication app;
+	private RecordingManager recordingManager;
 
 	private ArrayList<MockLocation> mockLocations;
 
@@ -25,12 +25,12 @@ public class MockLocationManager extends ModelManager {
 
 	private MockLocationManager(Context c) {
 		super(c);
-		app = (PocketMockerApplication) c;
 		mockLocations = new ArrayList<MockLocation>();
+		recordingManager = RecordingManager.getInstance(c);
 	}
 
 	public void addLocation(Location l) {
-		MockLocation m = new MockLocation(l, app.getCurrentRecordingId());
+		MockLocation m = new MockLocation(l, recordingManager.getCurrentRecordingId());
 
 		SQLiteDatabase sql = db.getWritableDatabase();
 		ContentValues values = new ContentValues();
@@ -85,8 +85,8 @@ public class MockLocationManager extends ModelManager {
 				if (isTrue(cursor, MockLocation.COL_HAS_ACCURACY_INDEX)) {
 					loc.setAccuracy(getFloat(cursor, MockLocation.COL_ACCURACY_INDEX));
 				}
-				// TODO: Create Bundle from a String and set it on our real
-				// Location
+				// TODO: Create Bundle from the String extras and set it on our
+				// real Location
 				ml.setRealLocation(loc);
 				mockLocations.add(ml);
 			} while (cursor.moveToNext());
@@ -94,11 +94,15 @@ public class MockLocationManager extends ModelManager {
 		sql.close();
 		return mockLocations;
 	}
+	
+	public void init() {
+		if (mockLocations.size() == 0) {
+			Log.v("REC", "getting locations for rec_id: " + recordingManager.getCurrentRecordingId());
+			mockLocations = getMockLocationsForRecording(recordingManager.getCurrentRecordingId());
+		}
+	}
 
 	public MockLocation getNext() {
-		if (mockLocations.size() == 0) {
-			mockLocations = getMockLocationsForRecording(app.getCurrentRecordingId());
-		}	
 		if (hasNext()) {
 			return mockLocations.remove(0);
 		} else {
@@ -106,7 +110,7 @@ public class MockLocationManager extends ModelManager {
 		}
 	}
 
-	private boolean hasNext() {
+	public boolean hasNext() {
 		return mockLocations.size() != 0;
 	}
 

@@ -10,24 +10,14 @@ public class PocketMockerApplication extends Application {
 	public static final boolean DO_REPLAY = true;
 	public static final boolean DO_NOT_REPLAY = false;
 	
-	private long currentRecordingId;
 	private boolean isRecording;
 	private boolean isReplaying;
 	
 	@Override
 	public void onCreate() {
 		super.onCreate();	
-		currentRecordingId = 0;
 		isRecording = false;
 		isReplaying = false;
-	}
-	
-	public void setCurrentRecordingId(long id) {
-		currentRecordingId = id;
-	}
-	
-	public long getCurrentRecordingId() {
-		return currentRecordingId;
 	}
 	
 	public boolean isRecording() {

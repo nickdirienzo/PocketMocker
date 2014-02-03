@@ -3,6 +3,7 @@ package edu.buffalo.cse.blue.pocketmocker.models;
 import java.util.Date;
 
 import android.location.Location;
+import android.os.Bundle;
 
 public class MockLocation extends TimestampModel {
 
@@ -130,6 +131,50 @@ public class MockLocation extends TimestampModel {
 
 	public void setRealLocation(Location location) {
 		this.realLocation = location;
+	}
+	
+	public Bundle toBundle() {
+		Bundle data = new Bundle();
+		data.putFloat("accuracy", realLocation.getAccuracy());
+		data.putBoolean("has_accuracy", realLocation.hasAccuracy());
+		
+		data.putDouble("altitude", realLocation.getAltitude());
+		data.putBoolean("has_altitude", realLocation.hasAltitude());
+		
+		data.putFloat("bearing", realLocation.getBearing());
+		data.putBoolean("has_bearing", realLocation.hasBearing());
+		
+		data.putDouble("latitude", realLocation.getLatitude());
+		data.putDouble("longitude", realLocation.getLongitude());
+		data.putString("provider", realLocation.getProvider());
+		
+		data.putFloat("speed", realLocation.getSpeed());
+		data.putBoolean("has_speed", realLocation.hasSpeed());
+		
+		data.putLong("time", realLocation.getTime());
+		return data;
+	}
+	
+	public Bundle toBundle(long time) {
+		Bundle data = new Bundle();
+		data.putFloat("accuracy", realLocation.getAccuracy());
+		data.putBoolean("has_accuracy", realLocation.hasAccuracy());
+		
+		data.putDouble("altitude", realLocation.getAltitude());
+		data.putBoolean("has_altitude", realLocation.hasAltitude());
+		
+		data.putFloat("bearing", realLocation.getBearing());
+		data.putBoolean("has_bearing", realLocation.hasBearing());
+		
+		data.putDouble("latitude", realLocation.getLatitude());
+		data.putDouble("longitude", realLocation.getLongitude());
+		data.putString("provider", realLocation.getProvider());
+		
+		data.putFloat("speed", realLocation.getSpeed());
+		data.putBoolean("has_speed", realLocation.hasSpeed());
+		
+		data.putLong("time", time);
+		return data;
 	}
 
 }

@@ -39,12 +39,9 @@ public class TestMockerServiceActivity extends Activity {
 		this.doBindService();
 	}
 
-	public void sendMessage(View view) {
-		Log.v(TAG, "Sending message");
+	public void subscribe(View view) {
+		Log.v(TAG, "Subscribing...");
 		Message msg = Message.obtain();
-		Bundle data = new Bundle();
-		data.putString("MSG", "YOSUPDUDE");
-		msg.setData(data);
 		msg.replyTo = messenger;
 		try {
 			messengerService.send(msg);
@@ -58,7 +55,8 @@ public class TestMockerServiceActivity extends Activity {
 	class IncomingHandler extends Handler {
 		@Override
 		public void handleMessage(Message msg) {
-			Log.v(TAG, "Message received: " + msg.toString());
+			Bundle b = msg.getData();
+			Log.v(TAG, "Message received: " + b.toString());
 		}
 	}
 
