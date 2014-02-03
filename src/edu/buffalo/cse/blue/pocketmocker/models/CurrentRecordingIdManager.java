@@ -5,18 +5,18 @@ import android.content.Context;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 
-public class CurrentRecordingManager extends ModelManager {
+public class CurrentRecordingIdManager extends ModelManager {
 
-	private static CurrentRecordingManager sInstance;
+	private static CurrentRecordingIdManager sInstance;
 
-	public static CurrentRecordingManager getInstance(Context c) {
+	public static CurrentRecordingIdManager getInstance(Context c) {
 		if (sInstance == null) {
-			sInstance = new CurrentRecordingManager(c);
+			sInstance = new CurrentRecordingIdManager(c);
 		}
 		return sInstance;
 	}
 
-	protected CurrentRecordingManager(Context c) {
+	protected CurrentRecordingIdManager(Context c) {
 		super(c);
 	}
 

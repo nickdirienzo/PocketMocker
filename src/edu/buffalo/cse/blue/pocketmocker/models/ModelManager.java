@@ -11,8 +11,10 @@ public abstract class ModelManager {
 		db = Database.getInstance(c);
 	}
 	
-	protected boolean isTrue(Cursor c, int index) {
-		return Boolean.parseBoolean(c.getString(index));
+	protected boolean getBoolean(Cursor c, int index) {
+		String ret = c.getString(index);
+		if(ret.equals("0")) return false;
+		else return true;
 	}
 
 	protected float getFloat(Cursor c, int index) {

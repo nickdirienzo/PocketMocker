@@ -12,7 +12,7 @@ import edu.buffalo.cse.blue.pocketmocker.PocketMockerApplication;
 public class RecordingManager extends ModelManager {
 
 	private static RecordingManager sInstance;
-	private CurrentRecordingManager curRecordingManager;
+	private CurrentRecordingIdManager curRecordingManager;
 	private PocketMockerApplication app;
 
 	public static RecordingManager getInstance(Context c) {
@@ -26,7 +26,7 @@ public class RecordingManager extends ModelManager {
 	private RecordingManager(Context c) {
 		super(c);
 		app = (PocketMockerApplication) c;
-		curRecordingManager = CurrentRecordingManager.getInstance(c);
+		curRecordingManager = CurrentRecordingIdManager.getInstance(c);
 	}
 	
 	public void setCurrentRecordingId(long recId) {

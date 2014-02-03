@@ -73,16 +73,16 @@ public class MockLocationManager extends ModelManager {
 				loc.setTime(getLong(cursor, MockLocation.COL_TIMESTAMP_INDEX));
 				loc.setLongitude(getDouble(cursor, MockLocation.COL_LONGITUDE_INDEX));
 				loc.setLatitude(getDouble(cursor, MockLocation.COL_LATITUDE_INDEX));
-				if (isTrue(cursor, MockLocation.COL_HAS_ALTITUDE_INDEX)) {
+				if (getBoolean(cursor, MockLocation.COL_HAS_ALTITUDE_INDEX)) {
 					loc.setAltitude(getDouble(cursor, MockLocation.COL_ALTITUDE_INDEX));
 				}
-				if (isTrue(cursor, MockLocation.COL_HAS_SPEED_INDEX)) {
+				if (getBoolean(cursor, MockLocation.COL_HAS_SPEED_INDEX)) {
 					loc.setSpeed(getFloat(cursor, MockLocation.COL_SPEED_INDEX));
 				}
-				if (isTrue(cursor, MockLocation.COL_HAS_BEARING_INDEX)) {
+				if (getBoolean(cursor, MockLocation.COL_HAS_BEARING_INDEX)) {
 					loc.setBearing(getFloat(cursor, MockLocation.COL_BEARING_INDEX));
 				}
-				if (isTrue(cursor, MockLocation.COL_HAS_ACCURACY_INDEX)) {
+				if (getBoolean(cursor, MockLocation.COL_HAS_ACCURACY_INDEX)) {
 					loc.setAccuracy(getFloat(cursor, MockLocation.COL_ACCURACY_INDEX));
 				}
 				// TODO: Create Bundle from the String extras and set it on our
