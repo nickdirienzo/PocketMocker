@@ -255,6 +255,7 @@ public class MainActivity extends Activity {
 		o.setRecordingId(recId);
 		o.setLastModifiedDate(new Date());
 		objectivesManager.updateObjective(o);
+		recordingManager.setCurrentRecordingId(recId);
 		recordReplayManager.setIsRecording(true);
 		this.toggleRecordingButton();
 	}
