@@ -97,6 +97,7 @@ public class MainActivity extends Activity {
 		recordButton = (Button) this.findViewById(R.id.record_button);
 
 		locationManager = (LocationManager) this.getSystemService(Context.LOCATION_SERVICE);
+		Log.v(TAG, "Requesting location updates...");
 		locationManager.requestLocationUpdates(LocationManager.GPS_PROVIDER, 0, 0,
 				new LocationListener() {
 
