@@ -75,6 +75,7 @@ public class RecordReplayManager extends ModelManager {
 
 	public void toggleReplaying() {
 		boolean isReplaying = this.isReplaying();
+		Log.v("PM", "IsReplaying will now be: " + !isReplaying);
 		ContentValues values = new ContentValues();
 		values.put(COL_IS_REC, false);
 		values.put(COL_IS_REPLAY, !isReplaying);

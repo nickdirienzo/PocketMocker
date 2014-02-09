@@ -178,22 +178,6 @@ public class MainActivity extends Activity {
 		return locationPrefix;
 	}
 
-	public LocationManager getLocationManager() {
-		return locationManager;
-	}
-
-	public ObjectivesManager getObjectivesManager() {
-		return objectivesManager;
-	}
-
-	public MockLocationManager getMockLocationManager() {
-		return mockLocationManager;
-	}
-
-	public RecordingManager getRecordingManager() {
-		return recordingManager;
-	}
-
 	public void updateLocationText(Location loc) {
 		String displayLoc = app.buildLocationDisplayString(loc);
 		locationText.setText(getLocationPrefix() + displayLoc);
@@ -218,12 +202,12 @@ public class MainActivity extends Activity {
 	private void prepareToRecord() {
 		toggleRecordingButton();
 		if (recordReplayManager.isRecording()) {
-			Location lastLoc = getLocationManager().getLastKnownLocation(
+			Location lastLoc = locationManager.getLastKnownLocation(
 					LocationManager.GPS_PROVIDER);
 			if (lastLoc == null) {
 				updateLocationText("Waiting for location...");
 			} else {
-				getMockLocationManager().addLocation(lastLoc);
+				mockLocationManager.addLocation(lastLoc);
 				updateLocationText(lastLoc);
 			}
 		} else {
@@ -234,12 +218,25 @@ public class MainActivity extends Activity {
 	public void recordButtonClicked(View v) {
 		Log.v(MainActivity.TAG, "Checking if objective (" + getSelectedObjectiveName()
 				+ ") already has a recording.");
-		if (getObjectivesManager().hasExistingRecording(getSelectedObjectiveName())) {
+		if (objectivesManager.hasExistingRecording(getSelectedObjectiveName())) {
 			showOverwriteRecordingDialog();
 		} else {
 			recordReplayManager.toggleRecording();
 			prepareToRecord();
 		}
+	}
+	
+	public void replayButtonClicked(View v) {
+	    Button replayButton = (Button) v;
+	    if (replayButton.getText().equals(this.getString(R.string.replay))) {
+	        Log.v(TAG, "Stop replaying.");
+	        replayButton.setText(R.string.stop_replaying);
+	    } else {
+	        Log.v(TAG, "Start replaying.");
+	        replayButton.setText(R.string.replay);
+	    }
+	    recordReplayManager.toggleReplaying();
+	    
 	}
 
 	public void showOverwriteRecordingDialog() {

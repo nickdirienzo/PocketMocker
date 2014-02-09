@@ -9,6 +9,7 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.widget.EditText;
 import edu.buffalo.cse.blue.pocketmocker.models.Objective;
+import edu.buffalo.cse.blue.pocketmocker.models.ObjectivesManager;
 
 public class NewObjectiveDialog extends DialogFragment {
 
@@ -24,6 +25,7 @@ public class NewObjectiveDialog extends DialogFragment {
 			}
 		}
 		final MainActivity activity = (MainActivity) this.getActivity();
+		final ObjectivesManager objectivesManager = ObjectivesManager.getInstance(activity.getApplicationContext());
 
 		AlertDialog.Builder builder = new AlertDialog.Builder(activity);
 		builder.setTitle(R.string.objective_dialog_title);
@@ -37,7 +39,7 @@ public class NewObjectiveDialog extends DialogFragment {
 						EditText e = (EditText) view.findViewById(R.id.objective_name);
 						Objective o = new Objective();
 						o.setName(e.getText().toString());
-						activity.getObjectivesManager().addObjective(o);
+						objectivesManager.addObjective(o);
 						activity.populateObjectivesSpinner();
 					}
 				});

@@ -14,7 +14,10 @@
     <string name="create">Create</string>
     <string name="cancel">Cancel</string>
     <string name="overwrite_recording_question">Are you sure you want to overwrite the recording for <b>objective</b>?</string>
-	<string name="ok">OK</string>
-	<string name="subscribe">Subscribe</string>
-	<string name="test_mock_service">Test Mock Service</string>
+    <string name="ok">OK</string>
+    <string name="subscribe">Subscribe</string>
+    <string name="test_mock_service">Test Mock Service</string>
+    <string name="replay">Replay</string>
+    <string name="stop_replaying">Stop Replaying</string>
+
 </resources>
