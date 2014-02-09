@@ -101,6 +101,10 @@ public class MockLocationManager extends ModelManager {
 			mockLocations = getMockLocationsForRecording(recordingManager.getCurrentRecordingId());
 		}
 	}
+	
+	public boolean isReady() {
+		return mockLocations.size() != 0;
+	}
 
 	public MockLocation getNext() {
 		if (hasNext()) {
