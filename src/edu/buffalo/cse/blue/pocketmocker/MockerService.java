@@ -29,7 +29,7 @@ public class MockerService extends Service {
 
 	@Override
 	public void onCreate() {
-		Log.v(TAG, "Mocker service started.");
+		Log.v(TAG, "MockerService started.");
 		mockLocationManager = MockLocationManager.getInstance(getApplicationContext());
 		app = (PocketMockerApplication) getApplicationContext();
 	}
@@ -41,6 +41,7 @@ public class MockerService extends Service {
 
 	@SuppressLint("HandlerLeak")
 	class IncomingHandler extends Handler {
+	    // TODO: Handle messages in their own thread
 		@Override
 		public void handleMessage(Message msg) {
 			Log.v(TAG, "Message received: " + msg.toString());
@@ -91,8 +92,9 @@ public class MockerService extends Service {
 	}
 
 	private void broadcastMockLocation(MockLocation m) {
-		for (Messenger client : clients.values()) {
-			sendMockLocation(m, client);
+		for (String clientPkg : clients.keySet()) {
+		    Log.v(TAG, "Sending message to: " + clientPkg);
+			sendMockLocation(m, clients.get(clientPkg));
 		}
 	}
 

@@ -43,6 +43,9 @@ public class TestMockerServiceActivity extends Activity {
 		Log.v(TAG, "Subscribing...");
 		Message msg = Message.obtain();
 		msg.replyTo = messenger;
+		Bundle data = new Bundle();
+		data.putString("package", this.getPackageName());
+		msg.setData(data);
 		try {
 			messengerService.send(msg);
 			Log.v(TAG, "Message sent.");
