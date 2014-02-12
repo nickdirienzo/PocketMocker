@@ -442,8 +442,8 @@ public class LocationManager<ServiceConnection> {
 
             @Override
             public void onServiceDisconnected(ComponentName name) {
-                mMockSubscriber = null;
-                Log.v(PM_TAG, "MockerService died. Setting mMockSubscriber to null.");
+                // This is probably a terrible idea...
+                bindToMockerService();
             }
         };
         Log.v(PM_TAG, "Getting ready to bind to MockerService.");
