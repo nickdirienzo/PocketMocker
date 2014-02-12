@@ -120,13 +120,14 @@ public class MockerService extends Service {
                 Log.v(TAG, "Sending location for mock: " + id);
                 m.send(reply);
             } catch (RemoteException e) {
+                // TODO: Handle android.os.DeadObjectException better.
                 Log.v(TAG, "RemoteException: " + e.toString());
             }
         }
     }
 
     private class ReplayMonitor implements Runnable {
-        
+
         private boolean hasNotifiedStop = false;
 
         @Override
