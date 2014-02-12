@@ -4,6 +4,7 @@ package edu.buffalo.cse.blue.pocketmocker;
 import android.annotation.SuppressLint;
 import android.app.Service;
 import android.content.Intent;
+import android.location.LocationManager;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.IBinder;
@@ -55,6 +56,7 @@ public class MockerService extends Service {
             // need to send their Context data.
             String clientPackage = data.getString("package");
             if (!clients.containsKey(clientPackage)
+                    // We cannot subscribe to ourself
                     && !clientPackage.equals(getApplicationContext().getPackageName())) {
                 Log.v(TAG, "Adding sender for " + clientPackage + " to clients.");
                 clients.put(clientPackage, msg.replyTo);
@@ -87,14 +89,35 @@ public class MockerService extends Service {
             Log.v(TAG, "Done running thread.");
         }
 
+        /**
+         * Guarantees the following keys: bool hasLocation, long mockId. If
+         * hasLocation is true, then we are also replaying. If hasLocation is
+         * false, we are not replaying.
+         * 
+         * @param mLoc
+         * @param m
+         * @param isReplaying
+         */
         private void sendMockLocation(MockLocation mLoc, Messenger m) {
-            Bundle data = mLoc.toBundle(System.currentTimeMillis());
-            data.putBoolean("isReplaying", false);
-            data.putLong("mockId", mLoc.getId());
+            Bundle data;
+            long id = -1;
+            if (mLoc != null) {
+                Log.v(TAG, "We have a location to mock!");
+                data = mLoc.toBundle(System.currentTimeMillis());
+                data.putBoolean("hasLocation", true);
+                id = mLoc.getId();
+                data.putLong("mockId", id);
+            } else {
+                // In the case that we are not replaying.
+                Log.v(TAG, "We do not have a location to mock!");
+                data = new Bundle();
+                data.putBoolean("hasLocation", false);
+                data.putLong("mockId", id);
+            }
             Message reply = Message.obtain();
             reply.setData(data);
             try {
-                Log.v(TAG, "Sending location for mock: " + mLoc.getId());
+                Log.v(TAG, "Sending location for mock: " + id);
                 m.send(reply);
             } catch (RemoteException e) {
                 Log.v(TAG, "RemoteException: " + e.toString());
@@ -103,6 +126,8 @@ public class MockerService extends Service {
     }
 
     private class ReplayMonitor implements Runnable {
+        
+        private boolean hasNotifiedStop = false;
 
         @Override
         public void run() {
@@ -118,6 +143,16 @@ public class MockerService extends Service {
                         mockLocationManager.init();
                     }
                     while (mockLocationManager.hasNext()) {
+                        if (!recordReplayManager.isReplaying()) {
+                            // If the user stops replaying early, we should be
+                            // able to handle that event.
+                            // Just being safe here.
+                            Log.v(TAG, "Stopped recording early.");
+                            broadcastMockLocation(null);
+                            hasNotifiedStop = true;
+                            break;
+                        }
+                        hasNotifiedStop = false;
                         if (oldLoc == null) {
                             oldLoc = mockLocationManager.getNext();
                             Log.v(TAG, "Old loc: " + oldLoc.getId());
@@ -138,15 +173,23 @@ public class MockerService extends Service {
                             Log.v(TAG, "InterruptedException:", e);
                         }
                     }
-                    // By this point oldLoc has been sent, but nextLoc is our
-                    // last
-                    // location to send.
-                    broadcastMockLocation(nextLoc);
-                    Log.v(TAG, "No more mocked locations! Old loc: " + oldLoc.getId()
-                            + " Next loc: "
-                            + nextLoc.getId());
+                    if (recordReplayManager.isReplaying()) {
+                        // By this point oldLoc has been sent, but nextLoc is
+                        // our
+                        // last
+                        // location to send.
+                        broadcastMockLocation(nextLoc);
+                        Log.v(TAG, "No more mocked locations! Old loc: " + oldLoc.getId()
+                                + " Next loc: "
+                                + nextLoc.getId());
+                    }
                 } else {
-                    Log.v(TAG, "We are not replaying.");
+                    if (!hasNotifiedStop) {
+                        Log.v(TAG, "Notifying about stop.");
+                        broadcastMockLocation(null);
+                        hasNotifiedStop = true;
+                    }
+
                 }
                 try {
                     // We shouldn't hammer the CPU, so it's okay to be a second
