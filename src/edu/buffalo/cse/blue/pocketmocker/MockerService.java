@@ -169,7 +169,12 @@ public class MockerService extends Service {
                         try {
                             Log.v(TAG, "Sleeping for " + timeToWait);
                             // timeToWait is seconds
-                            Thread.sleep(timeToWait * 1000);
+                            // Catch rollover seconds because it turns out
+                            // negative at the end and I don't feel like
+                            // actually fixing that right now
+                            if (timeToWait > 0) {
+                                Thread.sleep(timeToWait * 1000);
+                            }
                         } catch (InterruptedException e) {
                             Log.v(TAG, "InterruptedException:", e);
                         }
