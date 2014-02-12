@@ -33,6 +33,7 @@ import android.util.Log;
 import com.android.internal.location.ProviderProperties;
 
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.HashMap;
 import java.util.List;
 
@@ -76,6 +77,13 @@ public class LocationManager<ServiceConnection> {
     private Messenger mMockSubscriber;
     // This is sent with every Message
     private boolean mIsReplaying = false;
+
+    private enum RequiredKey {
+        ACCURACY, HAS_ACCURACY, ALTITUDE, HAS_ALTITUDE, BEARING, HAS_BEARING,
+        LATITUDE, LONGITUDE, PROVIDER, SPEED, HAS_SPEED, TIME
+    }
+
+    private HashMap<RequiredKey, String> requiredKeys = new HashMap<RequiredKey, String>();
     // End
 
     /**
@@ -305,16 +313,80 @@ public class LocationManager<ServiceConnection> {
             // I hate having these keys like this. I'd much prefer to import
             // shared constants between PM and the system, but I'm not sure of
             // the best way to do that.
-            if (data.containsKey("isReplaying")) {
-                mIsReplaying = data.getBoolean("isReplaying");
-            }
             long mockId = -1;
             if (data.containsKey("mockId")) {
                 mockId = data.getLong("mockId");
             }
+            if (data.containsKey("hasLocation")) {
+                mIsReplaying = data.getBoolean("hasLocation");
+            }
             Log.v(LocationManager.PM_TAG, "Received mock " + mockId + ". IsReplaying: "
                     + mIsReplaying);
+            if (mIsReplaying) {
+                // We also will double check that we have keys before
+                // proceeding.
+                for (String key : requiredKeys.values()) {
+                    if (!data.containsKey(key)) {
+                        // If we do not have a required key, we cannot properly
+                        // mock, so we should display real data. This is a
+                        // necessary step here for
+                        // man-in-the-middle-like "attacks" to keep the mocking
+                        // context strong.
+                        //
+                        // We should also probably tell the MockerService that
+                        // something bad happened.
+                        mIsReplaying = false;
+                    }
+                }
+
+                if (mIsReplaying) {
+                    Location mockLoc = new Location(getString(data, RequiredKey.PROVIDER));
+                    if (getBoolean(data, RequiredKey.HAS_ACCURACY)) {
+                        mockLoc.setAccuracy(getFloat(data, RequiredKey.ACCURACY));
+                    }
+                    if (getBoolean(data, RequiredKey.HAS_ALTITUDE)) {
+                        mockLoc.setAltitude(getDouble(data, RequiredKey.ALTITUDE));
+                    }
+                    if (getBoolean(data, RequiredKey.HAS_BEARING)) {
+                        mockLoc.setBearing(getFloat(data, RequiredKey.BEARING));
+                    }
+                    if (getBoolean(data, RequiredKey.HAS_SPEED)) {
+                        mockLoc.setSpeed(getFloat(data, RequiredKey.SPEED));
+                    }
+                    mockLoc.setLatitude(getDouble(data, RequiredKey.LATITUDE));
+                    mockLoc.setLongitude(getDouble(data, RequiredKey.LONGITUDE));
+                    mockLoc.setTime(getLong(data, RequiredKey.TIME));
+                    // Broadcast the mock location to all registered listeners
+                    for (LocationListener listener : mListeners.keySet()) {
+                        Log.v(PM_TAG, "Sending to listener: " + listener.toString() + ". Lat: "
+                                + mockLoc.getLatitude() + "\tLong: " + mockLoc.getLongitude());
+                        listener.onLocationChanged(mockLoc);
+                    }
+                }
+            }
         }
+    }
+
+    // nvdirien: Helper functions that can cheat because we sanity check the
+    // input before passing in 'data'.
+    private String getString(Bundle data, RequiredKey key) {
+        return data.getString(requiredKeys.get(key));
+    }
+
+    private boolean getBoolean(Bundle data, RequiredKey key) {
+        return data.getBoolean(requiredKeys.get(key));
+    }
+
+    private float getFloat(Bundle data, RequiredKey key) {
+        return data.getFloat(requiredKeys.get(key));
+    }
+
+    private double getDouble(Bundle data, RequiredKey key) {
+        return data.getDouble(requiredKeys.get(key));
+    }
+
+    private long getLong(Bundle data, RequiredKey key) {
+        return data.getLong(requiredKeys.get(key));
     }
 
     // End
@@ -329,9 +401,21 @@ public class LocationManager<ServiceConnection> {
         mService = service;
         mContext = context;
         // nvdirien
-        Log.v(PM_TAG, "WTF?!");
         Log.v(PM_TAG, "Context package: " + mContext.getPackageName());
-        Log.v(PM_TAG, "WTF?!");
+        // Since we cannot get these keys from PocketMocker.MockLocatoin, we
+        // have to resort to this.
+        requiredKeys.put(RequiredKey.ACCURACY, "accuracy");
+        requiredKeys.put(RequiredKey.HAS_ACCURACY, "has_accuracy");
+        requiredKeys.put(RequiredKey.ALTITUDE, "altitude");
+        requiredKeys.put(RequiredKey.HAS_ALTITUDE, "has_altitude");
+        requiredKeys.put(RequiredKey.BEARING, "bearing");
+        requiredKeys.put(RequiredKey.HAS_BEARING, "has_bearing");
+        requiredKeys.put(RequiredKey.LATITUDE, "latitude");
+        requiredKeys.put(RequiredKey.LONGITUDE, "longitude");
+        requiredKeys.put(RequiredKey.PROVIDER, "provider");
+        requiredKeys.put(RequiredKey.SPEED, "speed");
+        requiredKeys.put(RequiredKey.HAS_SPEED, "has_speed");
+        requiredKeys.put(RequiredKey.TIME, "time");
         // Handles incoming updates
         Log.v(PM_TAG, "Creating mMockListener.");
         mMockListener = new Messenger(new MockLocationListener());
