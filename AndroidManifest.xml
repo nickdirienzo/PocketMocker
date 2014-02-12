@@ -39,7 +39,7 @@
 
         <service
             android:name="edu.buffalo.cse.blue.pocketmocker.MockerService"
-            android:exported="false"
+            android:exported="true"
             android:process="edu.buffalo.cse.blue.pocketmocker.MockerProcess" >
             <intent-filter>
                 <action android:name="edu.buffalo.cse.blue.pocketmocker.MockerService" >
