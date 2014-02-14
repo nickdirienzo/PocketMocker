@@ -93,6 +93,7 @@ public class RecordReplayManager extends ModelManager {
 			cursor.moveToFirst();
 		}
 		boolean isRecording = this.getBoolean(cursor, COL_IS_REC_INDEX);
+		cursor.close();
 		sql.close();
 		return isRecording;
 	}

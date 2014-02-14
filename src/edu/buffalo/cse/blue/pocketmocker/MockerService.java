@@ -1,10 +1,11 @@
 
 package edu.buffalo.cse.blue.pocketmocker;
 
+import java.util.HashMap;
+
 import android.annotation.SuppressLint;
 import android.app.Service;
 import android.content.Intent;
-import android.location.LocationManager;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.IBinder;
@@ -12,12 +13,9 @@ import android.os.Message;
 import android.os.Messenger;
 import android.os.RemoteException;
 import android.util.Log;
-
 import edu.buffalo.cse.blue.pocketmocker.models.MockLocation;
 import edu.buffalo.cse.blue.pocketmocker.models.MockLocationManager;
 import edu.buffalo.cse.blue.pocketmocker.models.RecordReplayManager;
-
-import java.util.HashMap;
 
 public class MockerService extends Service {
 

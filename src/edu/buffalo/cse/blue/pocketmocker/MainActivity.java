@@ -3,12 +3,20 @@ package edu.buffalo.cse.blue.pocketmocker;
 import java.util.Date;
 import java.util.List;
 
+import android.annotation.TargetApi;
 import android.app.Activity;
 import android.content.Context;
 import android.content.Intent;
+import android.hardware.Sensor;
+import android.hardware.SensorEvent;
+import android.hardware.SensorEventListener;
+import android.hardware.SensorManager;
+import android.hardware.TriggerEvent;
+import android.hardware.TriggerEventListener;
 import android.location.Location;
 import android.location.LocationListener;
 import android.location.LocationManager;
+import android.os.Build;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.Menu;
@@ -44,6 +52,7 @@ public class MainActivity extends Activity {
 	private RecordReplayManager recordReplayManager;
 
 	private LocationManager locationManager;
+	private SensorManager sensorManager;
 
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
@@ -96,6 +105,19 @@ public class MainActivity extends Activity {
 		locationText = (TextView) this.findViewById(R.id.locationText);
 		recordButton = (Button) this.findViewById(R.id.record_button);
 
+		initLocationManager();
+		initSensorManager();
+
+	}
+
+	@Override
+	public boolean onCreateOptionsMenu(Menu menu) {
+		// Inflate the menu; this adds items to the action bar if it is present.
+		getMenuInflater().inflate(R.menu.main, menu);
+		return true;
+	}
+
+	private void initLocationManager() {
 		locationManager = (LocationManager) this.getSystemService(Context.LOCATION_SERVICE);
 		Log.v(TAG, "Requesting location updates...");
 		locationManager.requestLocationUpdates(LocationManager.GPS_PROVIDER, 0, 0,
@@ -134,11 +156,47 @@ public class MainActivity extends Activity {
 				});
 	}
 
-	@Override
-	public boolean onCreateOptionsMenu(Menu menu) {
-		// Inflate the menu; this adds items to the action bar if it is present.
-		getMenuInflater().inflate(R.menu.main, menu);
-		return true;
+	@TargetApi(Build.VERSION_CODES.JELLY_BEAN_MR2)
+	private void initSensorManager() {
+		sensorManager = (SensorManager) this.getSystemService(Context.SENSOR_SERVICE);
+		for (Sensor s : sensorManager.getSensorList(Sensor.TYPE_ALL)) {
+			Log.v(TAG, "Registering listener for sensor: " + s.getName());
+			if (s.getType() != Sensor.TYPE_SIGNIFICANT_MOTION) {
+				sensorManager.registerListener(new SensorEventListener() {
+
+					@Override
+					public void onAccuracyChanged(Sensor sensor, int accuracy) {
+						if (recordReplayManager.isRecording()) {
+							Log.v(TAG, "Accuracy changed for sensor " + sensor.getName()
+									+ ". Accuracy: " + accuracy);
+						}
+					}
+
+					@Override
+					public void onSensorChanged(SensorEvent event) {
+						if (recordReplayManager.isRecording()) {
+							Log.v(TAG, "Sensor " + event.sensor.getName() + " changed. Acc: "
+									+ event.accuracy + " timestamp: " + event.timestamp
+									+ " values: " + event.values);
+						}
+					}
+
+				}, s, SensorManager.SENSOR_DELAY_FASTEST);
+			} else if (s.getType() == Sensor.TYPE_SIGNIFICANT_MOTION) {
+				if (Build.VERSION.SDK_INT == Build.VERSION_CODES.JELLY_BEAN_MR2) {
+					sensorManager.requestTriggerSensor(new TriggerEventListener() {
+
+						@Override
+						public void onTrigger(TriggerEvent event) {
+							if (recordReplayManager.isRecording()) {
+								Log.v(TAG, "onTrigger for sensor: " + event.sensor.getName()
+										+ " values: " + event.values);
+							}
+						}
+					}, s);
+				}
+			}
+		}
 	}
 
 	private void displayNewObjectiveDialog() {
@@ -202,8 +260,7 @@ public class MainActivity extends Activity {
 	private void prepareToRecord() {
 		toggleRecordingButton();
 		if (recordReplayManager.isRecording()) {
-			Location lastLoc = locationManager.getLastKnownLocation(
-					LocationManager.GPS_PROVIDER);
+			Location lastLoc = locationManager.getLastKnownLocation(LocationManager.GPS_PROVIDER);
 			if (lastLoc == null) {
 				updateLocationText("Waiting for location...");
 			} else {
@@ -225,18 +282,18 @@ public class MainActivity extends Activity {
 			prepareToRecord();
 		}
 	}
-	
+
 	public void replayButtonClicked(View v) {
-	    Button replayButton = (Button) v;
-	    if (replayButton.getText().equals(this.getString(R.string.replay))) {
-	        Log.v(TAG, "Stop replaying.");
-	        replayButton.setText(R.string.stop_replaying);
-	    } else {
-	        Log.v(TAG, "Start replaying.");
-	        replayButton.setText(R.string.replay);
-	    }
-	    recordReplayManager.toggleReplaying();
-	    
+		Button replayButton = (Button) v;
+		if (replayButton.getText().equals(this.getString(R.string.replay))) {
+			Log.v(TAG, "Stop replaying.");
+			replayButton.setText(R.string.stop_replaying);
+		} else {
+			Log.v(TAG, "Start replaying.");
+			replayButton.setText(R.string.replay);
+		}
+		recordReplayManager.toggleReplaying();
+
 	}
 
 	public void showOverwriteRecordingDialog() {
