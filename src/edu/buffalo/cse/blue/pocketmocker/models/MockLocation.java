@@ -155,6 +155,11 @@ public class MockLocation extends TimestampModel {
 		return data;
 	}
 	
+	/**
+	 * Bundle representing an android.location.Location
+	 * @param time
+	 * @return
+	 */
 	public Bundle toBundle(long time) {
 		Bundle data = new Bundle();
 		data.putFloat("accuracy", realLocation.getAccuracy());
