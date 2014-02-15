@@ -15,6 +15,12 @@ public class MockSensorEvent extends TimestampModel {
     // SensorEvent Fields
     // We can recreate the SensorEvent object in the platform, so we can just
     // leave it like this.
+    // We can also send out events whenever we feel like because of this little
+    // clause in SensorManager.registerListener:
+    // "The rate sensor events are delivered at. This is only a hint to the
+    // system.
+    // Events may be received faster or slower than the specified rate. Usually
+    // events are received faster."
     private int eventAccuracy;
     private int eventSensorType;
     private long eventTimestamp;
