@@ -69,6 +69,7 @@ public class MainActivity extends Activity {
         mockLocationManager = MockLocationManager.getInstance(getApplicationContext());
         recordReplayManager = RecordReplayManager.getInstance(getApplicationContext());
         recordReplayManager.setIsRecording(false);
+        app.setIsRecording(false);
 
         this.checkFirstTimeUse();
 
@@ -84,6 +85,7 @@ public class MainActivity extends Activity {
                     spinnerInitFlag = true;
                 } else {
                     recordReplayManager.setIsRecording(false);
+                    app.setIsRecording(false);
                     toggleRecordingButton();
                     String selectedText = objectivesSpinner.getSelectedItem().toString();
                     if (selectedText.equals(objectivesManager.getMockObjectiveString())) {
@@ -129,7 +131,7 @@ public class MainActivity extends Activity {
 
                     @Override
                     public void onLocationChanged(Location loc) {
-                        if (recordReplayManager.isRecording()) {
+                        if (app.isRecording()) {
                             // Logging only when recording because otherwise
                             // it's a huge mess in LogCat
                             Log.v(TAG, "LocatoinChanged.");
@@ -181,21 +183,21 @@ public class MainActivity extends Activity {
                         // TODO: Because of the file system logging, syncing at
                         // the db level is IMPOSSIBLE for a large number of
                         // threads.
-                        // if (recordReplayManager.isRecording()) {
-                        // Log.v(TAG, "Accuracy changed for sensor " +
-                        // sensor.getName()
-                        // + ". Accuracy: " + accuracy);
-                        // }
+                        if (app.isRecording()) {
+                            Log.v(TAG, "Accuracy changed for sensor " +
+                                    sensor.getName()
+                                    + ". Accuracy: " + accuracy);
+                        }
                     }
 
                     @Override
                     public void onSensorChanged(SensorEvent event) {
-                        // if (recordReplayManager.isRecording()) {
-                        // Log.v(TAG, "Sensor " + event.sensor.getName() +
-                        // " changed. Acc: "
-                        // + event.accuracy + " timestamp: " + event.timestamp
-                        // + " values: " + event.values);
-                        // }
+                        if (app.isRecording()) {
+                            Log.v(TAG, "Sensor " + event.sensor.getName() +
+                                    " changed. Acc: "
+                                    + event.accuracy + " timestamp: " + event.timestamp
+                                    + " values: " + event.values);
+                        }
                     }
 
                 }, s, SensorManager.SENSOR_DELAY_FASTEST);
@@ -205,12 +207,12 @@ public class MainActivity extends Activity {
 
                         @Override
                         public void onTrigger(TriggerEvent event) {
-                            // if (recordReplayManager.isRecording()) {
-                            // Log.v(TAG, "onTrigger for sensor: " +
-                            // event.sensor.getName()
-                            // + " values: " + event.values);
-                            // }
-                        }
+                            if (app.isRecording()) {
+                                Log.v(TAG, "onTrigger for sensor: " +
+                                        event.sensor.getName()
+                                        + " values: " + event.values);
+                            }
+                        }   
                     }, s);
                 }
             }
@@ -268,16 +270,17 @@ public class MainActivity extends Activity {
     }
 
     public void toggleRecordingButton() {
-        if (recordReplayManager.isRecording()) {
+        if (app.isRecording()) {
             recordButton.setText(R.string.stop_record);
         } else {
             recordButton.setText(R.string.record);
         }
+        Log.v(TAG, "Recording: " + app.isRecording());
     }
 
     private void prepareToRecord() {
         toggleRecordingButton();
-        if (recordReplayManager.isRecording()) {
+        if (app.isRecording()) {
             Location lastLoc = locationManager.getLastKnownLocation(LocationManager.GPS_PROVIDER);
             if (lastLoc == null) {
                 updateLocationText("Waiting for location...");
@@ -298,6 +301,7 @@ public class MainActivity extends Activity {
             showOverwriteRecordingDialog();
         } else {
             recordReplayManager.toggleRecording();
+            app.toggleIsRecording();
             prepareToRecord();
         }
     }
@@ -312,7 +316,6 @@ public class MainActivity extends Activity {
             replayButton.setText(R.string.replay);
         }
         recordReplayManager.toggleReplaying();
-
     }
 
     public void showOverwriteRecordingDialog() {
@@ -331,6 +334,7 @@ public class MainActivity extends Activity {
         objectivesManager.updateObjective(o);
         recordingManager.setCurrentRecordingId(recId);
         recordReplayManager.setIsRecording(true);
+        app.setIsRecording(true);
         this.toggleRecordingButton();
     }
 
