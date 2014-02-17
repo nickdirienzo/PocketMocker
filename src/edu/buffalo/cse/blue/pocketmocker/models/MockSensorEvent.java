@@ -1,10 +1,9 @@
 
 package edu.buffalo.cse.blue.pocketmocker.models;
 
-import android.hardware.Sensor;
-import android.os.Bundle;
-
 import java.util.Date;
+
+import android.os.Bundle;
 
 public class MockSensorEvent extends TimestampModel {
 
