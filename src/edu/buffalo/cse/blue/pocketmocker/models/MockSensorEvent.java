@@ -3,6 +3,7 @@ package edu.buffalo.cse.blue.pocketmocker.models;
 
 import java.util.Date;
 
+import android.hardware.SensorEvent;
 import android.os.Bundle;
 
 public class MockSensorEvent extends TimestampModel {
@@ -56,6 +57,15 @@ public class MockSensorEvent extends TimestampModel {
 
     public MockSensorEvent() {
         creationDate = new Date();
+    }
+    
+    public MockSensorEvent(SensorEvent event, long recId) {
+    	eventAccuracy = event.accuracy;
+    	eventSensorType = event.sensor.getType();
+    	eventTimestamp = event.timestamp;
+    	eventValues = event.values;
+    	creationDate = new Date();
+    	recordingId = recId;
     }
 
     public long getId() {

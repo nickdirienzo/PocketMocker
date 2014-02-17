@@ -31,6 +31,7 @@ public class RecordingManager extends ModelManager {
 	
 	public void setCurrentRecordingId(long recId) {
 		curRecordingManager.setCurrentRecordingId(recId);
+		app.setCurrentRecordingId(recId);
 		Log.v("REC", "set cur rec id: " + recId);
 	}
 	

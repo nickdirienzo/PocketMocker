@@ -13,11 +13,22 @@ public class PocketMockerApplication extends Application {
 	private boolean isRecording;
 	private boolean isReplaying;
 	
+	private long currentRecordingId;
+	
 	@Override
 	public void onCreate() {
 		super.onCreate();	
 		isRecording = false;
 		isReplaying = false;
+	}
+	
+	// I hate having this and the database separated 
+	public long getCurrentRecordingId() {
+		return currentRecordingId;
+	}
+	
+	public void setCurrentRecordingId(long id) {
+		currentRecordingId = id;
 	}
 	
 	public boolean isRecording() {

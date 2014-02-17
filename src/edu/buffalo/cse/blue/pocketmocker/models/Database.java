@@ -1,25 +1,51 @@
 package edu.buffalo.cse.blue.pocketmocker.models;
 
+import java.util.concurrent.atomic.AtomicInteger;
+
 import android.content.Context;
 import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteOpenHelper;
 
+/**
+ * Thread-safe database manager. Thanks:
+ * https://github.com/dmytrodanylyk/dmytrodanylyk
+ * /blob/gh-pages/articles/Concurrent%20Database%20Access.md
+ * 
+ * @author nvd
+ * 
+ */
 public class Database extends SQLiteOpenHelper {
 
 	private static final int DB_VERSION = 4;
 	private static final String DB_NAME = "PocketMocker.db";
 
 	private static Database sInstance;
+	private SQLiteDatabase database;
+	private AtomicInteger dbRefCount;
 
-	public static Database getInstance(Context c) {
+	public static synchronized Database getInstance(Context c) {
 		if (sInstance == null) {
 			sInstance = new Database(c.getApplicationContext());
 		}
 		return sInstance;
 	}
 
+	public synchronized SQLiteDatabase openDatabase() {
+		if(dbRefCount.incrementAndGet() == 1) {
+			database = sInstance.getWritableDatabase();
+		}
+		return database;
+	}
+	
+	public synchronized void closeDatabase() {
+		if(dbRefCount.decrementAndGet() == 0) {
+			database.close();
+		}
+	}
+
 	private Database(Context context) {
 		super(context, DB_NAME, null, DB_VERSION);
+		dbRefCount = new AtomicInteger();
 	}
 
 	@Override
