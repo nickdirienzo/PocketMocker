@@ -37,7 +37,6 @@ public class MockLocationManager extends ModelManager {
 	public void addLocation(Location l, String eventType, int status) {
 		MockLocation m = new MockLocation(l, recordingManager.getCurrentRecordingId());
 
-		SQLiteDatabase sql = db.getWritableDatabase();
 		ContentValues values = new ContentValues();
 		Location realLoc = m.getRealLocation();
 		values.put(MockLocation.COL_CREATION_DATE, m.getCreationDateSqlString());
@@ -70,13 +69,12 @@ public class MockLocationManager extends ModelManager {
 		values.put(MockLocation.COL_EVENT_TYPE, eventType);
 		// Set status to -1 for all other callbacks besides onStatusChanged
 		values.put(MockLocation.COL_STATUS, status);
-		sql.insert(MockLocation.TABLE_NAME, null, values);
-		sql.close();
+		this.insert(values, MockLocation.TABLE_NAME);
 	}
 
 	public ArrayList<MockLocation> getMockLocationsForRecording(long recId) {
 		ArrayList<MockLocation> mockLocations = new ArrayList<MockLocation>();
-		SQLiteDatabase sql = db.getReadableDatabase();
+		SQLiteDatabase sql = manager.openDatabase();
 		String query = MockLocation.SELECT_ALL + " WHERE " + MockLocation.COL_RECORDING + " = '"
 				+ recId + "'";
 		Cursor cursor = sql.rawQuery(query, null);
@@ -132,7 +130,7 @@ public class MockLocationManager extends ModelManager {
 				mockLocations.add(ml);
 			} while (cursor.moveToNext());
 		}
-		sql.close();
+		manager.closeDatabase();
 		return mockLocations;
 	}
 	

@@ -28,26 +28,34 @@ public class RecordingManager extends ModelManager {
 		app = (PocketMockerApplication) c;
 		curRecordingManager = CurrentRecordingIdManager.getInstance(c);
 	}
-	
+
 	public void setCurrentRecordingId(long recId) {
 		curRecordingManager.setCurrentRecordingId(recId);
 		app.setCurrentRecordingId(recId);
 		Log.v("REC", "set cur rec id: " + recId);
 	}
-	
+
 	public long getCurrentRecordingId() {
 		long recId = curRecordingManager.getCurrentRecordingId();
 		Log.v("REC", "get cur rec id: " + recId);
 		return recId;
 	}
 
+	/**
+	 * This is different than the MockX Managers because this only is called
+	 * through the UI, so it's "safe" to run this insert on the UI thread (don't
+	 * hate me).
+	 * 
+	 * @param r
+	 * @return
+	 */
 	public long addRecording(Recording r) {
-		SQLiteDatabase sql = db.getWritableDatabase();
+		SQLiteDatabase sql = manager.openDatabase();
 		ContentValues values = new ContentValues();
 		values.put(Recording.COL_CREATION_DATE, r.getCreationDateSqlString());
 		long id = sql.insert(Recording.TABLE_NAME, null, values);
 		Log.v("REC", "Insertedd recording: " + id);
-		sql.close();
+		manager.closeDatabase();
 		return id;
 	}
 

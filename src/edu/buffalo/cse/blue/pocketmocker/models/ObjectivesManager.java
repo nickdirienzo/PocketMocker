@@ -11,7 +11,7 @@ import android.util.Log;
 import edu.buffalo.cse.blue.pocketmocker.MainActivity;
 
 public class ObjectivesManager extends ModelManager {
-	
+
 	private static ObjectivesManager sInstance;
 
 	private Objective addNewObjectiveMock;
@@ -19,12 +19,12 @@ public class ObjectivesManager extends ModelManager {
 	private RecordingManager recordingManager;
 
 	public static ObjectivesManager getInstance(Context c) {
-		if(sInstance == null) {
+		if (sInstance == null) {
 			sInstance = new ObjectivesManager(c);
 		}
 		return sInstance;
 	}
-	
+
 	private ObjectivesManager(Context c) {
 		super(c);
 		recordingManager = RecordingManager.getInstance(c);
@@ -47,12 +47,11 @@ public class ObjectivesManager extends ModelManager {
 			long recId = recordingManager.addRecording(new Recording());
 			values.put(Objective.COL_RECORDING, recId);
 			recordingManager.setCurrentRecordingId(recId);
+
 		} else {
 			values.put(Objective.COL_RECORDING, o.getRecordingId());
 		}
-		SQLiteDatabase sql = db.getWritableDatabase();
-		sql.insert(Objective.TABLE_NAME, null, values);
-		sql.close();
+		insert(values, Objective.TABLE_NAME);
 	}
 
 	public void updateObjective(Objective o) {
@@ -61,15 +60,13 @@ public class ObjectivesManager extends ModelManager {
 		values.put(Objective.COL_CREATION_DATE, o.getCreationDateSqlString());
 		values.put(Objective.COL_LAST_MODIFIED_DATE, o.getLastModifiedDateSqlString());
 		values.put(Objective.COL_RECORDING, o.getRecordingId());
-		SQLiteDatabase sql = db.getWritableDatabase();
-		sql.update(Objective.TABLE_NAME, values, Objective.COL_ID + "=?",
+		this.update(Objective.TABLE_NAME, values, Objective.COL_ID + "=?",
 				new String[] { String.valueOf(o.getId()) });
-		sql.close();
 		Log.v(MainActivity.TAG, "Updated objective " + o.getId());
 	}
 
 	public Objective getObjectiveByName(String name) {
-		SQLiteDatabase sql = db.getReadableDatabase();
+		SQLiteDatabase sql = manager.openDatabase();
 		Objective objective;
 		Cursor cursor = sql.query(Objective.TABLE_NAME, Objective.ALL_COLS, Objective.COL_NAME
 				+ "=?", new String[] { name }, null, null, null);
@@ -82,13 +79,13 @@ public class ObjectivesManager extends ModelManager {
 		objective.setCreationDate(cursor.getString(Objective.COL_CREATION_DATE_INDEX));
 		objective.setLastModifiedDate(cursor.getString(Objective.COL_LAST_MODIFIED_DATE_INDEX));
 		objective.setRecordingId(Long.parseLong(cursor.getString(Objective.COL_RECORDING_INDEX)));
-		sql.close();
+		manager.closeDatabase();
 		return objective;
 	}
 
 	public ArrayList<Objective> getObjectives() {
 		ArrayList<Objective> objectives = new ArrayList<Objective>();
-		SQLiteDatabase sql = db.getWritableDatabase();
+		SQLiteDatabase sql = manager.openDatabase();
 		Cursor cursor = sql.rawQuery(Objective.SELECT_ALL, null);
 		if (cursor.moveToFirst()) {
 			do {
@@ -102,7 +99,7 @@ public class ObjectivesManager extends ModelManager {
 				objectives.add(objective);
 			} while (cursor.moveToNext());
 		}
-		sql.close();
+		manager.closeDatabase();
 		objectives.add(addNewObjectiveMock);
 		return objectives;
 	}

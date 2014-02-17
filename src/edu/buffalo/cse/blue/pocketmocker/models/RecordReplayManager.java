@@ -45,9 +45,7 @@ public class RecordReplayManager extends ModelManager {
 		// Just to be safe
 		values.put(COL_IS_REPLAY, false);
 		values.put(COL_TIMESTAMP, System.currentTimeMillis());
-		SQLiteDatabase sql = db.getWritableDatabase();
-		sql.insert(TABLE_NAME, null, values);
-		sql.close();
+		this.insert(values, TABLE_NAME);
 	}
 
 	public void toggleRecording() {
@@ -58,9 +56,7 @@ public class RecordReplayManager extends ModelManager {
 		// Just to be safe
 		values.put(COL_IS_REPLAY, false);
 		values.put(COL_TIMESTAMP, System.currentTimeMillis());
-		SQLiteDatabase sql = db.getWritableDatabase();
-		sql.insert(TABLE_NAME, null, values);
-		sql.close();
+		this.insert(values, TABLE_NAME);
 	}
 
 	public void setIsReplaying(boolean isReplaying) {
@@ -68,9 +64,7 @@ public class RecordReplayManager extends ModelManager {
 		values.put(COL_IS_REC, false);
 		values.put(COL_IS_REPLAY, isReplaying);
 		values.put(COL_TIMESTAMP, System.currentTimeMillis());
-		SQLiteDatabase sql = db.getWritableDatabase();
-		sql.insert(TABLE_NAME, null, values);
-		sql.close();
+		this.insert(values, TABLE_NAME);
 	}
 
 	public void toggleReplaying() {
@@ -80,13 +74,11 @@ public class RecordReplayManager extends ModelManager {
 		values.put(COL_IS_REC, false);
 		values.put(COL_IS_REPLAY, !isReplaying);
 		values.put(COL_TIMESTAMP, System.currentTimeMillis());
-		SQLiteDatabase sql = db.getWritableDatabase();
-		sql.insert(TABLE_NAME, null, values);
-		sql.close();
+		this.insert(values, TABLE_NAME);
 	}
 
 	public boolean isRecording() {
-		SQLiteDatabase sql = db.getReadableDatabase();
+		SQLiteDatabase sql = manager.openDatabase();
 		Cursor cursor = sql.rawQuery("SELECT * FROM " + TABLE_NAME + " ORDER BY " + COL_TIMESTAMP
 				+ " DESC LIMIT 1", null);
 		if (cursor != null) {
@@ -94,19 +86,19 @@ public class RecordReplayManager extends ModelManager {
 		}
 		boolean isRecording = this.getBoolean(cursor, COL_IS_REC_INDEX);
 		cursor.close();
-		sql.close();
+		manager.closeDatabase();
 		return isRecording;
 	}
 
 	public boolean isReplaying() {
-		SQLiteDatabase sql = db.getReadableDatabase();
+		SQLiteDatabase sql = manager.openDatabase();
 		Cursor cursor = sql.rawQuery("SELECT * FROM " + TABLE_NAME + " ORDER BY " + COL_TIMESTAMP
 				+ " DESC LIMIT 1", null);
 		if (cursor != null) {
 			cursor.moveToFirst();
 		}
 		boolean isReplaying = this.getBoolean(cursor, COL_IS_REPLAY_INDEX);
-		sql.close();
+		manager.closeDatabase();
 		return isReplaying;
 	}
 

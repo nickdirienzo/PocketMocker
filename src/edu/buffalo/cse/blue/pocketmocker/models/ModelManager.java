@@ -1,14 +1,16 @@
 package edu.buffalo.cse.blue.pocketmocker.models;
 
+import android.content.ContentValues;
 import android.content.Context;
 import android.database.Cursor;
+import android.database.sqlite.SQLiteDatabase;
 
 public abstract class ModelManager {
 	
-	protected Database db;
+	protected Database manager;
 		
 	protected ModelManager(Context c) {
-		db = Database.getInstance(c);
+		manager = Database.getInstance(c);
 	}
 	
 	protected boolean getBoolean(Cursor c, int index) {
@@ -35,6 +37,56 @@ public abstract class ModelManager {
 	
 	protected int getInt(Cursor c, int index) {
 	    return Integer.parseInt(c.getString(index));
+	}
+	
+	protected void insert(ContentValues values, String tableName) {
+		new Thread(new InsertTask(values, tableName)).run();
+	}
+	
+	protected class InsertTask implements Runnable {
+		
+		private ContentValues values;
+		private String tableName;
+		
+		public InsertTask(ContentValues values, String tableName) {
+			this.values = values;
+			this.tableName = tableName;
+		}
+
+		@Override
+		public void run() {
+			SQLiteDatabase db = manager.openDatabase();
+			db.insert(tableName, null, values);
+			manager.closeDatabase();
+		}
+		
+	}
+	
+	protected void update(String tableName, ContentValues values, String where, String[] whereArgs) {
+		new Thread(new UpdateTask(tableName, values, where, whereArgs)).run();
+	}
+	
+	protected class UpdateTask implements Runnable {
+		
+		private String tableName;
+		private ContentValues values;
+		private String where;
+		private String[] whereArgs;
+		
+		public UpdateTask(String tableName, ContentValues values, String where, String[] whereArgs) {
+			this.tableName = tableName;
+			this.values = values;
+			this.where = where;
+			this.whereArgs = whereArgs;
+		}
+
+		@Override
+		public void run() {
+			SQLiteDatabase db = manager.openDatabase();
+			db.update(tableName, values, where, whereArgs);
+			manager.closeDatabase();
+		}
+		
 	}
 
 }

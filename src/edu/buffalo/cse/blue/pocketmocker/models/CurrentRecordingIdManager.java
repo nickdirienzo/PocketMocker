@@ -37,20 +37,18 @@ public class CurrentRecordingIdManager extends ModelManager {
 		ContentValues values = new ContentValues();
 		values.put(COL_REC_ID, id);
 		values.put(COL_TIMESTAMP, System.currentTimeMillis());
-		SQLiteDatabase sql = db.getWritableDatabase();
-		sql.insert(TABLE_NAME, null, values);
-		sql.close();
+		this.insert(values, TABLE_NAME);
 	}
 
 	public long getCurrentRecordingId() {
-		SQLiteDatabase sql = db.getReadableDatabase();
+		SQLiteDatabase sql = manager.openDatabase();
 		Cursor cursor = sql.rawQuery("SELECT * FROM " + TABLE_NAME + " ORDER BY " + COL_TIMESTAMP
 				+ " DESC LIMIT 1", null);
 		if (cursor != null) {
 			cursor.moveToFirst();
 		}
 		long recId = this.getLong(cursor, COL_REC_ID_INDEX);
-		sql.close();
+		manager.closeDatabase();
 		return recId;
 	}
 
