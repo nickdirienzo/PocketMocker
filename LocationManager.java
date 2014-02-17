@@ -80,7 +80,7 @@ public class LocationManager<ServiceConnection> {
 
     private enum RequiredKey {
         ACCURACY, HAS_ACCURACY, ALTITUDE, HAS_ALTITUDE, BEARING, HAS_BEARING,
-        LATITUDE, LONGITUDE, PROVIDER, SPEED, HAS_SPEED, TIME
+        LATITUDE, LONGITUDE, PROVIDER, SPEED, HAS_SPEED, TIME, EVENT_TPYE, STATUS, EXTRAS
     }
 
     private HashMap<RequiredKey, String> requiredKeys = new HashMap<RequiredKey, String>();
@@ -314,8 +314,16 @@ public class LocationManager<ServiceConnection> {
             // shared constants between PM and the system, but I'm not sure of
             // the best way to do that.
             long mockId = -1;
+            String eventType = "";
+            int status = -1;
             if (data.containsKey("mockId")) {
                 mockId = data.getLong("mockId");
+            }
+            if (data.containsKey(requiredKeys.get(RequiredKey.EVENT_TPYE))) {
+                eventType = getString(data, RequiredKey.EVENT_TPYE);
+            }
+            if (data.containsKey(requiredKeys.get(RequiredKey.STATUS))) {
+                status = getInt(data, RequiredKey.STATUS);
             }
             if (data.containsKey("hasLocation")) {
                 mIsReplaying = data.getBoolean("hasLocation");
@@ -356,12 +364,8 @@ public class LocationManager<ServiceConnection> {
                     mockLoc.setLatitude(getDouble(data, RequiredKey.LATITUDE));
                     mockLoc.setLongitude(getDouble(data, RequiredKey.LONGITUDE));
                     mockLoc.setTime(getLong(data, RequiredKey.TIME));
-                    // Broadcast the mock location to all registered listeners
-                    for (LocationListener listener : mListeners.keySet()) {
-                        Log.v(PM_TAG, "Sending to listener: " + listener.toString() + ". Lat: "
-                                + mockLoc.getLatitude() + "\tLong: " + mockLoc.getLongitude());
-                        listener.onLocationChanged(mockLoc);
-                    }
+                    mockLoc.setExtras(getBundle(data, RequiredKey.EXTRAS));
+                    broadcastMock(mockLoc, eventType, status);
                 }
             }
         }
@@ -387,6 +391,30 @@ public class LocationManager<ServiceConnection> {
 
     private long getLong(Bundle data, RequiredKey key) {
         return data.getLong(requiredKeys.get(key));
+    }
+    
+    private int getInt(Bundle data, RequiredKey key) {
+        return data.getInt(requiredKeys.get(key));
+    }
+    
+    private Bundle getBundle(Bundle data, RequiredKey key) {
+        return data.getBundle(requiredKeys.get(key));
+    }
+
+    // Broadcast Helper
+    private void broadcastMock(Location loc, String eventType, int status) {
+        Log.v(PM_TAG, "Broadcasting event: " + eventType + ". Status: " + status);
+        for (LocationListener listener : mListeners.keySet()) {
+            if (eventType.equals("onLocationChanged")) {
+                listener.onLocationChanged(loc);
+            } else if(eventType.equals("onProviderDisabled")) {
+                listener.onProviderDisabled(loc.getProvider());
+            } else if(eventType.equals("onProviderEnabled")) {
+                listener.onProviderEnabled(loc.getProvider());
+            } else if(eventType.equals("onStatusChanged")) {
+                listener.onStatusChanged(loc.getProvider(), status, loc.getExtras());
+            }
+        }
     }
 
     // End
@@ -416,6 +444,9 @@ public class LocationManager<ServiceConnection> {
         requiredKeys.put(RequiredKey.SPEED, "speed");
         requiredKeys.put(RequiredKey.HAS_SPEED, "has_speed");
         requiredKeys.put(RequiredKey.TIME, "time");
+        requiredKeys.put(RequiredKey.EVENT_TPYE, "eventType");
+        requiredKeys.put(RequiredKey.STATUS, "status");
+        requiredKeys.put(RequiredKey.EXTRAS, "extras");
         // Handles incoming updates
         Log.v(PM_TAG, "Creating mMockListener.");
         mMockListener = new Messenger(new MockLocationListener());
