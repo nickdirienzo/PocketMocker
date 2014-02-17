@@ -1,13 +1,18 @@
 package edu.buffalo.cse.blue.pocketmocker.models;
 
-import java.util.ArrayList;
-
 import android.content.ContentValues;
 import android.content.Context;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 import android.location.Location;
+import android.os.Bundle;
 import android.util.Log;
+
+import org.json.JSONException;
+import org.json.JSONObject;
+
+import java.util.ArrayList;
+import java.util.Iterator;
 
 public class MockLocationManager extends ModelManager {
 
@@ -29,7 +34,7 @@ public class MockLocationManager extends ModelManager {
 		recordingManager = RecordingManager.getInstance(c);
 	}
 
-	public void addLocation(Location l) {
+	public void addLocation(Location l, String eventType, int status) {
 		MockLocation m = new MockLocation(l, recordingManager.getCurrentRecordingId());
 
 		SQLiteDatabase sql = db.getWritableDatabase();
@@ -49,8 +54,22 @@ public class MockLocationManager extends ModelManager {
 		values.put(MockLocation.COL_HAS_ACCURACY, realLoc.hasAccuracy());
 		values.put(MockLocation.COL_ACCURACY, realLoc.getAccuracy());
 		// Not sure what to do with the bundle, so this will do for now.
-		values.put(MockLocation.COL_EXTRAS, realLoc.getExtras().toString());
+		try {
+		    // Holy hacks, Batman.
+		    JSONObject json = new JSONObject();
+		    for(String key: realLoc.getExtras().keySet()) {
+		        Object obj = realLoc.getExtras().get(key);
+		        json.put(key, obj);
+		    }
+            values.put(MockLocation.COL_EXTRAS, json.toString());
+        } catch (JSONException e) {
+            // If we can't serialize to JSON, might as well store it as a string anyway
+            values.put(MockLocation.COL_EXTRAS, realLoc.getExtras().toString());
+        }
 		values.put(MockLocation.COL_PROVIDER, realLoc.getProvider());
+		values.put(MockLocation.COL_EVENT_TYPE, eventType);
+		// Set status to -1 for all other callbacks besides onStatusChanged
+		values.put(MockLocation.COL_STATUS, status);
 		sql.insert(MockLocation.TABLE_NAME, null, values);
 		sql.close();
 	}
@@ -85,9 +104,31 @@ public class MockLocationManager extends ModelManager {
 				if (getBoolean(cursor, MockLocation.COL_HAS_ACCURACY_INDEX)) {
 					loc.setAccuracy(getFloat(cursor, MockLocation.COL_ACCURACY_INDEX));
 				}
-				// TODO: Create Bundle from the String extras and set it on our
+				try {
+				    // Holy hacks, Batman.
+				    Bundle extras = new Bundle();
+                    JSONObject jsonBlob = new JSONObject(getString(cursor, MockLocation.COL_EXTRAS_INDEX));
+                    Iterator<String> extrasIt = jsonBlob.keys();
+                    String key;
+                    while(extrasIt.hasNext()) {
+                        key = extrasIt.next();
+                        Object obj = jsonBlob.get(key);
+                        if(obj instanceof Integer) {
+                            extras.putInt(key, (Integer) obj);
+                        } else if (obj instanceof Float) {
+                            extras.putFloat(key, (Float) obj);
+                        } else if (obj instanceof String) {
+                            extras.putString(key, (String) obj);
+                        }
+                    }
+                    loc.setExtras(extras);
+                } catch (JSONException e) {
+                    Log.v("PM_MLM", "Can't parse into JSON. Screw it.");
+                }
 				// real Location
 				ml.setRealLocation(loc);
+				ml.setEventType(getString(cursor, MockLocation.COL_EVENT_TYPE_INDEX));
+				ml.setStatus(getInt(cursor, MockLocation.COL_STATUS_INDEX));
 				mockLocations.add(ml);
 			} while (cursor.moveToNext());
 		}

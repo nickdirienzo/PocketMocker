@@ -28,5 +28,13 @@ public abstract class ModelManager {
 	protected long getLong(Cursor c, int index) {
 		return Long.parseLong(c.getString(index));
 	}
+	
+	protected String getString(Cursor c, int index) {
+	    return c.getString(index);
+	}
+	
+	protected int getInt(Cursor c, int index) {
+	    return Integer.parseInt(c.getString(index));
+	}
 
 }

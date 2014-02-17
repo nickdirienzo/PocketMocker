@@ -53,6 +53,9 @@ public class MainActivity extends Activity {
     private RecordReplayManager recordReplayManager;
 
     private LocationManager locationManager;
+    // We use lastLocation as the location to add when we have other updates
+    // that don't receive a Location as a parameter in the callback
+    private Location lastLocation;
     private SensorManager sensorManager;
 
     @Override
@@ -130,7 +133,8 @@ public class MainActivity extends Activity {
                             // Logging only when recording because otherwise
                             // it's a huge mess in LogCat
                             Log.v(TAG, "LocatoinChanged.");
-                            mockLocationManager.addLocation(loc);
+                            lastLocation = loc;
+                            mockLocationManager.addLocation(loc, "onLocationChanged", -1);
                             String displayLoc = app.buildLocationDisplayString(loc);
                             locationText.setText(locationPrefix + displayLoc);
                             // Log.v(TAG, "Location count: "
@@ -139,19 +143,26 @@ public class MainActivity extends Activity {
                     }
 
                     @Override
-                    public void onProviderDisabled(String arg0) {
+                    public void onProviderDisabled(String provider) {
                         Log.v(TAG,
                                 "Provider disabled. Alert user that we need this turned on to function.");
+                        lastLocation.setProvider(provider);
+                        mockLocationManager.addLocation(lastLocation, "onProviderDisabled", -1);
                     }
 
                     @Override
-                    public void onProviderEnabled(String arg0) {
+                    public void onProviderEnabled(String provider) {
                         Log.v(TAG, "Provider enabled. Woot, we can log things.");
+                        lastLocation.setProvider(provider);
+                        mockLocationManager.addLocation(lastLocation, "onProviderEnabled", -1);
                     }
 
                     @Override
-                    public void onStatusChanged(String arg0, int arg1, Bundle arg2) {
+                    public void onStatusChanged(String provider, int status, Bundle extras) {
                         Log.v(TAG, "onStatusChanged. Nothing to do here yet.");
+                        lastLocation.setExtras(extras);
+                        lastLocation.setProvider(provider);
+                        mockLocationManager.addLocation(lastLocation, "onStatusChanged", status);
                     }
 
                 });
@@ -169,7 +180,7 @@ public class MainActivity extends Activity {
                     public void onAccuracyChanged(Sensor sensor, int accuracy) {
                         // TODO: Because of the file system logging, syncing at
                         // the db level is IMPOSSIBLE for a large number of
-                        // threads. 
+                        // threads.
                         // if (recordReplayManager.isRecording()) {
                         // Log.v(TAG, "Accuracy changed for sensor " +
                         // sensor.getName()
@@ -271,7 +282,8 @@ public class MainActivity extends Activity {
             if (lastLoc == null) {
                 updateLocationText("Waiting for location...");
             } else {
-                mockLocationManager.addLocation(lastLoc);
+                lastLocation = lastLoc;
+                mockLocationManager.addLocation(lastLoc, "onLocationChanged", -1);
                 updateLocationText(lastLoc);
             }
         } else {
