@@ -12,6 +12,13 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:text="@string/objective_dialog_detail" />
+    
+    <TextView
+        android:id="@+id/new_objective_error"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text=""
+        android:textColor="#FF0000" />
 
     <EditText
         android:id="@+id/objective_name"

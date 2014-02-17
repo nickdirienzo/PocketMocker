@@ -1,3 +1,4 @@
+
 package edu.buffalo.cse.blue.pocketmocker;
 
 import java.util.Date;
@@ -35,289 +36,295 @@ import edu.buffalo.cse.blue.pocketmocker.models.RecordingManager;
 
 public class MainActivity extends Activity {
 
-	public static final String TAG = "REC";
+    public static final String TAG = "REC";
 
-	private PocketMockerApplication app;
+    private PocketMockerApplication app;
 
-	private TextView locationText;
-	private Button recordButton;
-	private String locationPrefix;
+    private TextView locationText;
+    private Button recordButton;
+    private String locationPrefix;
 
-	private Spinner objectivesSpinner;
-	private boolean spinnerInitFlag;
+    private Spinner objectivesSpinner;
+    private boolean spinnerInitFlag;
 
-	private ObjectivesManager objectivesManager;
-	private RecordingManager recordingManager;
-	private MockLocationManager mockLocationManager;
-	private RecordReplayManager recordReplayManager;
+    private ObjectivesManager objectivesManager;
+    private RecordingManager recordingManager;
+    private MockLocationManager mockLocationManager;
+    private RecordReplayManager recordReplayManager;
 
-	private LocationManager locationManager;
-	private SensorManager sensorManager;
+    private LocationManager locationManager;
+    private SensorManager sensorManager;
 
-	@Override
-	protected void onCreate(Bundle savedInstanceState) {
-		super.onCreate(savedInstanceState);
-		setContentView(R.layout.activity_main);
-		app = (PocketMockerApplication) getApplicationContext();
+    @Override
+    protected void onCreate(Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
+        setContentView(R.layout.activity_main);
+        app = (PocketMockerApplication) getApplicationContext();
 
-		objectivesManager = ObjectivesManager.getInstance(getApplicationContext());
-		recordingManager = RecordingManager.getInstance(getApplicationContext());
-		mockLocationManager = MockLocationManager.getInstance(getApplicationContext());
-		recordReplayManager = RecordReplayManager.getInstance(getApplicationContext());
-		recordReplayManager.setIsRecording(false);
+        objectivesManager = ObjectivesManager.getInstance(getApplicationContext());
+        recordingManager = RecordingManager.getInstance(getApplicationContext());
+        mockLocationManager = MockLocationManager.getInstance(getApplicationContext());
+        recordReplayManager = RecordReplayManager.getInstance(getApplicationContext());
+        recordReplayManager.setIsRecording(false);
 
-		this.checkFirstTimeUse();
+        this.checkFirstTimeUse();
 
-		spinnerInitFlag = false;
-		objectivesSpinner = (Spinner) this.findViewById(R.id.objectives_spinner);
-		objectivesSpinner.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
+        spinnerInitFlag = false;
+        objectivesSpinner = (Spinner) this.findViewById(R.id.objectives_spinner);
+        objectivesSpinner.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
 
-			@Override
-			public void onItemSelected(AdapterView<?> adapterView, View view, int i, long l) {
-				if (!spinnerInitFlag) {
-					// Workaround for when this gets called when the
-					// view is initially rendered
-					spinnerInitFlag = true;
-				} else {
-					recordReplayManager.setIsRecording(false);
-					toggleRecordingButton();
-					String selectedText = objectivesSpinner.getSelectedItem().toString();
-					if (selectedText.equals(objectivesManager.getMockObjectiveString())) {
-						displayNewObjectiveDialog();
-					}
-					Log.v(TAG, "Selected: " + objectivesSpinner.getSelectedItem().toString());
-				}
-			}
+            @Override
+            public void onItemSelected(AdapterView<?> adapterView, View view, int i, long l) {
+                if (!spinnerInitFlag) {
+                    // Workaround for when this gets called when the
+                    // view is initially rendered
+                    spinnerInitFlag = true;
+                } else {
+                    recordReplayManager.setIsRecording(false);
+                    toggleRecordingButton();
+                    String selectedText = objectivesSpinner.getSelectedItem().toString();
+                    if (selectedText.equals(objectivesManager.getMockObjectiveString())) {
+                        displayNewObjectiveDialog();
+                    }
+                    Log.v(TAG, "Selected: " + objectivesSpinner.getSelectedItem().toString());
+                }
+            }
 
-			@Override
-			public void onNothingSelected(AdapterView<?> adapterView) {
-				Log.v(TAG, "Spinner nothing.");
-			}
-		});
-		this.populateObjectivesSpinner();
-		List<Objective> objectives = objectivesManager.getObjectives();
-		if (objectives.size() > 1) {
-			Log.v(TAG, "Setting current rec id to: " + objectives.get(0).getId());
-			recordingManager.setCurrentRecordingId(objectives.get(0).getId());
-		}
+            @Override
+            public void onNothingSelected(AdapterView<?> adapterView) {
+                Log.v(TAG, "Spinner nothing.");
+            }
+        });
+        this.populateObjectivesSpinner();
+        List<Objective> objectives = objectivesManager.getObjectives();
+        if (objectives.size() > 1) {
+            Log.v(TAG, "Setting current rec id to: " + objectives.get(0).getId());
+            recordingManager.setCurrentRecordingId(objectives.get(0).getId());
+        }
 
-		locationPrefix = this.getString(R.string.loc_prefix);
-		locationText = (TextView) this.findViewById(R.id.locationText);
-		recordButton = (Button) this.findViewById(R.id.record_button);
+        locationPrefix = this.getString(R.string.loc_prefix);
+        locationText = (TextView) this.findViewById(R.id.locationText);
+        recordButton = (Button) this.findViewById(R.id.record_button);
 
-		initLocationManager();
-		initSensorManager();
+        initLocationManager();
+        initSensorManager();
 
-	}
+    }
 
-	@Override
-	public boolean onCreateOptionsMenu(Menu menu) {
-		// Inflate the menu; this adds items to the action bar if it is present.
-		getMenuInflater().inflate(R.menu.main, menu);
-		return true;
-	}
+    @Override
+    public boolean onCreateOptionsMenu(Menu menu) {
+        // Inflate the menu; this adds items to the action bar if it is present.
+        getMenuInflater().inflate(R.menu.main, menu);
+        return true;
+    }
 
-	private void initLocationManager() {
-		locationManager = (LocationManager) this.getSystemService(Context.LOCATION_SERVICE);
-		Log.v(TAG, "Requesting location updates...");
-		locationManager.requestLocationUpdates(LocationManager.GPS_PROVIDER, 0, 0,
-				new LocationListener() {
+    private void initLocationManager() {
+        locationManager = (LocationManager) this.getSystemService(Context.LOCATION_SERVICE);
+        Log.v(TAG, "Requesting location updates...");
+        locationManager.requestLocationUpdates(LocationManager.GPS_PROVIDER, 0, 0,
+                new LocationListener() {
 
-					@Override
-					public void onLocationChanged(Location loc) {
-						if (recordReplayManager.isRecording()) {
-							// Logging only when recording because otherwise
-							// it's a huge mess in LogCat
-							Log.v(TAG, "LocatoinChanged.");
-							mockLocationManager.addLocation(loc);
-							String displayLoc = app.buildLocationDisplayString(loc);
-							locationText.setText(locationPrefix + displayLoc);
-							// Log.v(TAG, "Location count: "
-							// + dbHandler.getLocationCount());
-						}
-					}
+                    @Override
+                    public void onLocationChanged(Location loc) {
+                        if (recordReplayManager.isRecording()) {
+                            // Logging only when recording because otherwise
+                            // it's a huge mess in LogCat
+                            Log.v(TAG, "LocatoinChanged.");
+                            mockLocationManager.addLocation(loc);
+                            String displayLoc = app.buildLocationDisplayString(loc);
+                            locationText.setText(locationPrefix + displayLoc);
+                            // Log.v(TAG, "Location count: "
+                            // + dbHandler.getLocationCount());
+                        }
+                    }
 
-					@Override
-					public void onProviderDisabled(String arg0) {
-						Log.v(TAG,
-								"Provider disabled. Alert user that we need this turned on to function.");
-					}
+                    @Override
+                    public void onProviderDisabled(String arg0) {
+                        Log.v(TAG,
+                                "Provider disabled. Alert user that we need this turned on to function.");
+                    }
 
-					@Override
-					public void onProviderEnabled(String arg0) {
-						Log.v(TAG, "Provider enabled. Woot, we can log things.");
-					}
+                    @Override
+                    public void onProviderEnabled(String arg0) {
+                        Log.v(TAG, "Provider enabled. Woot, we can log things.");
+                    }
 
-					@Override
-					public void onStatusChanged(String arg0, int arg1, Bundle arg2) {
-						Log.v(TAG, "onStatusChanged. Nothing to do here yet.");
-					}
+                    @Override
+                    public void onStatusChanged(String arg0, int arg1, Bundle arg2) {
+                        Log.v(TAG, "onStatusChanged. Nothing to do here yet.");
+                    }
 
-				});
-	}
+                });
+    }
 
-	@TargetApi(Build.VERSION_CODES.JELLY_BEAN_MR2)
-	private void initSensorManager() {
-		sensorManager = (SensorManager) this.getSystemService(Context.SENSOR_SERVICE);
-		for (Sensor s : sensorManager.getSensorList(Sensor.TYPE_ALL)) {
-			Log.v(TAG, "Registering listener for sensor: " + s.getName());
-			if (s.getType() != Sensor.TYPE_SIGNIFICANT_MOTION) {
-				sensorManager.registerListener(new SensorEventListener() {
+    @TargetApi(Build.VERSION_CODES.JELLY_BEAN_MR2)
+    private void initSensorManager() {
+        sensorManager = (SensorManager) this.getSystemService(Context.SENSOR_SERVICE);
+        for (Sensor s : sensorManager.getSensorList(Sensor.TYPE_ALL)) {
+            Log.v(TAG, "Registering listener for sensor: " + s.getName());
+            if (s.getType() != Sensor.TYPE_SIGNIFICANT_MOTION) {
+                sensorManager.registerListener(new SensorEventListener() {
 
-					@Override
-					public void onAccuracyChanged(Sensor sensor, int accuracy) {
-						if (recordReplayManager.isRecording()) {
-							Log.v(TAG, "Accuracy changed for sensor " + sensor.getName()
-									+ ". Accuracy: " + accuracy);
-						}
-					}
+                    @Override
+                    public void onAccuracyChanged(Sensor sensor, int accuracy) {
+                        // TODO: Because of the file system logging, syncing at
+                        // the db level is IMPOSSIBLE for a large number of
+                        // threads. 
+                        // if (recordReplayManager.isRecording()) {
+                        // Log.v(TAG, "Accuracy changed for sensor " +
+                        // sensor.getName()
+                        // + ". Accuracy: " + accuracy);
+                        // }
+                    }
 
-					@Override
-					public void onSensorChanged(SensorEvent event) {
-						if (recordReplayManager.isRecording()) {
-							Log.v(TAG, "Sensor " + event.sensor.getName() + " changed. Acc: "
-									+ event.accuracy + " timestamp: " + event.timestamp
-									+ " values: " + event.values);
-						}
-					}
+                    @Override
+                    public void onSensorChanged(SensorEvent event) {
+                        // if (recordReplayManager.isRecording()) {
+                        // Log.v(TAG, "Sensor " + event.sensor.getName() +
+                        // " changed. Acc: "
+                        // + event.accuracy + " timestamp: " + event.timestamp
+                        // + " values: " + event.values);
+                        // }
+                    }
 
-				}, s, SensorManager.SENSOR_DELAY_FASTEST);
-			} else if (s.getType() == Sensor.TYPE_SIGNIFICANT_MOTION) {
-				if (Build.VERSION.SDK_INT == Build.VERSION_CODES.JELLY_BEAN_MR2) {
-					sensorManager.requestTriggerSensor(new TriggerEventListener() {
+                }, s, SensorManager.SENSOR_DELAY_FASTEST);
+            } else if (s.getType() == Sensor.TYPE_SIGNIFICANT_MOTION) {
+                if (Build.VERSION.SDK_INT == Build.VERSION_CODES.JELLY_BEAN_MR2) {
+                    sensorManager.requestTriggerSensor(new TriggerEventListener() {
 
-						@Override
-						public void onTrigger(TriggerEvent event) {
-							if (recordReplayManager.isRecording()) {
-								Log.v(TAG, "onTrigger for sensor: " + event.sensor.getName()
-										+ " values: " + event.values);
-							}
-						}
-					}, s);
-				}
-			}
-		}
-	}
+                        @Override
+                        public void onTrigger(TriggerEvent event) {
+                            // if (recordReplayManager.isRecording()) {
+                            // Log.v(TAG, "onTrigger for sensor: " +
+                            // event.sensor.getName()
+                            // + " values: " + event.values);
+                            // }
+                        }
+                    }, s);
+                }
+            }
+        }
+    }
 
-	private void displayNewObjectiveDialog() {
-		NewObjectiveDialog dialog = new NewObjectiveDialog();
-		dialog.show(getFragmentManager(), TAG);
-	}
+    private void displayNewObjectiveDialog() {
+        NewObjectiveDialog dialog = new NewObjectiveDialog();
+        dialog.show(getFragmentManager(), TAG);
+    }
 
-	private void checkFirstTimeUse() {
-		// No existing objectives besides the mock, so we can assume it's the
-		// first time the user is using the app.
-		if (objectivesManager.getObjectives().size() == 1) {
-			NewObjectiveDialog dialog = new NewObjectiveDialog();
-			Bundle b = new Bundle();
-			b.putBoolean(NewObjectiveDialog.FIRST_KEY, true);
-			dialog.setArguments(b);
-			dialog.show(getFragmentManager(), TAG);
-		}
-	}
+    private void checkFirstTimeUse() {
+        // No existing objectives besides the mock, so we can assume it's the
+        // first time the user is using the app.
+        if (objectivesManager.getObjectives().size() == 1) {
+            NewObjectiveDialog dialog = new NewObjectiveDialog();
+            Bundle b = new Bundle();
+            b.putBoolean(NewObjectiveDialog.FIRST_KEY, true);
+            dialog.setArguments(b);
+            dialog.show(getFragmentManager(), TAG);
+        }
+    }
 
-	public void populateObjectivesSpinner() {
-		ArrayAdapter<String> objectivesSpinnerAdapter = new ArrayAdapter<String>(this,
-				android.R.layout.simple_spinner_item, objectivesManager.getObjectivesNames());
-		objectivesSpinnerAdapter
-				.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
-		objectivesSpinner.setAdapter(objectivesSpinnerAdapter);
-	}
+    public void populateObjectivesSpinner() {
+        ArrayAdapter<String> objectivesSpinnerAdapter = new ArrayAdapter<String>(this,
+                android.R.layout.simple_spinner_item, objectivesManager.getObjectivesNames());
+        objectivesSpinnerAdapter
+                .setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
+        objectivesSpinner.setAdapter(objectivesSpinnerAdapter);
+    }
 
-	public String getSelectedObjectiveName() {
-		return objectivesSpinner.getSelectedItem().toString();
-	}
+    public String getSelectedObjectiveName() {
+        return objectivesSpinner.getSelectedItem().toString();
+    }
 
-	public TextView getLocationText() {
-		return locationText;
-	}
+    public TextView getLocationText() {
+        return locationText;
+    }
 
-	public String getLocationPrefix() {
-		return locationPrefix;
-	}
+    public String getLocationPrefix() {
+        return locationPrefix;
+    }
 
-	public void updateLocationText(Location loc) {
-		String displayLoc = app.buildLocationDisplayString(loc);
-		locationText.setText(getLocationPrefix() + displayLoc);
-	}
+    public void updateLocationText(Location loc) {
+        String displayLoc = app.buildLocationDisplayString(loc);
+        locationText.setText(getLocationPrefix() + displayLoc);
+    }
 
-	public void updateLocationText(String s) {
-		locationText.setText(s);
-	}
+    public void updateLocationText(String s) {
+        locationText.setText(s);
+    }
 
-	public void resetLocationText() {
-		locationText.setText(this.getString(R.string.loc_placeholder));
-	}
+    public void resetLocationText() {
+        locationText.setText(this.getString(R.string.loc_placeholder));
+    }
 
-	public void toggleRecordingButton() {
-		if (recordReplayManager.isRecording()) {
-			recordButton.setText(R.string.stop_record);
-		} else {
-			recordButton.setText(R.string.record);
-		}
-	}
+    public void toggleRecordingButton() {
+        if (recordReplayManager.isRecording()) {
+            recordButton.setText(R.string.stop_record);
+        } else {
+            recordButton.setText(R.string.record);
+        }
+    }
 
-	private void prepareToRecord() {
-		toggleRecordingButton();
-		if (recordReplayManager.isRecording()) {
-			Location lastLoc = locationManager.getLastKnownLocation(LocationManager.GPS_PROVIDER);
-			if (lastLoc == null) {
-				updateLocationText("Waiting for location...");
-			} else {
-				mockLocationManager.addLocation(lastLoc);
-				updateLocationText(lastLoc);
-			}
-		} else {
-			resetLocationText();
-		}
-	}
+    private void prepareToRecord() {
+        toggleRecordingButton();
+        if (recordReplayManager.isRecording()) {
+            Location lastLoc = locationManager.getLastKnownLocation(LocationManager.GPS_PROVIDER);
+            if (lastLoc == null) {
+                updateLocationText("Waiting for location...");
+            } else {
+                mockLocationManager.addLocation(lastLoc);
+                updateLocationText(lastLoc);
+            }
+        } else {
+            resetLocationText();
+        }
+    }
 
-	public void recordButtonClicked(View v) {
-		Log.v(MainActivity.TAG, "Checking if objective (" + getSelectedObjectiveName()
-				+ ") already has a recording.");
-		if (objectivesManager.hasExistingRecording(getSelectedObjectiveName())) {
-			showOverwriteRecordingDialog();
-		} else {
-			recordReplayManager.toggleRecording();
-			prepareToRecord();
-		}
-	}
+    public void recordButtonClicked(View v) {
+        Log.v(MainActivity.TAG, "Checking if objective (" + getSelectedObjectiveName()
+                + ") already has a recording.");
+        if (objectivesManager.hasExistingRecording(getSelectedObjectiveName())) {
+            showOverwriteRecordingDialog();
+        } else {
+            recordReplayManager.toggleRecording();
+            prepareToRecord();
+        }
+    }
 
-	public void replayButtonClicked(View v) {
-		Button replayButton = (Button) v;
-		if (replayButton.getText().equals(this.getString(R.string.replay))) {
-			Log.v(TAG, "Stop replaying.");
-			replayButton.setText(R.string.stop_replaying);
-		} else {
-			Log.v(TAG, "Start replaying.");
-			replayButton.setText(R.string.replay);
-		}
-		recordReplayManager.toggleReplaying();
+    public void replayButtonClicked(View v) {
+        Button replayButton = (Button) v;
+        if (replayButton.getText().equals(this.getString(R.string.replay))) {
+            Log.v(TAG, "Stop replaying.");
+            replayButton.setText(R.string.stop_replaying);
+        } else {
+            Log.v(TAG, "Start replaying.");
+            replayButton.setText(R.string.replay);
+        }
+        recordReplayManager.toggleReplaying();
 
-	}
+    }
 
-	public void showOverwriteRecordingDialog() {
-		OverwriteRecordingDialog dialog = new OverwriteRecordingDialog();
-		Bundle b = new Bundle();
-		b.putString("objective", this.getSelectedObjectiveName());
-		dialog.setArguments(b);
-		dialog.show(this.getFragmentManager(), TAG);
-	}
+    public void showOverwriteRecordingDialog() {
+        OverwriteRecordingDialog dialog = new OverwriteRecordingDialog();
+        Bundle b = new Bundle();
+        b.putString("objective", this.getSelectedObjectiveName());
+        dialog.setArguments(b);
+        dialog.show(this.getFragmentManager(), TAG);
+    }
 
-	public void overwriteRecording() {
-		long recId = recordingManager.addRecording(new Recording());
-		Objective o = objectivesManager.getObjectiveByName(this.getSelectedObjectiveName());
-		o.setRecordingId(recId);
-		o.setLastModifiedDate(new Date());
-		objectivesManager.updateObjective(o);
-		recordingManager.setCurrentRecordingId(recId);
-		recordReplayManager.setIsRecording(true);
-		this.toggleRecordingButton();
-	}
+    public void overwriteRecording() {
+        long recId = recordingManager.addRecording(new Recording());
+        Objective o = objectivesManager.getObjectiveByName(this.getSelectedObjectiveName());
+        o.setRecordingId(recId);
+        o.setLastModifiedDate(new Date());
+        objectivesManager.updateObjective(o);
+        recordingManager.setCurrentRecordingId(recId);
+        recordReplayManager.setIsRecording(true);
+        this.toggleRecordingButton();
+    }
 
-	public void openTestMockerServiceActivity(View view) {
-		Intent intent = new Intent(this, TestMockerServiceActivity.class);
-		this.startActivity(intent);
-	}
+    public void openTestMockerServiceActivity(View view) {
+        Intent intent = new Intent(this, TestMockerServiceActivity.class);
+        this.startActivity(intent);
+    }
 
 }
