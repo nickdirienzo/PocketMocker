@@ -44,64 +44,28 @@ public abstract class ModelManager {
 
     protected String serialize(float[] a) {
         String s = "";
-        for (int i = 0; i < a.length; i++) {
-            if (i != a.length - 1) {
-                s += a[i] + ",";
-            } else {
-                s += a[i];
+        if (a != null) {
+            for (int i = 0; i < a.length; i++) {
+                if (i != a.length - 1) {
+                    s += a[i] + ",";
+                } else {
+                    s += a[i];
+                }
             }
         }
         return s;
     }
 
     protected void insert(ContentValues values, String tableName) {
-        new Thread(new InsertTask(values, tableName)).run();
-    }
-
-    protected class InsertTask implements Runnable {
-
-        private ContentValues values;
-        private String tableName;
-
-        public InsertTask(ContentValues values, String tableName) {
-            this.values = values;
-            this.tableName = tableName;
-        }
-
-        @Override
-        public void run() {
-            SQLiteDatabase db = manager.openDatabase();
-            db.insert(tableName, null, values);
-            manager.closeDatabase();
-        }
-
+        SQLiteDatabase db = manager.openDatabase();
+        db.insert(tableName, null, values);
+        manager.closeDatabase();
     }
 
     protected void update(String tableName, ContentValues values, String where, String[] whereArgs) {
-        new Thread(new UpdateTask(tableName, values, where, whereArgs)).run();
-    }
-
-    protected class UpdateTask implements Runnable {
-
-        private String tableName;
-        private ContentValues values;
-        private String where;
-        private String[] whereArgs;
-
-        public UpdateTask(String tableName, ContentValues values, String where, String[] whereArgs) {
-            this.tableName = tableName;
-            this.values = values;
-            this.where = where;
-            this.whereArgs = whereArgs;
-        }
-
-        @Override
-        public void run() {
-            SQLiteDatabase db = manager.openDatabase();
-            db.update(tableName, values, where, whereArgs);
-            manager.closeDatabase();
-        }
-
+        SQLiteDatabase db = manager.openDatabase();
+        db.update(tableName, values, where, whereArgs);
+        manager.closeDatabase();
     }
 
 }

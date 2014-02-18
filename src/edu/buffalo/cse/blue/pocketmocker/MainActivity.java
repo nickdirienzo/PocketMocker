@@ -72,6 +72,7 @@ public class MainActivity extends Activity {
         mockLocationManager = MockLocationManager.getInstance(getApplicationContext());
         recordReplayManager = RecordReplayManager.getInstance(getApplicationContext());
         mockSensorEventManager = MockSensorEventManager.getInstance(getApplicationContext());
+        Log.v(TAG, "MSEM Created.");
         recordReplayManager.setIsRecording(false);
         app.setIsRecording(false);
 
@@ -185,9 +186,9 @@ public class MainActivity extends Activity {
                     @Override
                     public void onAccuracyChanged(Sensor sensor, int accuracy) {
                         if (app.isRecording()) {
-                            Log.v(TAG, "Accuracy changed for sensor " +
-                                    sensor.getName()
-                                    + ". Accuracy: " + accuracy);
+//                            Log.v(TAG, "Accuracy changed for sensor " +
+//                                    sensor.getName()
+//                                    + ". Accuracy: " + accuracy);
                             mockSensorEventManager.addAccuracyChange(sensor, accuracy);
                             
                         }
@@ -196,10 +197,10 @@ public class MainActivity extends Activity {
                     @Override
                     public void onSensorChanged(SensorEvent event) {
                         if (app.isRecording()) {
-                            Log.v(TAG, "Sensor " + event.sensor.getName() +
-                                    " changed. Acc: "
-                                    + event.accuracy + " timestamp: " + event.timestamp
-                                    + " values: " + event.values);
+//                            Log.v(TAG, "Sensor " + event.sensor.getName() +
+//                                    " changed. Acc: "
+//                                    + event.accuracy + " timestamp: " + event.timestamp
+//                                    + " values: " + event.values);
                             mockSensorEventManager.addSensorEvent(event);
                         }
                     }
@@ -212,9 +213,9 @@ public class MainActivity extends Activity {
                         @Override
                         public void onTrigger(TriggerEvent event) {
                             if (app.isRecording()) {
-                                Log.v(TAG, "onTrigger for sensor: " +
-                                        event.sensor.getName()
-                                        + " values: " + event.values);
+//                                Log.v(TAG, "onTrigger for sensor: " +
+//                                        event.sensor.getName()
+//                                        + " values: " + event.values);
                                 mockSensorEventManager.addTrigerEvent(event);
                             }
                         }
