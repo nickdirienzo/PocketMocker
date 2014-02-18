@@ -1,9 +1,6 @@
 
 package edu.buffalo.cse.blue.pocketmocker;
 
-import java.util.Date;
-import java.util.List;
-
 import android.annotation.TargetApi;
 import android.app.Activity;
 import android.content.Context;
@@ -27,12 +24,17 @@ import android.widget.ArrayAdapter;
 import android.widget.Button;
 import android.widget.Spinner;
 import android.widget.TextView;
+
 import edu.buffalo.cse.blue.pocketmocker.models.MockLocationManager;
+import edu.buffalo.cse.blue.pocketmocker.models.MockSensorEventManager;
 import edu.buffalo.cse.blue.pocketmocker.models.Objective;
 import edu.buffalo.cse.blue.pocketmocker.models.ObjectivesManager;
 import edu.buffalo.cse.blue.pocketmocker.models.RecordReplayManager;
 import edu.buffalo.cse.blue.pocketmocker.models.Recording;
 import edu.buffalo.cse.blue.pocketmocker.models.RecordingManager;
+
+import java.util.Date;
+import java.util.List;
 
 public class MainActivity extends Activity {
 
@@ -51,6 +53,7 @@ public class MainActivity extends Activity {
     private RecordingManager recordingManager;
     private MockLocationManager mockLocationManager;
     private RecordReplayManager recordReplayManager;
+    private MockSensorEventManager mockSensorEventManager;
 
     private LocationManager locationManager;
     // We use lastLocation as the location to add when we have other updates
@@ -68,6 +71,7 @@ public class MainActivity extends Activity {
         recordingManager = RecordingManager.getInstance(getApplicationContext());
         mockLocationManager = MockLocationManager.getInstance(getApplicationContext());
         recordReplayManager = RecordReplayManager.getInstance(getApplicationContext());
+        mockSensorEventManager = MockSensorEventManager.getInstance(getApplicationContext());
         recordReplayManager.setIsRecording(false);
         app.setIsRecording(false);
 
@@ -180,13 +184,12 @@ public class MainActivity extends Activity {
 
                     @Override
                     public void onAccuracyChanged(Sensor sensor, int accuracy) {
-                        // TODO: Because of the file system logging, syncing at
-                        // the db level is IMPOSSIBLE for a large number of
-                        // threads.
                         if (app.isRecording()) {
                             Log.v(TAG, "Accuracy changed for sensor " +
                                     sensor.getName()
                                     + ". Accuracy: " + accuracy);
+                            mockSensorEventManager.addAccuracyChange(sensor, accuracy);
+                            
                         }
                     }
 
@@ -197,6 +200,7 @@ public class MainActivity extends Activity {
                                     " changed. Acc: "
                                     + event.accuracy + " timestamp: " + event.timestamp
                                     + " values: " + event.values);
+                            mockSensorEventManager.addSensorEvent(event);
                         }
                     }
 
@@ -211,8 +215,9 @@ public class MainActivity extends Activity {
                                 Log.v(TAG, "onTrigger for sensor: " +
                                         event.sensor.getName()
                                         + " values: " + event.values);
+                                mockSensorEventManager.addTrigerEvent(event);
                             }
-                        }   
+                        }
                     }, s);
                 }
             }

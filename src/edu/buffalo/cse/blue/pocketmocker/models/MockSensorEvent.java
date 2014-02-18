@@ -1,16 +1,22 @@
 
 package edu.buffalo.cse.blue.pocketmocker.models;
 
-import java.util.Date;
-
+import android.annotation.SuppressLint;
+import android.annotation.TargetApi;
+import android.hardware.Sensor;
 import android.hardware.SensorEvent;
+import android.hardware.TriggerEvent;
+import android.os.Build;
 import android.os.Bundle;
+
+import java.util.Date;
 
 public class MockSensorEvent extends TimestampModel {
 
     private long id;
     private Date creationDate;
     private long recordingId;
+    private String eventType;
 
     // SensorEvent Fields
     // We can recreate the SensorEvent object in the platform, so we can just
@@ -28,7 +34,7 @@ public class MockSensorEvent extends TimestampModel {
     private float[] eventValues;
 
     // SQL things
-    private static final String TABLE_NAME = "sensor_events";
+    public static final String TABLE_NAME = "sensor_events";
     private static int index = 0;
     public static final String COL_ID = "_id";
     public static final int COL_ID_INDEX = index++;
@@ -46,26 +52,51 @@ public class MockSensorEvent extends TimestampModel {
     public static final int COL_EVENT_TIMESTAMP_INDEX = index++;
     public static final String COL_EVENT_VALUES = "event_values";
     public static final int COL_EVENT_VALUES_INDEX = index++;
-
-    public static final String COL_RECORDING_FK = OPEN_PAREN + COL_RECORDING + CLOSE_PAREN +
+    public static final String COL_EVENT_TYPE = "type";
+    public static final int COL_EVENT_TYPE_INDEX = index++;
+    
+    public static final String COL_RECORDING_FK = FK + OPEN_PAREN + COL_RECORDING + CLOSE_PAREN +
             REFS + Recording.TABLE_NAME + OPEN_PAREN + Recording.COL_ID + CLOSE_PAREN;
     public static String CREATE_TABLE_CMD = CREATE_TABLE + TABLE_NAME + OPEN_PAREN + COL_ID
             + INT + PK + COMMA + COL_CREATION_DATE + TEXT + COMMA + COL_RECORDING + INT + COMMA
             + COL_EVENT_ACCURACY + INT + COMMA + COL_EVENT_SENSOR + INT + COMMA + COL_EVENT_VALUES
-            + TEXT + CLOSE_PAREN;
+            + TEXT + COMMA + COL_EVENT_TYPE + TEXT + COMMA + COL_RECORDING_FK + CLOSE_PAREN;
     public static final String DROP_TABLE_CMD = dropTable(TABLE_NAME);
 
-    public MockSensorEvent() {
+    public MockSensorEvent(String eventType) {
         creationDate = new Date();
+        this.eventType = eventType;
     }
     
-    public MockSensorEvent(SensorEvent event, long recId) {
+    public MockSensorEvent(SensorEvent event, long recId, String eventType) {
     	eventAccuracy = event.accuracy;
     	eventSensorType = event.sensor.getType();
     	eventTimestamp = event.timestamp;
     	eventValues = event.values;
     	creationDate = new Date();
     	recordingId = recId;
+    	this.eventType = eventType;
+    }
+    
+    @TargetApi(Build.VERSION_CODES.JELLY_BEAN_MR2)
+    public MockSensorEvent(TriggerEvent event, long recId, String eventType) {
+        eventAccuracy = -1;
+        eventSensorType = event.sensor.getType();
+        eventTimestamp = event.timestamp;
+        eventValues = event.values;
+        creationDate = new Date();
+        recordingId = recId;
+        this.eventType = eventType;
+    }
+    
+    public MockSensorEvent(Sensor sensor, int accuracy, long recId, String eventType) {
+        eventAccuracy = accuracy;
+        eventSensorType = sensor.getType();
+        eventTimestamp = System.currentTimeMillis();
+        eventValues = null;
+        creationDate = new Date();
+        recordingId = recId;
+        this.eventType = eventType;
     }
 
     public long getId() {
@@ -130,6 +161,14 @@ public class MockSensorEvent extends TimestampModel {
 
     public void setEventValues(float[] eventValues) {
         this.eventValues = eventValues;
+    }
+
+    public String getEventType() {
+        return eventType;
+    }
+
+    public void setEventType(String eventType) {
+        this.eventType = eventType;
     }
 
     /**
