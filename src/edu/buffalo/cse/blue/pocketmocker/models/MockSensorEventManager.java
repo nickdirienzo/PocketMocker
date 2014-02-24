@@ -11,15 +11,10 @@ import android.util.Log;
 import edu.buffalo.cse.blue.pocketmocker.MainActivity;
 import edu.buffalo.cse.blue.pocketmocker.PocketMockerApplication;
 
-import java.util.concurrent.BlockingQueue;
-import java.util.concurrent.LinkedBlockingQueue;
-
 public class MockSensorEventManager extends ModelManager {
 
     private static MockSensorEventManager sInstance;
     private PocketMockerApplication app;
-
-    private BlockingQueue<ContentValues> queue;
 
     public static MockSensorEventManager getInstance(Context c) {
         if (sInstance == null) {
@@ -31,8 +26,6 @@ public class MockSensorEventManager extends ModelManager {
     protected MockSensorEventManager(Context c) {
         super(c);
         app = (PocketMockerApplication) c.getApplicationContext();
-//        queue = new LinkedBlockingQueue<ContentValues>();
-//        new Thread(new MockSensorEventWriter()).start();
     }
 
     private void insertMockSensorEvent(MockSensorEvent mockEvent) {
@@ -46,11 +39,6 @@ public class MockSensorEventManager extends ModelManager {
         values.put(MockSensorEvent.COL_EVENT_TYPE, mockEvent.getEventType());
         insert(values, MockSensorEvent.TABLE_NAME);
         Log.v(MainActivity.TAG, "Inserted " + values.toString() + " into db.");
-//        try {
-//            queue.put(values);
-//        } catch (InterruptedException e) {
-//            e.printStackTrace();
-//        }
     }
 
     public void addSensorEvent(SensorEvent event) {
@@ -68,27 +56,6 @@ public class MockSensorEventManager extends ModelManager {
     public void addTrigerEvent(TriggerEvent event) {
         MockSensorEvent m = new MockSensorEvent(event, app.getCurrentRecordingId(), "onTrigger");
         insertMockSensorEvent(m);
-    }
-
-    private class MockSensorEventWriter implements Runnable {
-
-        @Override
-        public void run() {
-            while (true) {
-                try {
-                    // Sleeps until there is an item in the queue
-                    Log.v("PM_MSEM", "Waiting for value...");
-                    ContentValues values = queue.take();
-                    Log.v("PM_MSEM", "Value found!");
-                    insert(values, MockSensorEvent.TABLE_NAME);
-                    Log.v("PM_MSEM", "Inserted values: " + values.toString());
-                    Thread.sleep(100);
-                } catch (InterruptedException e) {
-                    e.printStackTrace();
-                }
-            }
-        }
-
     }
 
 }
