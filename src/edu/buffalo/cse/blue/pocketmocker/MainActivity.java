@@ -55,6 +55,8 @@ public class MainActivity extends Activity {
     private MockSensorEventManager mockSensorEventManager;
 
     private LocationManager locationManager;
+    private HandlerThread locationHandlerThread;
+    private LocationListener locationListener;
     // We use lastLocation as the location to add when we have other updates
     // that don't receive a Location as a parameter in the callback
     private Location lastLocation;
@@ -118,7 +120,18 @@ public class MainActivity extends Activity {
         recordButton = (Button) this.findViewById(R.id.record_button);
 
         initLocationManager();
-        // Sensor listening things
+        initSensorManager();
+
+    }
+
+    @Override
+    public boolean onCreateOptionsMenu(Menu menu) {
+        // Inflate the menu; this adds items to the action bar if it is present.
+        getMenuInflater().inflate(R.menu.main, menu);
+        return true;
+    }
+
+    private void initSensorManager() {
         // Starts when the recording process begins
         sensorManager = (SensorManager) getSystemService(Context.SENSOR_SERVICE);
         sensorHandlerThread = new HandlerThread("SensorHandlerThread");
@@ -140,68 +153,67 @@ public class MainActivity extends Activity {
         };
     }
 
-    @Override
-    public boolean onCreateOptionsMenu(Menu menu) {
-        // Inflate the menu; this adds items to the action bar if it is present.
-        getMenuInflater().inflate(R.menu.main, menu);
-        return true;
-    }
-
     private void startSensorListener() {
+        Log.v(TAG, "Listening for sensor updates.");
         sensorManager.registerListener(sensorEventListener,
                 sensorManager.getDefaultSensor(Sensor.TYPE_ACCELEROMETER),
                 SensorManager.SENSOR_DELAY_GAME, new Handler(sensorHandlerThread.getLooper()));
     }
 
     private void stopSensorListener() {
+        Log.v(TAG, "Stopping listening for sensor updates.");
         sensorManager.unregisterListener(sensorEventListener);
     }
 
     private void initLocationManager() {
         locationManager = (LocationManager) this.getSystemService(Context.LOCATION_SERVICE);
-        Log.v(TAG, "Requesting location updates...");
-        locationManager.requestLocationUpdates(LocationManager.GPS_PROVIDER, 0, 0,
-                new LocationListener() {
+        locationHandlerThread = new HandlerThread("LocationHandlerThread");
+        locationHandlerThread.start();
+        locationListener = new LocationListener() {
 
-                    @Override
-                    public void onLocationChanged(Location loc) {
-                        if (app.isRecording()) {
-                            // Logging only when recording because otherwise
-                            // it's a huge mess in LogCat
-                            Log.v(TAG, "LocatoinChanged.");
-                            lastLocation = loc;
-                            mockLocationManager.addLocation(loc, "onLocationChanged", -1);
-                            String displayLoc = app.buildLocationDisplayString(loc);
-                            locationText.setText(locationPrefix + displayLoc);
-                            // Log.v(TAG, "Location count: "
-                            // + dbHandler.getLocationCount());
-                        }
-                    }
+            @Override
+            public void onLocationChanged(Location loc) {
+                lastLocation = loc;
+                mockLocationManager.addLocation(loc, "onLocationChanged", -1);
+                String displayLoc = app.buildLocationDisplayString(loc);
+                locationText.setText(locationPrefix + displayLoc);
+            }
 
-                    @Override
-                    public void onProviderDisabled(String provider) {
-                        Log.v(TAG,
-                                "Provider disabled. Alert user that we need this turned on to function.");
-                        lastLocation.setProvider(provider);
-                        mockLocationManager.addLocation(lastLocation, "onProviderDisabled", -1);
-                    }
+            @Override
+            public void onProviderDisabled(String provider) {
+                Log.v(TAG,
+                        "Provider disabled. Alert user that we need this turned on to function.");
+                lastLocation.setProvider(provider);
+                mockLocationManager.addLocation(lastLocation, "onProviderDisabled", -1);
+            }
 
-                    @Override
-                    public void onProviderEnabled(String provider) {
-                        Log.v(TAG, "Provider enabled. Woot, we can log things.");
-                        lastLocation.setProvider(provider);
-                        mockLocationManager.addLocation(lastLocation, "onProviderEnabled", -1);
-                    }
+            @Override
+            public void onProviderEnabled(String provider) {
+                Log.v(TAG, "Provider enabled. Woot, we can log things.");
+                lastLocation.setProvider(provider);
+                mockLocationManager.addLocation(lastLocation, "onProviderEnabled", -1);
+            }
 
-                    @Override
-                    public void onStatusChanged(String provider, int status, Bundle extras) {
-                        Log.v(TAG, "onStatusChanged. Nothing to do here yet.");
-                        lastLocation.setExtras(extras);
-                        lastLocation.setProvider(provider);
-                        mockLocationManager.addLocation(lastLocation, "onStatusChanged", status);
-                    }
+            @Override
+            public void onStatusChanged(String provider, int status, Bundle extras) {
+                Log.v(TAG, "onStatusChanged. Nothing to do here yet.");
+                lastLocation.setExtras(extras);
+                lastLocation.setProvider(provider);
+                mockLocationManager.addLocation(lastLocation, "onStatusChanged", status);
+            }
 
-                });
+        };
+    }
+
+    private void startLocationListener() {
+        Log.v(TAG, "Listening for location updates.");
+        locationManager.requestSingleUpdate(LocationManager.GPS_PROVIDER, locationListener,
+                locationHandlerThread.getLooper());
+    }
+    
+    private void stopLocationListener() {
+        Log.v(TAG, "Stopping listening for location updates.");
+        locationManager.removeUpdates(locationListener);
     }
 
     private void displayNewObjectiveDialog() {
@@ -259,10 +271,12 @@ public class MainActivity extends Activity {
             recordButton.setText(R.string.stop_record);
             // LOLWAT
             startSensorListener();
+            startLocationListener();
         } else {
             recordButton.setText(R.string.record);
             // LOLWAT
             stopSensorListener();
+            stopLocationListener();
         }
         Log.v(TAG, "Recording: " + app.isRecording());
     }
