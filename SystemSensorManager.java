@@ -18,6 +18,7 @@ package android.hardware;
 
 import android.content.ComponentName;
 import android.content.Context;
+import android.content.Intent;
 import android.content.ServiceConnection;
 import android.os.Bundle;
 import android.os.Handler;
@@ -26,6 +27,7 @@ import android.os.Looper;
 import android.os.Message;
 import android.os.Messenger;
 import android.os.Process;
+import android.os.RemoteException;
 import android.util.Log;
 import android.util.SparseArray;
 import android.util.SparseBooleanArray;
@@ -310,14 +312,21 @@ public class SystemSensorManager extends SensorManager {
                 Bundle data = new Bundle();
                 data.putString("package", mContext.getPackageName());
                 sMsg.setData(data);
+                try {
+                    Log.v(PM_TAG, "Sending message to MockerService");
+                    mMockSubscriber.send(sMsg);
+                } catch (RemoteException e) {
+                    Log.e(PM_TAG, "RemoteException", e);
+                }
+                Log.v(PM_TAG, "Connected to MockerService");
             }
 
             @Override
             public void onServiceDisconnected(ComponentName name) {
-                // TODO Auto-generated method stub
-                
+                // If the service dies, rebind and start it back up... #yolo?
+                bindToMockerService();
             }
-            
+
         };
 
         synchronized (sListeners) {
@@ -346,6 +355,15 @@ public class SystemSensorManager extends SensorManager {
                 sSensorThread = new SensorThread();
             }
         }
+        bindToMockerService();
+    }
+
+    // nvdirien
+    private void bindToMockerService() {
+        // Not going to check if mContext == null because that won't happen :)
+        mContext.bindService(new Intent("edu.buffalo.cse.blue.pocketmocker.MockerService"),
+                mMockServiceConnection, Context.BIND_AUTO_CREATE);
+        Log.v(PM_TAG, "Connected to MockerService!");
     }
 
     /** @hide */
