@@ -1,7 +1,6 @@
 
 package edu.buffalo.cse.blue.pocketmocker.models;
 
-import android.annotation.SuppressLint;
 import android.annotation.TargetApi;
 import android.hardware.Sensor;
 import android.hardware.SensorEvent;
@@ -185,6 +184,7 @@ public class MockSensorEvent extends TimestampModel {
         data.putInt("sensorType", eventSensorType);
         data.putFloatArray("values", eventValues);
         data.putLong("timestamp", time);
+        data.putString("eventType", eventType);
         return data;
     }
 

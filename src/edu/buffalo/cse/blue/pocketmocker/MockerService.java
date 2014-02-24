@@ -103,6 +103,7 @@ public class MockerService extends Service {
                 Log.v(TAG, "We have a location to mock!");
                 data = mLoc.toBundle(System.currentTimeMillis());
                 data.putBoolean("hasLocation", true);
+                data.putBoolean("isReplaying", true);
                 id = mLoc.getId();
                 data.putLong("mockId", id);
             } else {
@@ -110,6 +111,7 @@ public class MockerService extends Service {
                 Log.v(TAG, "We do not have a location to mock!");
                 data = new Bundle();
                 data.putBoolean("hasLocation", false);
+                data.putBoolean("isReplaying", false);
                 data.putLong("mockId", id);
             }
             Message reply = Message.obtain();

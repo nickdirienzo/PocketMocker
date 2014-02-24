@@ -16,7 +16,7 @@ import android.database.sqlite.SQLiteOpenHelper;
  */
 public class Database extends SQLiteOpenHelper {
 
-	private static final int DB_VERSION = 7;
+	private static final int DB_VERSION = 1;
 	private static final String DB_NAME = "PocketMocker.db";
 
 	private static Database sInstance;
