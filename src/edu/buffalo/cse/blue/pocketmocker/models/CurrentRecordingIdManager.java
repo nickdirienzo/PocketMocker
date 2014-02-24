@@ -29,7 +29,7 @@ public class CurrentRecordingIdManager extends ModelManager {
 	public static final String COL_TIMESTAMP = "timestamp";
 	public static final int COL_TIMESTAMP_INDEX = index++;
 	public static final String CREATE_TABLE_CMD = Model.CREATE_TABLE + TABLE_NAME
-			+ Model.OPEN_PAREN + COL_REC_ID + Model.INT + Model.PK + Model.COMMA + COL_TIMESTAMP
+			+ Model.OPEN_PAREN + COL_REC_ID + Model.INT + Model.COMMA + COL_TIMESTAMP
 			+ Model.INT + Model.CLOSE_PAREN;
 	public static final String DROP_TABLE_CMD = Model.dropTable(TABLE_NAME);
 

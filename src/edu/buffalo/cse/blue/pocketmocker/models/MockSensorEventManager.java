@@ -8,6 +8,7 @@ import android.hardware.SensorEvent;
 import android.hardware.TriggerEvent;
 import android.util.Log;
 
+import edu.buffalo.cse.blue.pocketmocker.MainActivity;
 import edu.buffalo.cse.blue.pocketmocker.PocketMockerApplication;
 
 import java.util.concurrent.BlockingQueue;
@@ -30,8 +31,8 @@ public class MockSensorEventManager extends ModelManager {
     protected MockSensorEventManager(Context c) {
         super(c);
         app = (PocketMockerApplication) c.getApplicationContext();
-        queue = new LinkedBlockingQueue<ContentValues>();
-        new Thread(new MockSensorEventWriter()).start();
+//        queue = new LinkedBlockingQueue<ContentValues>();
+//        new Thread(new MockSensorEventWriter()).start();
     }
 
     private void insertMockSensorEvent(MockSensorEvent mockEvent) {
@@ -43,11 +44,13 @@ public class MockSensorEventManager extends ModelManager {
         values.put(MockSensorEvent.COL_EVENT_TIMESTAMP, mockEvent.getEventTimestamp());
         values.put(MockSensorEvent.COL_EVENT_VALUES, this.serialize(mockEvent.getEventValues()));
         values.put(MockSensorEvent.COL_EVENT_TYPE, mockEvent.getEventType());
-        try {
-            queue.put(values);
-        } catch (InterruptedException e) {
-            e.printStackTrace();
-        }
+        insert(values, MockSensorEvent.TABLE_NAME);
+        Log.v(MainActivity.TAG, "Inserted " + values.toString() + " into db.");
+//        try {
+//            queue.put(values);
+//        } catch (InterruptedException e) {
+//            e.printStackTrace();
+//        }
     }
 
     public void addSensorEvent(SensorEvent event) {

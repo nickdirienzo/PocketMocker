@@ -54,12 +54,13 @@ public class MockSensorEvent extends TimestampModel {
     public static final int COL_EVENT_VALUES_INDEX = index++;
     public static final String COL_EVENT_TYPE = "type";
     public static final int COL_EVENT_TYPE_INDEX = index++;
-    
+
     public static final String COL_RECORDING_FK = FK + OPEN_PAREN + COL_RECORDING + CLOSE_PAREN +
             REFS + Recording.TABLE_NAME + OPEN_PAREN + Recording.COL_ID + CLOSE_PAREN;
     public static String CREATE_TABLE_CMD = CREATE_TABLE + TABLE_NAME + OPEN_PAREN + COL_ID
             + INT + PK + COMMA + COL_CREATION_DATE + TEXT + COMMA + COL_RECORDING + INT + COMMA
-            + COL_EVENT_ACCURACY + INT + COMMA + COL_EVENT_SENSOR + INT + COMMA + COL_EVENT_VALUES
+            + COL_EVENT_ACCURACY + INT + COMMA + COL_EVENT_SENSOR + INT + COMMA
+            + COL_EVENT_TIMESTAMP + INT + COMMA + COL_EVENT_VALUES
             + TEXT + COMMA + COL_EVENT_TYPE + TEXT + COMMA + COL_RECORDING_FK + CLOSE_PAREN;
     public static final String DROP_TABLE_CMD = dropTable(TABLE_NAME);
 
@@ -67,17 +68,17 @@ public class MockSensorEvent extends TimestampModel {
         creationDate = new Date();
         this.eventType = eventType;
     }
-    
+
     public MockSensorEvent(SensorEvent event, long recId, String eventType) {
-    	eventAccuracy = event.accuracy;
-    	eventSensorType = event.sensor.getType();
-    	eventTimestamp = event.timestamp;
-    	eventValues = event.values;
-    	creationDate = new Date();
-    	recordingId = recId;
-    	this.eventType = eventType;
+        eventAccuracy = event.accuracy;
+        eventSensorType = event.sensor.getType();
+        eventTimestamp = event.timestamp;
+        eventValues = event.values;
+        creationDate = new Date();
+        recordingId = recId;
+        this.eventType = eventType;
     }
-    
+
     @TargetApi(Build.VERSION_CODES.JELLY_BEAN_MR2)
     public MockSensorEvent(TriggerEvent event, long recId, String eventType) {
         eventAccuracy = -1;
@@ -88,7 +89,7 @@ public class MockSensorEvent extends TimestampModel {
         recordingId = recId;
         this.eventType = eventType;
     }
-    
+
     public MockSensorEvent(Sensor sensor, int accuracy, long recId, String eventType) {
         eventAccuracy = accuracy;
         eventSensorType = sensor.getType();

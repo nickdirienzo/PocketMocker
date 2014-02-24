@@ -1,7 +1,6 @@
 
 package edu.buffalo.cse.blue.pocketmocker;
 
-import android.annotation.TargetApi;
 import android.app.Activity;
 import android.content.Context;
 import android.content.Intent;
@@ -9,13 +8,12 @@ import android.hardware.Sensor;
 import android.hardware.SensorEvent;
 import android.hardware.SensorEventListener;
 import android.hardware.SensorManager;
-import android.hardware.TriggerEvent;
-import android.hardware.TriggerEventListener;
 import android.location.Location;
 import android.location.LocationListener;
 import android.location.LocationManager;
-import android.os.Build;
 import android.os.Bundle;
+import android.os.Handler;
+import android.os.HandlerThread;
 import android.util.Log;
 import android.view.Menu;
 import android.view.View;
@@ -33,6 +31,7 @@ import edu.buffalo.cse.blue.pocketmocker.models.RecordReplayManager;
 import edu.buffalo.cse.blue.pocketmocker.models.Recording;
 import edu.buffalo.cse.blue.pocketmocker.models.RecordingManager;
 
+import java.util.Arrays;
 import java.util.Date;
 import java.util.List;
 
@@ -59,7 +58,10 @@ public class MainActivity extends Activity {
     // We use lastLocation as the location to add when we have other updates
     // that don't receive a Location as a parameter in the callback
     private Location lastLocation;
+
     private SensorManager sensorManager;
+    private HandlerThread sensorHandlerThread;
+    private SensorEventListener sensorEventListener;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -72,7 +74,6 @@ public class MainActivity extends Activity {
         mockLocationManager = MockLocationManager.getInstance(getApplicationContext());
         recordReplayManager = RecordReplayManager.getInstance(getApplicationContext());
         mockSensorEventManager = MockSensorEventManager.getInstance(getApplicationContext());
-        Log.v(TAG, "MSEM Created.");
         recordReplayManager.setIsRecording(false);
         app.setIsRecording(false);
 
@@ -117,8 +118,26 @@ public class MainActivity extends Activity {
         recordButton = (Button) this.findViewById(R.id.record_button);
 
         initLocationManager();
-        initSensorManager();
+        // Sensor listening things
+        // Starts when the recording process begins
+        sensorManager = (SensorManager) getSystemService(Context.SENSOR_SERVICE);
+        sensorHandlerThread = new HandlerThread("SensorHandlerThread");
+        sensorHandlerThread.start();
+        sensorEventListener = new SensorEventListener() {
 
+            @Override
+            public void onAccuracyChanged(Sensor sensor, int accuracy) {
+                Log.v(TAG, "Accuracy change: " + accuracy);
+                mockSensorEventManager.addAccuracyChange(sensor, accuracy);
+            }
+
+            @Override
+            public void onSensorChanged(SensorEvent event) {
+                Log.v(TAG, "Sensor changed: " + Arrays.toString(event.values));
+                mockSensorEventManager.addSensorEvent(event);
+            }
+
+        };
     }
 
     @Override
@@ -126,6 +145,16 @@ public class MainActivity extends Activity {
         // Inflate the menu; this adds items to the action bar if it is present.
         getMenuInflater().inflate(R.menu.main, menu);
         return true;
+    }
+
+    private void startSensorListener() {
+        sensorManager.registerListener(sensorEventListener,
+                sensorManager.getDefaultSensor(Sensor.TYPE_ACCELEROMETER),
+                SensorManager.SENSOR_DELAY_GAME, new Handler(sensorHandlerThread.getLooper()));
+    }
+
+    private void stopSensorListener() {
+        sensorManager.unregisterListener(sensorEventListener);
     }
 
     private void initLocationManager() {
@@ -173,56 +202,6 @@ public class MainActivity extends Activity {
                     }
 
                 });
-    }
-
-    @TargetApi(Build.VERSION_CODES.JELLY_BEAN_MR2)
-    private void initSensorManager() {
-        sensorManager = (SensorManager) this.getSystemService(Context.SENSOR_SERVICE);
-        for (Sensor s : sensorManager.getSensorList(Sensor.TYPE_ALL)) {
-            Log.v(TAG, "Registering listener for sensor: " + s.getName());
-            if (s.getType() != Sensor.TYPE_SIGNIFICANT_MOTION) {
-                sensorManager.registerListener(new SensorEventListener() {
-
-                    @Override
-                    public void onAccuracyChanged(Sensor sensor, int accuracy) {
-                        if (app.isRecording()) {
-//                            Log.v(TAG, "Accuracy changed for sensor " +
-//                                    sensor.getName()
-//                                    + ". Accuracy: " + accuracy);
-                            mockSensorEventManager.addAccuracyChange(sensor, accuracy);
-                            
-                        }
-                    }
-
-                    @Override
-                    public void onSensorChanged(SensorEvent event) {
-                        if (app.isRecording()) {
-//                            Log.v(TAG, "Sensor " + event.sensor.getName() +
-//                                    " changed. Acc: "
-//                                    + event.accuracy + " timestamp: " + event.timestamp
-//                                    + " values: " + event.values);
-                            mockSensorEventManager.addSensorEvent(event);
-                        }
-                    }
-
-                }, s, SensorManager.SENSOR_DELAY_FASTEST);
-            } else if (s.getType() == Sensor.TYPE_SIGNIFICANT_MOTION) {
-                if (Build.VERSION.SDK_INT == Build.VERSION_CODES.JELLY_BEAN_MR2) {
-                    sensorManager.requestTriggerSensor(new TriggerEventListener() {
-
-                        @Override
-                        public void onTrigger(TriggerEvent event) {
-                            if (app.isRecording()) {
-//                                Log.v(TAG, "onTrigger for sensor: " +
-//                                        event.sensor.getName()
-//                                        + " values: " + event.values);
-                                mockSensorEventManager.addTrigerEvent(event);
-                            }
-                        }
-                    }, s);
-                }
-            }
-        }
     }
 
     private void displayNewObjectiveDialog() {
@@ -278,8 +257,12 @@ public class MainActivity extends Activity {
     public void toggleRecordingButton() {
         if (app.isRecording()) {
             recordButton.setText(R.string.stop_record);
+            // LOLWAT
+            startSensorListener();
         } else {
             recordButton.setText(R.string.record);
+            // LOLWAT
+            stopSensorListener();
         }
         Log.v(TAG, "Recording: " + app.isRecording());
     }

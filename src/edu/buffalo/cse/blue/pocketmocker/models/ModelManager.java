@@ -5,6 +5,9 @@ import android.content.ContentValues;
 import android.content.Context;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
+import android.util.Log;
+
+import edu.buffalo.cse.blue.pocketmocker.MainActivity;
 
 public abstract class ModelManager {
 
@@ -58,7 +61,8 @@ public abstract class ModelManager {
 
     protected void insert(ContentValues values, String tableName) {
         SQLiteDatabase db = manager.openDatabase();
-        db.insert(tableName, null, values);
+        long id = db.insertOrThrow(tableName, null, values);
+        Log.v(MainActivity.TAG, "Inserted thing into " + tableName + " : " + id);
         manager.closeDatabase();
     }
 
