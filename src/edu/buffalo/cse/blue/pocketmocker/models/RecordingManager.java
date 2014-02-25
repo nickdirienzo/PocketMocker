@@ -66,4 +66,8 @@ public class RecordingManager extends ModelManager {
 				+ id + ".");
 		return mockLocations.size() > 0;
 	}
+	
+	public boolean hasSensorEvents(long id) {
+	    return MockSensorEventManager.getInstance(app).getMockSensorEventsForRecording(id).size() > 0;
+	}
 }

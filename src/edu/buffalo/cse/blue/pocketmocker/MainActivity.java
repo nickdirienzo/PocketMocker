@@ -131,6 +131,18 @@ public class MainActivity extends Activity {
         return true;
     }
 
+    private void updateSensorText(final String s) {
+        findViewById(R.id.sensorText).post(new Runnable() {
+
+            @Override
+            public void run() {
+                TextView t = (TextView) findViewById(R.id.sensorText);
+                t.setText(s);
+            }
+
+        });
+    }
+
     private void initSensorManager() {
         // Starts when the recording process begins
         sensorManager = (SensorManager) getSystemService(Context.SENSOR_SERVICE);
@@ -140,16 +152,30 @@ public class MainActivity extends Activity {
 
             @Override
             public void onAccuracyChanged(Sensor sensor, int accuracy) {
-                Log.v(TAG, "Accuracy change: " + accuracy);
-                mockSensorEventManager.addAccuracyChange(sensor, accuracy);
+                // Don't record sensor data until we have location data (for
+                // now)
+                if (lastLocation != null) {
+                    Log.v(TAG, "Accuracy change: " + accuracy);
+                    mockSensorEventManager.addAccuracyChange(sensor, accuracy);
+                    updateSensorText("Accuracy changed!");
+                } else {
+                    updateSensorText("Waiting for location updates.");
+                }
             }
 
             @Override
             public void onSensorChanged(SensorEvent event) {
-                Log.v(TAG, "Sensor changed: " + Arrays.toString(event.values));
-                mockSensorEventManager.addSensorEvent(event);
-            }
+                // Don't record sensor data until we have location data (for
+                // now)
+                if (lastLocation != null) {
+                    Log.v(TAG, "Sensor changed: " + Arrays.toString(event.values));
+                    mockSensorEventManager.addSensorEvent(event);
+                    updateSensorText("Recording sensorChanged...");
 
+                } else {
+                    updateSensorText("Waiting for location updates.");
+                }
+            }
         };
     }
 
@@ -162,6 +188,7 @@ public class MainActivity extends Activity {
 
     private void stopSensorListener() {
         Log.v(TAG, "Stopping listening for sensor updates.");
+        updateSensorText("Not listenting for sensor updates.");
         sensorManager.unregisterListener(sensorEventListener);
     }
 
@@ -175,8 +202,16 @@ public class MainActivity extends Activity {
             public void onLocationChanged(Location loc) {
                 lastLocation = loc;
                 mockLocationManager.addLocation(loc, "onLocationChanged", -1);
-                String displayLoc = app.buildLocationDisplayString(loc);
-                locationText.setText(locationPrefix + displayLoc);
+                final String displayLoc = app.buildLocationDisplayString(loc);
+                locationText.post(new Runnable() {
+
+                    @Override
+                    public void run() {
+                        locationText.setText(locationPrefix + displayLoc);
+                    }
+
+                });
+
             }
 
             @Override
@@ -210,7 +245,7 @@ public class MainActivity extends Activity {
         locationManager.requestSingleUpdate(LocationManager.GPS_PROVIDER, locationListener,
                 locationHandlerThread.getLooper());
     }
-    
+
     private void stopLocationListener() {
         Log.v(TAG, "Stopping listening for location updates.");
         locationManager.removeUpdates(locationListener);
@@ -278,6 +313,7 @@ public class MainActivity extends Activity {
             stopSensorListener();
             stopLocationListener();
         }
+        lastLocation = null;
         Log.v(TAG, "Recording: " + app.isRecording());
     }
 
@@ -294,19 +330,25 @@ public class MainActivity extends Activity {
             }
         } else {
             resetLocationText();
+            updateSensorText("Not listenting for sensor updates.");
         }
     }
 
     public void recordButtonClicked(View v) {
         Log.v(MainActivity.TAG, "Checking if objective (" + getSelectedObjectiveName()
                 + ") already has a recording.");
-        if (objectivesManager.hasExistingRecording(getSelectedObjectiveName())) {
-            showOverwriteRecordingDialog();
+        if (!app.isRecording()) {
+            if (objectivesManager.hasMocks(getSelectedObjectiveName())) {
+                showOverwriteRecordingDialog();
+            } else {
+                recordReplayManager.toggleRecording();
+                app.toggleIsRecording();
+            }
         } else {
-            recordReplayManager.toggleRecording();
-            app.toggleIsRecording();
-            prepareToRecord();
+            recordReplayManager.setIsRecording(false);
+            app.setIsRecording(false);
         }
+        prepareToRecord();
     }
 
     public void replayButtonClicked(View v) {

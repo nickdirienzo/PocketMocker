@@ -58,6 +58,15 @@ public abstract class ModelManager {
         }
         return s;
     }
+    
+    protected float[] deserialize(String a) {
+        String[] strValues = a.split(",");
+        float[] values = new float[strValues.length];
+        for(int i = 0; i < values.length; i++) {
+            values[i] = Float.parseFloat(strValues[i]);
+        }
+        return values;
+    }
 
     protected void insert(ContentValues values, String tableName) {
         SQLiteDatabase db = manager.openDatabase();

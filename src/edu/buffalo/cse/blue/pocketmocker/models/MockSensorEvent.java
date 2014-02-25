@@ -68,6 +68,17 @@ public class MockSensorEvent extends TimestampModel {
         this.eventType = eventType;
     }
 
+    public MockSensorEvent(int accuracy, int sensorType, long timestamp, float[] values,
+            long recId, String eventType) {
+        eventAccuracy = accuracy;
+        eventSensorType = sensorType;
+        eventTimestamp = timestamp;
+        eventValues = values;
+        creationDate = new Date();
+        recordingId = recId;
+        this.eventType = eventType;
+    }
+
     public MockSensorEvent(SensorEvent event, long recId, String eventType) {
         eventAccuracy = event.accuracy;
         eventSensorType = event.sensor.getType();

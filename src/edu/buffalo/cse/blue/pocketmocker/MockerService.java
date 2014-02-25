@@ -1,8 +1,6 @@
 
 package edu.buffalo.cse.blue.pocketmocker;
 
-import java.util.HashMap;
-
 import android.annotation.SuppressLint;
 import android.app.Service;
 import android.content.Intent;
@@ -13,9 +11,14 @@ import android.os.Message;
 import android.os.Messenger;
 import android.os.RemoteException;
 import android.util.Log;
+
 import edu.buffalo.cse.blue.pocketmocker.models.MockLocation;
 import edu.buffalo.cse.blue.pocketmocker.models.MockLocationManager;
+import edu.buffalo.cse.blue.pocketmocker.models.MockSensorEvent;
+import edu.buffalo.cse.blue.pocketmocker.models.MockSensorEventManager;
 import edu.buffalo.cse.blue.pocketmocker.models.RecordReplayManager;
+
+import java.util.HashMap;
 
 public class MockerService extends Service {
 
@@ -24,17 +27,21 @@ public class MockerService extends Service {
     private final Messenger messenger = new Messenger(new IncomingHandler());
     private MockLocationManager mockLocationManager;
     private RecordReplayManager recordReplayManager;
+    private MockSensorEventManager mockSensorEventManager;
     private MockLocation oldLoc;
     private MockLocation nextLoc;
 
-    private final HashMap<String, Messenger> clients = new HashMap<String, Messenger>();
+    private final HashMap<String, Messenger> locationClients = new HashMap<String, Messenger>();
+    private final HashMap<String, Messenger> sensorClients = new HashMap<String, Messenger>();
 
     @Override
     public void onCreate() {
         Log.v(TAG, "MockerService started.");
         mockLocationManager = MockLocationManager.getInstance(getApplicationContext());
         recordReplayManager = RecordReplayManager.getInstance(getApplicationContext());
-        new Thread(new ReplayMonitor()).start();
+        mockSensorEventManager = MockSensorEventManager.getInstance(getApplicationContext());
+        new Thread(new LocationReplayer()).start();
+        new Thread(new SensorReplayer()).start();
     }
 
     @Override
@@ -44,7 +51,6 @@ public class MockerService extends Service {
 
     @SuppressLint("HandlerLeak")
     class IncomingHandler extends Handler {
-        // TODO: Handle messages in their own thread
         @Override
         public void handleMessage(Message msg) {
             Log.v(TAG, "Message received: " + msg.toString());
@@ -53,20 +59,18 @@ public class MockerService extends Service {
             // LocationListeners to the LocationManager, we don't care, we just
             // need to send their Context data.
             String clientPackage = data.getString("package");
-            if (!clients.containsKey(clientPackage)
-                    // We cannot subscribe to ourself
-                    && !clientPackage.equals(getApplicationContext().getPackageName())) {
-                Log.v(TAG, "Adding sender for " + clientPackage + " to clients.");
-                clients.put(clientPackage, msg.replyTo);
-                Log.v(TAG, "Clients: " + clients.keySet().toString());
+            String[] packageParts = clientPackage.split("_");
+            if (!packageParts[0].equals(getApplicationContext().getPackageName())) {
+                if (packageParts[1].equals("location")) {
+                    if (!locationClients.containsKey(clientPackage)) {
+                        locationClients.put(clientPackage, msg.replyTo);
+                    }
+                } else if (packageParts[1].equals("sensor")) {
+                    if (!sensorClients.containsKey(clientPackage)) {
+                        sensorClients.put(clientPackage, msg.replyTo);
+                    }
+                }
             }
-        }
-    }
-
-    private void broadcastMockLocation(MockLocation m) {
-        for (String clientPkg : clients.keySet()) {
-            Log.v(TAG, "Sending message to: " + clientPkg);
-            new MockLocationSender(clients.get(clientPkg), m).start();
         }
     }
 
@@ -126,12 +130,20 @@ public class MockerService extends Service {
         }
     }
 
-    private class ReplayMonitor implements Runnable {
+    private class LocationReplayer implements Runnable {
 
         private boolean hasNotifiedStop = false;
 
+        private void broadcastMockLocation(MockLocation m) {
+            for (String clientPkg : locationClients.keySet()) {
+                Log.v(TAG, "Sending message to: " + clientPkg);
+                new MockLocationSender(locationClients.get(clientPkg), m).start();
+            }
+        }
+
         @Override
         public void run() {
+            Log.v(TAG, "Starting LocationReplayer");
             long timeToWait;
             // For "security" purposes, we poll the DB to determine if we should
             // be replaying or not. Otherwise, another application could send a
@@ -207,4 +219,100 @@ public class MockerService extends Service {
             }
         }
     }
+
+    private class SensorReplayer implements Runnable {
+
+        private boolean hasNotifiedStop = false;
+        private MockSensorEvent oldEvent;
+        private MockSensorEvent newEvent;
+
+        private void sendMockSensorEvent(MockSensorEvent e, Messenger m) {
+            Bundle data;
+            long id = -1;
+            if (e != null) {
+                Log.v(TAG, "We have a sensor event to mock.");
+                data = e.toBundle(System.currentTimeMillis());
+                data.putBoolean("isReplaying", true);
+                id = e.getId();
+            } else {
+                Log.v(TAG, "We do not have a sensor event to mock!");
+                data = new Bundle();
+                data.putBoolean("isReplaying", false);
+            }
+            data.putLong("mockId", id);
+            Message mockMessage = Message.obtain();
+            mockMessage.setData(data);
+            try {
+                m.send(mockMessage);
+            } catch (RemoteException e1) {
+                // TODO: Handle android.os.DeadObjectException better.
+                e1.printStackTrace();
+            }
+        }
+
+        private void broadcastMockSensorEvent(MockSensorEvent e) {
+            for (String client : sensorClients.keySet()) {
+                Log.v(TAG, "Sending mock sensor event to: " + client);
+                sendMockSensorEvent(e, sensorClients.get(client));
+            }
+        }
+
+        @Override
+        public void run() {
+            Log.v(TAG, "Starting SensorReplayer");
+            long timeToWait;
+            while (true) {
+                if (recordReplayManager.isReplaying()) {
+                    if (!mockSensorEventManager.isReady()) {
+                        mockSensorEventManager.init();
+                    }
+                    while (mockSensorEventManager.hasNext()) {
+                        if (!recordReplayManager.isReplaying()) {
+                            Log.v(TAG, "Stopped recording early.");
+                            broadcastMockSensorEvent(null);
+                            hasNotifiedStop = true;
+                            break;
+                        }
+                        hasNotifiedStop = false;
+                        if (oldEvent == null) {
+                            oldEvent = mockSensorEventManager.getNext();
+                            Log.v(TAG, "old event: " + oldEvent.getId());
+                        } else {
+                            oldEvent = newEvent;
+                            Log.v(TAG, "old event: " + oldEvent.getId());
+                        }
+                        newEvent = mockSensorEventManager.getNext();
+                        Log.v(TAG, "new event: " + newEvent.getId());
+                        timeToWait = newEvent.getEventTimestamp() - oldEvent.getEventTimestamp();
+                        broadcastMockSensorEvent(oldEvent);
+                        Log.v(TAG, "Sensor thread sleeping for: " + timeToWait);
+                        if(timeToWait > 0) {
+                            try {
+                                Thread.sleep(timeToWait);
+                            } catch (InterruptedException e) {
+                                e.printStackTrace();
+                            }
+                        }
+                    }
+                    if(recordReplayManager.isReplaying()) {
+                        broadcastMockSensorEvent(newEvent);
+                        Log.v(TAG, "No more sensor events!");
+                    }
+                } else {
+                    if(!hasNotifiedStop) {
+                        Log.v(TAG, "Sensor thread notifying stop");
+                        broadcastMockSensorEvent(null);
+                        hasNotifiedStop = true;
+                    }
+                }
+                try {
+                    Thread.sleep(1000);
+                } catch (InterruptedException e) {
+                    e.printStackTrace();
+                }
+            }
+        }
+
+    }
+
 }
