@@ -459,7 +459,7 @@ public class LocationManager<ServiceConnection> {
                 Message sMsg = Message.obtain();
                 sMsg.replyTo = mMockListener;
                 Bundle data = new Bundle();
-                data.putString("package", mContext.getPackageName());
+                data.putString("package", mContext.getPackageName() + "_location");
                 sMsg.setData(data);
                 Log.v(PM_TAG, "Set message data: " + data.toString());
                 try {
