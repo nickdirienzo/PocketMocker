@@ -85,9 +85,19 @@ public class SystemSensorManager extends SensorManager {
                 int accuracy = data.getInt("accuracy");
                 long timestamp = data.getLong("timestamp");
                 String eventType = data.getString("eventType");
-                SensorEvent sensorEvent = new SensorEvent(values, sensor, 0, timestamp);
-                // TODO: Handle the message by calling the correct method of the
-                // SensorEventListener
+                for (ListenerDelegate delegate : sListeners) {
+                    if (eventType.equals("onSensorChanged")) {
+                        SensorEvent sensorEvent = new SensorEvent(values, sensor, accuracy,
+                                timestamp);
+                        Log.v(PM_TAG, "Sending " + sensorEvent.toString() + " to "
+                                + delegate.mSensorEventListener.toString());
+                        delegate.mSensorEventListener.onSensorChanged(sensorEvent);
+                    } else if (eventType.equals("onAccuracyChanged")) {
+                        Log.v(PM_TAG, "Sending accuracy change for " + sensor.toString() + " of "
+                                + accuracy + " to " + delegate.mSensorEventListener.toString());
+                        delegate.mSensorEventListener.onAccuracyChanged(sensor, accuracy);
+                    }
+                }
             }
         }
     }
@@ -232,7 +242,9 @@ public class SystemSensorManager extends SensorManager {
                             final int accuracy = mSensorAccuracies.get(handle);
                             if ((t.accuracy >= 0) && (accuracy != t.accuracy)) {
                                 mSensorAccuracies.put(handle, t.accuracy);
-                                mSensorEventListener.onAccuracyChanged(t.sensor, t.accuracy);
+                                if (!mIsReplaying) {
+                                    mSensorEventListener.onAccuracyChanged(t.sensor, t.accuracy);
+                                }
                             }
                             break;
                         default:
@@ -244,8 +256,9 @@ public class SystemSensorManager extends SensorManager {
                             }
                             break;
                     }
-
-                    mSensorEventListener.onSensorChanged(t);
+                    if (!mIsReplaying) {
+                        mSensorEventListener.onSensorChanged(t);
+                    }
                     sPool.returnToPool(t);
                 }
             };
@@ -310,7 +323,7 @@ public class SystemSensorManager extends SensorManager {
                 Message sMsg = Message.obtain();
                 sMsg.replyTo = mMockListener;
                 Bundle data = new Bundle();
-                data.putString("package", mContext.getPackageName());
+                data.putString("package", mContext.getPackageName() + "_sensor");
                 sMsg.setData(data);
                 try {
                     Log.v(PM_TAG, "Sending message to MockerService");
