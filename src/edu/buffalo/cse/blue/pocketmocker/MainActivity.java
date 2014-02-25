@@ -352,6 +352,7 @@ public class MainActivity extends Activity {
     }
 
     public void replayButtonClicked(View v) {
+        // TODO: Set up pub-sub between MainActivity and MockerService
         Button replayButton = (Button) v;
         if (replayButton.getText().equals(this.getString(R.string.replay))) {
             Log.v(TAG, "Stop replaying.");

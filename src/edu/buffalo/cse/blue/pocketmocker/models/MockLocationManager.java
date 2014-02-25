@@ -156,5 +156,10 @@ public class MockLocationManager extends ModelManager {
 	public boolean hasNext() {
 		return mockLocations.size() != 0;
 	}
+	
+	// When you have hacks like this, you should go to sleep.
+	public void kill() {
+	    mockLocations.clear();
+	}
 
 }

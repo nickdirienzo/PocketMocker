@@ -174,32 +174,46 @@ public class MockerService extends Service {
                             Log.v(TAG, "Old loc: " + oldLoc.getId());
                         }
                         nextLoc = mockLocationManager.getNext();
-                        Log.v(TAG, "Next loc: " + nextLoc.getId());
-                        timeToWait = nextLoc.getRealLocation().getTime()
-                                - oldLoc.getRealLocation().getTime();
-                        broadcastMockLocation(oldLoc);
-                        try {
-                            Log.v(TAG, "Sleeping for " + timeToWait);
-                            // timeToWait is seconds
-                            // Catch rollover seconds because it turns out
-                            // negative at the end and I don't feel like
-                            // actually fixing that right now
-                            if (timeToWait > 0) {
-                                Thread.sleep(timeToWait * 1000);
-                            }
-                        } catch (InterruptedException e) {
-                            Log.v(TAG, "InterruptedException:", e);
+                        if (nextLoc == null) {
+                            // If the user stops replaying early, we should be
+                            // able to handle that event.
+                            // Just being safe here.
+                            Log.v(TAG, "Stopped recording early.");
+                            broadcastMockLocation(null);
+                            hasNotifiedStop = true;
+                            recordReplayManager.setIsReplaying(false);
+                            mockLocationManager.kill();
+                            Log.v(TAG, "We should go around again and stop because mockLocations hasNext=" + mockLocationManager.hasNext());
                         }
-                    }
-                    if (recordReplayManager.isReplaying()) {
-                        // By this point oldLoc has been sent, but nextLoc is
-                        // our
-                        // last
-                        // location to send.
-                        broadcastMockLocation(nextLoc);
-                        Log.v(TAG, "No more mocked locations! Old loc: " + oldLoc.getId()
-                                + " Next loc: "
-                                + nextLoc.getId());
+                        else {
+                            Log.v(TAG, "Next loc: " + nextLoc.getId());
+                            timeToWait = nextLoc.getRealLocation().getTime()
+                                    - oldLoc.getRealLocation().getTime();
+                            broadcastMockLocation(oldLoc);
+                            try {
+                                Log.v(TAG, "Sleeping for " + timeToWait);
+                                // timeToWait is seconds
+                                // Catch rollover seconds because it turns out
+                                // negative at the end and I don't feel like
+                                // actually fixing that right now
+                                if (timeToWait > 0) {
+                                    Thread.sleep(timeToWait * 1000);
+                                }
+                            } catch (InterruptedException e) {
+                                Log.v(TAG, "InterruptedException:", e);
+                            }
+                        }
+                        if (recordReplayManager.isReplaying()) {
+                            // By this point oldLoc has been sent, but nextLoc
+                            // is
+                            // our
+                            // last
+                            // location to send.
+                            broadcastMockLocation(nextLoc);
+                            Log.v(TAG, "No more mocked locations! Old loc: " + oldLoc.getId()
+                                    + " Next loc: "
+                                    + nextLoc.getId());
+                        }
                     }
                 } else {
                     if (!hasNotifiedStop) {
@@ -286,7 +300,7 @@ public class MockerService extends Service {
                         timeToWait = newEvent.getEventTimestamp() - oldEvent.getEventTimestamp();
                         broadcastMockSensorEvent(oldEvent);
                         Log.v(TAG, "Sensor thread sleeping for: " + timeToWait);
-                        if(timeToWait > 0) {
+                        if (timeToWait > 0) {
                             try {
                                 Thread.sleep(timeToWait);
                             } catch (InterruptedException e) {
@@ -294,12 +308,12 @@ public class MockerService extends Service {
                             }
                         }
                     }
-                    if(recordReplayManager.isReplaying()) {
+                    if (recordReplayManager.isReplaying()) {
                         broadcastMockSensorEvent(newEvent);
                         Log.v(TAG, "No more sensor events!");
                     }
                 } else {
-                    if(!hasNotifiedStop) {
+                    if (!hasNotifiedStop) {
                         Log.v(TAG, "Sensor thread notifying stop");
                         broadcastMockSensorEvent(null);
                         hasNotifiedStop = true;
