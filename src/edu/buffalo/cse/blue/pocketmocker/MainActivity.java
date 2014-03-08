@@ -11,6 +11,8 @@ import android.hardware.SensorManager;
 import android.location.Location;
 import android.location.LocationListener;
 import android.location.LocationManager;
+import android.net.wifi.ScanResult;
+import android.net.wifi.WifiManager;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.HandlerThread;
@@ -37,7 +39,7 @@ import java.util.List;
 
 public class MainActivity extends Activity {
 
-    public static final String TAG = "REC";
+    public static final String TAG = "PM";
 
     private PocketMockerApplication app;
 
@@ -64,6 +66,8 @@ public class MainActivity extends Activity {
     private SensorManager sensorManager;
     private HandlerThread sensorHandlerThread;
     private SensorEventListener sensorEventListener;
+    
+    private WifiManager mWifiManager;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -121,7 +125,7 @@ public class MainActivity extends Activity {
 
         initLocationManager();
         initSensorManager();
-
+        initWifiManager();
     }
 
     @Override
@@ -181,14 +185,17 @@ public class MainActivity extends Activity {
 
     private void startSensorListener() {
         Log.v(TAG, "Listening for sensor updates.");
-        sensorManager.registerListener(sensorEventListener,
-                sensorManager.getDefaultSensor(Sensor.TYPE_ACCELEROMETER),
-                SensorManager.SENSOR_DELAY_GAME, new Handler(sensorHandlerThread.getLooper()));
+        for (Sensor s : sensorManager.getSensorList(Sensor.TYPE_ALL)) {
+            sensorManager.registerListener(sensorEventListener,
+                    s, SensorManager.SENSOR_DELAY_GAME,
+                    new Handler(sensorHandlerThread.getLooper()));
+        }
     }
 
     private void stopSensorListener() {
         Log.v(TAG, "Stopping listening for sensor updates.");
         updateSensorText("Not listenting for sensor updates.");
+        // Unregister our listener for all sensors
         sensorManager.unregisterListener(sensorEventListener);
     }
 
@@ -251,12 +258,18 @@ public class MainActivity extends Activity {
         locationManager.removeUpdates(locationListener);
     }
 
+    private void initWifiManager() {
+        mWifiManager = (WifiManager) this.getSystemService(Context.WIFI_SERVICE);
+        List<ScanResult> networks = mWifiManager.getScanResults();
+        Log.v(TAG, "Scan results: " + networks.toString());
+    }
+    
     private void displayNewObjectiveDialog() {
         NewObjectiveDialog dialog = new NewObjectiveDialog();
         dialog.show(getFragmentManager(), TAG);
     }
 
-    private void checkFirstTimeUse() {
+    private void checkFirstTimeUse() {  
         // No existing objectives besides the mock, so we can assume it's the
         // first time the user is using the app.
         if (objectivesManager.getObjectives().size() == 1) {

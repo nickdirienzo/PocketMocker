@@ -7,11 +7,9 @@ import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 import android.hardware.Sensor;
 import android.hardware.SensorEvent;
-import android.hardware.TriggerEvent;
 import android.util.Log;
 
 import edu.buffalo.cse.blue.pocketmocker.MainActivity;
-import edu.buffalo.cse.blue.pocketmocker.PocketMockerApplication;
 
 import java.util.LinkedList;
 import java.util.List;
@@ -23,7 +21,6 @@ public class MockSensorEventManager extends ModelManager {
 
     private static final String ON_SENSOR_CHANGED = "onSensorChanged";
     private static final String ON_ACCURACY_CHANGED = "onAccuracyChanged";
-    private static final String ON_TRIGGER = "onTrigger";
 
     private List<MockSensorEvent> mSensorEvents;
 
@@ -63,12 +60,6 @@ public class MockSensorEventManager extends ModelManager {
         MockSensorEvent m = new MockSensorEvent(sensor, accuracy,
                 recordingManager.getCurrentRecordingId(),
                 ON_ACCURACY_CHANGED);
-        insertMockSensorEvent(m);
-    }
-
-    public void addTrigerEvent(TriggerEvent event) {
-        MockSensorEvent m = new MockSensorEvent(event, recordingManager.getCurrentRecordingId(),
-                ON_TRIGGER);
         insertMockSensorEvent(m);
     }
 

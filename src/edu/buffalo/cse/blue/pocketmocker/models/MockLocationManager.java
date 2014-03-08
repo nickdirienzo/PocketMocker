@@ -106,6 +106,7 @@ public class MockLocationManager extends ModelManager {
 				    // Holy hacks, Batman.
 				    Bundle extras = new Bundle();
                     JSONObject jsonBlob = new JSONObject(getString(cursor, MockLocation.COL_EXTRAS_INDEX));
+                    @SuppressWarnings("unchecked")
                     Iterator<String> extrasIt = jsonBlob.keys();
                     String key;
                     while(extrasIt.hasNext()) {

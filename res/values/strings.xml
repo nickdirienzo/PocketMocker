@@ -20,5 +20,6 @@
     <string name="replay">Replay</string>
     <string name="stop_replaying">Stop Replaying</string>
     <string name="empty_objective_name">Please enter a name for the new objective!</string>
+    <string name="empty"></string>
 
 </resources>

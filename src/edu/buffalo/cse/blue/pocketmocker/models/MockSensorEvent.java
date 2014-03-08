@@ -1,11 +1,8 @@
 
 package edu.buffalo.cse.blue.pocketmocker.models;
 
-import android.annotation.TargetApi;
 import android.hardware.Sensor;
 import android.hardware.SensorEvent;
-import android.hardware.TriggerEvent;
-import android.os.Build;
 import android.os.Bundle;
 
 import java.util.Date;
@@ -81,17 +78,6 @@ public class MockSensorEvent extends TimestampModel {
 
     public MockSensorEvent(SensorEvent event, long recId, String eventType) {
         eventAccuracy = event.accuracy;
-        eventSensorType = event.sensor.getType();
-        eventTimestamp = event.timestamp;
-        eventValues = event.values;
-        creationDate = new Date();
-        recordingId = recId;
-        this.eventType = eventType;
-    }
-
-    @TargetApi(Build.VERSION_CODES.JELLY_BEAN_MR2)
-    public MockSensorEvent(TriggerEvent event, long recId, String eventType) {
-        eventAccuracy = -1;
         eventSensorType = event.sensor.getType();
         eventTimestamp = event.timestamp;
         eventValues = event.values;
