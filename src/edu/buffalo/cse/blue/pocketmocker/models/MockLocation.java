@@ -3,6 +3,7 @@ package edu.buffalo.cse.blue.pocketmocker.models;
 
 import java.util.Date;
 
+import android.content.ContentValues;
 import android.location.Location;
 import android.os.Bundle;
 
@@ -215,6 +216,12 @@ public class MockLocation extends TimestampModel {
         data.putString("eventType", eventType);
         data.putInt("status", status);
         return data;
+    }
+
+    @Override
+    public ContentValues toContentValues() {
+        // TODO Auto-generated method stub
+        return null;
     }
 
 }

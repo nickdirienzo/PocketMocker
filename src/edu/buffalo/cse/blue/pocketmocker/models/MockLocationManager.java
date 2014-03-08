@@ -17,8 +17,8 @@ import java.util.Iterator;
 public class MockLocationManager extends ModelManager {
 
 	private static MockLocationManager sInstance;
+	
 	private RecordingManager recordingManager;
-
 	private ArrayList<MockLocation> mockLocations;
 
 	public static MockLocationManager getInstance(Context c) {

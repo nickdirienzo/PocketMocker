@@ -37,17 +37,8 @@ public class MockSensorEventManager extends ModelManager {
         mSensorEvents = new LinkedList<MockSensorEvent>();
     }
 
-    private void insertMockSensorEvent(MockSensorEvent mockEvent) {
-        ContentValues values = new ContentValues();
-        values.put(MockSensorEvent.COL_CREATION_DATE, mockEvent.getCreationDateSqlString());
-        values.put(MockSensorEvent.COL_RECORDING, mockEvent.getRecordingId());
-        values.put(MockSensorEvent.COL_EVENT_ACCURACY, mockEvent.getEventAccuracy());
-        values.put(MockSensorEvent.COL_EVENT_SENSOR, mockEvent.getEventSensorType());
-        values.put(MockSensorEvent.COL_EVENT_TIMESTAMP, mockEvent.getEventTimestamp());
-        values.put(MockSensorEvent.COL_EVENT_VALUES, this.serialize(mockEvent.getEventValues()));
-        values.put(MockSensorEvent.COL_EVENT_TYPE, mockEvent.getEventType());
-        insert(values, MockSensorEvent.TABLE_NAME);
-        Log.v(MainActivity.TAG, "Inserted " + values.toString() + " into db.");
+    private void insertMockSensorEvent(MockSensorEvent mockEvent) {        
+        insert(mockEvent.toContentValues(), MockSensorEvent.TABLE_NAME);
     }
 
     public void addSensorEvent(SensorEvent event) {

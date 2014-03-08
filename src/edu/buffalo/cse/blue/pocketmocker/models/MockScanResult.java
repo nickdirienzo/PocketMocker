@@ -1,6 +1,9 @@
 
 package edu.buffalo.cse.blue.pocketmocker.models;
 
+import android.content.ContentValues;
+import android.net.wifi.ScanResult;
+
 import java.util.Date;
 
 public class MockScanResult extends TimestampModel {
@@ -48,5 +51,30 @@ public class MockScanResult extends TimestampModel {
             + COL_FREQUENCY + INT + COMMA + COL_LEVEL + INT + COMMA + COL_TIMESTAMP + INT + COMMA
             + COL_RECORDING_FK + CLOSE_PAREN;
     public static final String DROP_TABLE_CMD = dropTable(TABLE_NAME);
+    
+    public MockScanResult(ScanResult s, long recId) {
+        creationDate = new Date();
+        recordingId = recId;
+        bssid = s.BSSID;
+        ssid = s.SSID;
+        capabilities = s.capabilities;
+        frequency = s.frequency;
+        level = s.level;
+        timestamp = s.timestamp;
+    }
+    
+    @Override
+    public ContentValues toContentValues() {
+        ContentValues values = new ContentValues();
+        values.put(COL_CREATION_DATE, this.serializeDateToSqlString(creationDate));
+        values.put(COL_RECORDING, recordingId);
+        values.put(COL_BSSID, bssid);
+        values.put(COL_SSID, ssid);
+        values.put(COL_CAPABILITIES, capabilities);
+        values.put(COL_FREQUENCY, frequency);
+        values.put(COL_LEVEL, level);
+        values.put(COL_TIMESTAMP, timestamp);
+        return values;
+    }
 
 }

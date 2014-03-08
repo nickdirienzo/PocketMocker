@@ -26,6 +26,7 @@ import android.widget.Spinner;
 import android.widget.TextView;
 
 import edu.buffalo.cse.blue.pocketmocker.models.MockLocationManager;
+import edu.buffalo.cse.blue.pocketmocker.models.MockScanResultManager;
 import edu.buffalo.cse.blue.pocketmocker.models.MockSensorEventManager;
 import edu.buffalo.cse.blue.pocketmocker.models.Objective;
 import edu.buffalo.cse.blue.pocketmocker.models.ObjectivesManager;
@@ -55,6 +56,7 @@ public class MainActivity extends Activity {
     private MockLocationManager mockLocationManager;
     private RecordReplayManager recordReplayManager;
     private MockSensorEventManager mockSensorEventManager;
+    private MockScanResultManager mockScanResultManager;
 
     private LocationManager locationManager;
     private HandlerThread locationHandlerThread;
@@ -80,6 +82,7 @@ public class MainActivity extends Activity {
         mockLocationManager = MockLocationManager.getInstance(getApplicationContext());
         recordReplayManager = RecordReplayManager.getInstance(getApplicationContext());
         mockSensorEventManager = MockSensorEventManager.getInstance(getApplicationContext());
+        mockScanResultManager = MockScanResultManager.getInstance(getApplicationContext());
         recordReplayManager.setIsRecording(false);
         app.setIsRecording(false);
 
@@ -218,7 +221,8 @@ public class MainActivity extends Activity {
                     }
 
                 });
-
+                // TODO: This seems like a good point to update the Wifi scan results
+                
             }
 
             @Override
@@ -261,7 +265,8 @@ public class MainActivity extends Activity {
     private void initWifiManager() {
         mWifiManager = (WifiManager) this.getSystemService(Context.WIFI_SERVICE);
         List<ScanResult> networks = mWifiManager.getScanResults();
-        Log.v(TAG, "Scan results: " + networks.toString());
+        Log.v(TAG, "Networks: " + networks);
+        mockScanResultManager.addScanResults(mWifiManager.getScanResults());
     }
     
     private void displayNewObjectiveDialog() {

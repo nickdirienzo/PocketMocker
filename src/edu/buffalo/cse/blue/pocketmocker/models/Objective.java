@@ -1,5 +1,7 @@
 package edu.buffalo.cse.blue.pocketmocker.models;
 
+import android.content.ContentValues;
+
 import java.util.Date;
 
 public class Objective extends TimestampModel {
@@ -107,5 +109,11 @@ public class Objective extends TimestampModel {
 	public void setRecordingId(long recordingId) {
 		this.recordingId = recordingId;
 	}
+
+    @Override
+    public ContentValues toContentValues() {
+        // TODO Auto-generated method stub
+        return null;
+    }
 
 }

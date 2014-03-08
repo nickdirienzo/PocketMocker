@@ -126,6 +126,7 @@ public class ObjectivesManager extends ModelManager {
                 || recordingManager.hasSensorEvents(o.getRecordingId());
     }
 
+    // Is this used? 
     public boolean hasMocks(String objectiveName) {
         Objective o = this.getObjectiveByName(objectiveName);
         SQLiteDatabase db = manager.openDatabase();

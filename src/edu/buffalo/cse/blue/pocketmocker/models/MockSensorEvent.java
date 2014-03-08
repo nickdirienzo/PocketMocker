@@ -1,6 +1,7 @@
 
 package edu.buffalo.cse.blue.pocketmocker.models;
 
+import android.content.ContentValues;
 import android.hardware.Sensor;
 import android.hardware.SensorEvent;
 import android.os.Bundle;
@@ -183,6 +184,19 @@ public class MockSensorEvent extends TimestampModel {
         data.putLong("timestamp", time);
         data.putString("eventType", eventType);
         return data;
+    }
+
+    @Override
+    public ContentValues toContentValues() {
+        ContentValues values = new ContentValues();
+        values.put(MockSensorEvent.COL_CREATION_DATE, getCreationDateSqlString());
+        values.put(MockSensorEvent.COL_RECORDING, getRecordingId());
+        values.put(MockSensorEvent.COL_EVENT_ACCURACY, getEventAccuracy());
+        values.put(MockSensorEvent.COL_EVENT_SENSOR, getEventSensorType());
+        values.put(MockSensorEvent.COL_EVENT_TIMESTAMP, getEventTimestamp());
+        values.put(MockSensorEvent.COL_EVENT_VALUES, serialize(getEventValues()));
+        values.put(MockSensorEvent.COL_EVENT_TYPE, getEventType());
+        return values;
     }
 
 }

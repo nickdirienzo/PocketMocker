@@ -1,5 +1,7 @@
 package edu.buffalo.cse.blue.pocketmocker.models;
 
+import android.content.ContentValues;
+
 import java.util.ArrayList;
 import java.util.Date;
 
@@ -54,4 +56,10 @@ public class Recording extends TimestampModel {
 	public void setLocations(ArrayList<MockLocation> locations) {
 		this.locations = locations;
 	}
+
+    @Override
+    public ContentValues toContentValues() {
+        // TODO Auto-generated method stub
+        return null;
+    }
 }
