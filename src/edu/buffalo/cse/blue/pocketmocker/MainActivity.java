@@ -2,6 +2,7 @@
 package edu.buffalo.cse.blue.pocketmocker;
 
 import android.app.Activity;
+import android.app.AlertDialog;
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
@@ -23,6 +24,7 @@ import android.telephony.TelephonyManager;
 import android.telephony.cdma.CdmaCellLocation;
 import android.util.Log;
 import android.view.Menu;
+import android.view.MenuItem;
 import android.view.View;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
@@ -139,7 +141,7 @@ public class MainActivity extends Activity {
         }
 
         locationPrefix = this.getString(R.string.loc_prefix);
-        locationText = (TextView) this.findViewById(R.id.locationText);
+        // locationText = (TextView) this.findViewById(R.id.locationText);
         recordButton = (Button) this.findViewById(R.id.record_button);
 
         initLocationManager();
@@ -163,22 +165,46 @@ public class MainActivity extends Activity {
     }
 
     @Override
+    protected void onResume() {
+        super.onResume();
+        // This is safe. We shouldn't record if the RecordActivity isn't in the
+        // foreground.
+        this.stopLocationListener();
+        this.stopSensorListener();
+    }
+
+    @Override
     public boolean onCreateOptionsMenu(Menu menu) {
         // Inflate the menu; this adds items to the action bar if it is present.
         getMenuInflater().inflate(R.menu.main, menu);
         return true;
     }
 
+    @Override
+    public boolean onOptionsItemSelected(MenuItem item) {
+        switch (item.getItemId()) {
+            case R.id.action_about:
+                AlertDialog.Builder builder = new AlertDialog.Builder(this);
+                builder.setMessage(R.string.about_detail);
+                builder.create().show();
+                return true;
+            case R.id.action_settings:
+                return true;
+            default:
+                return super.onOptionsItemSelected(item);
+        }
+    }
+
     private void updateSensorText(final String s) {
-        findViewById(R.id.sensorText).post(new Runnable() {
-
-            @Override
-            public void run() {
-                TextView t = (TextView) findViewById(R.id.sensorText);
-                t.setText(s);
-            }
-
-        });
+        // findViewById(R.id.sensorText).post(new Runnable() {
+        //
+        // @Override
+        // public void run() {
+        // TextView t = (TextView) findViewById(R.id.sensorText);
+        // t.setText(s);
+        // }
+        //
+        // });
     }
 
     private void initSensorManager() {
@@ -217,7 +243,7 @@ public class MainActivity extends Activity {
         };
     }
 
-    private void startSensorListener() {
+    public void startSensorListener() {
         Log.v(TAG, "Listening for sensor updates.");
         for (Sensor s : sensorManager.getSensorList(Sensor.TYPE_ALL)) {
             sensorManager.registerListener(sensorEventListener,
@@ -226,7 +252,7 @@ public class MainActivity extends Activity {
         }
     }
 
-    private void stopSensorListener() {
+    public void stopSensorListener() {
         Log.v(TAG, "Stopping listening for sensor updates.");
         updateSensorText("Not listenting for sensor updates.");
         // Unregister our listener for all sensors
@@ -283,13 +309,13 @@ public class MainActivity extends Activity {
         };
     }
 
-    private void startLocationListener() {
+    public void startLocationListener() {
         Log.v(TAG, "Listening for location updates.");
         locationManager.requestSingleUpdate(LocationManager.GPS_PROVIDER, locationListener,
                 locationHandlerThread.getLooper());
     }
 
-    private void stopLocationListener() {
+    public void stopLocationListener() {
         Log.v(TAG, "Stopping listening for location updates.");
         locationManager.removeUpdates(locationListener);
     }
@@ -440,11 +466,6 @@ public class MainActivity extends Activity {
         mockScanResultManager.enableGrouping();
         mockScanResultManager.addScanResults(mWifiManager.getScanResults());
         mockScanResultManager.disableGrouping();
-    }
-
-    public void openTestMockerServiceActivity(View view) {
-        Intent intent = new Intent(this, TestMockerServiceActivity.class);
-        this.startActivity(intent);
     }
 
 }
