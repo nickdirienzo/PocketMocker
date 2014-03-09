@@ -17,7 +17,7 @@ public abstract class ModelManager {
         manager = Database.getInstance(c);
     }
 
-    protected boolean getBoolean(Cursor c, int index) {
+    public static boolean getBoolean(Cursor c, int index) {
         String ret = c.getString(index);
         if (ret.equals("0"))
             return false;
@@ -25,27 +25,27 @@ public abstract class ModelManager {
             return true;
     }
 
-    protected float getFloat(Cursor c, int index) {
+    public static float getFloat(Cursor c, int index) {
         return Float.parseFloat(c.getString(index));
     }
 
-    protected double getDouble(Cursor c, int index) {
+    public static double getDouble(Cursor c, int index) {
         return Double.parseDouble(c.getString(index));
     }
 
-    protected long getLong(Cursor c, int index) {
+    public static long getLong(Cursor c, int index) {
         return Long.parseLong(c.getString(index));
     }
 
-    protected String getString(Cursor c, int index) {
+    public static String getString(Cursor c, int index) {
         return c.getString(index);
     }
 
-    protected int getInt(Cursor c, int index) {
+    public static int getInt(Cursor c, int index) {
         return Integer.parseInt(c.getString(index));
     }
 
-    protected String serialize(float[] a) {
+    public static String serialize(float[] a) {
         String s = "";
         if (a != null) {
             for (int i = 0; i < a.length; i++) {
@@ -59,7 +59,7 @@ public abstract class ModelManager {
         return s;
     }
     
-    protected float[] deserialize(String a) {
+    public static float[] deserialize(String a) {
         String[] strValues = a.split(",");
         float[] values = new float[strValues.length];
         for(int i = 0; i < values.length; i++) {

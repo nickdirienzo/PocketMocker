@@ -32,33 +32,40 @@
         android:layout_height="wrap_content"
         android:onClick="recordButtonClicked"
         android:text="@string/record" />
-    
+
     <Button
         android:id="@+id/replay_button"
         android:layout_width="fill_parent"
         android:layout_height="wrap_content"
         android:onClick="replayButtonClicked"
         android:text="@string/replay" />
-    
+
     <Button
         android:id="@+id/test_mock_service"
         android:layout_width="fill_parent"
         android:layout_height="wrap_content"
-        android:text="@string/test_mock_service"
-        android:onClick="openTestMockerServiceActivity" />
-    
+        android:onClick="openTestMockerServiceActivity"
+        android:text="@string/test_mock_service" />
+
+    <Button
+        android:id="@+id/insert_wifi_button"
+        android:layout_width="fill_parent"
+        android:layout_height="wrap_content"
+        android:onClick="insertWifiScanResults"
+        android:text="@string/scan_and_insert_wifi" />
+
     <TextView
         android:id="@+id/locationText"
         android:layout_width="fill_parent"
         android:layout_height="wrap_content"
         android:paddingTop="@dimen/activity_vertical_margin"
         android:text="@string/loc_placeholder" />
-    
+
     <TextView
         android:id="@+id/sensorText"
         android:layout_width="fill_parent"
         android:layout_height="wrap_content"
         android:paddingTop="@dimen/activity_vertical_margin"
         android:text="@string/empty" />
-    
+
 </LinearLayout>

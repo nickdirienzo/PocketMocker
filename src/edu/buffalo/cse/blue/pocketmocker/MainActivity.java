@@ -2,8 +2,10 @@
 package edu.buffalo.cse.blue.pocketmocker;
 
 import android.app.Activity;
+import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
+import android.content.IntentFilter;
 import android.hardware.Sensor;
 import android.hardware.SensorEvent;
 import android.hardware.SensorEventListener;
@@ -16,6 +18,9 @@ import android.net.wifi.WifiManager;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.HandlerThread;
+import android.telephony.NeighboringCellInfo;
+import android.telephony.TelephonyManager;
+import android.telephony.cdma.CdmaCellLocation;
 import android.util.Log;
 import android.view.Menu;
 import android.view.View;
@@ -26,8 +31,8 @@ import android.widget.Spinner;
 import android.widget.TextView;
 
 import edu.buffalo.cse.blue.pocketmocker.models.MockLocationManager;
-import edu.buffalo.cse.blue.pocketmocker.models.MockScanResultManager;
 import edu.buffalo.cse.blue.pocketmocker.models.MockSensorEventManager;
+import edu.buffalo.cse.blue.pocketmocker.models.MockWifiManager;
 import edu.buffalo.cse.blue.pocketmocker.models.Objective;
 import edu.buffalo.cse.blue.pocketmocker.models.ObjectivesManager;
 import edu.buffalo.cse.blue.pocketmocker.models.RecordReplayManager;
@@ -56,7 +61,7 @@ public class MainActivity extends Activity {
     private MockLocationManager mockLocationManager;
     private RecordReplayManager recordReplayManager;
     private MockSensorEventManager mockSensorEventManager;
-    private MockScanResultManager mockScanResultManager;
+    private MockWifiManager mockScanResultManager;
 
     private LocationManager locationManager;
     private HandlerThread locationHandlerThread;
@@ -68,7 +73,7 @@ public class MainActivity extends Activity {
     private SensorManager sensorManager;
     private HandlerThread sensorHandlerThread;
     private SensorEventListener sensorEventListener;
-    
+
     private WifiManager mWifiManager;
 
     @Override
@@ -82,9 +87,20 @@ public class MainActivity extends Activity {
         mockLocationManager = MockLocationManager.getInstance(getApplicationContext());
         recordReplayManager = RecordReplayManager.getInstance(getApplicationContext());
         mockSensorEventManager = MockSensorEventManager.getInstance(getApplicationContext());
-        mockScanResultManager = MockScanResultManager.getInstance(getApplicationContext());
+        mockScanResultManager = MockWifiManager.getInstance(getApplicationContext());
         recordReplayManager.setIsRecording(false);
         app.setIsRecording(false);
+
+        IntentFilter filter = new IntentFilter();
+        filter.addAction(WifiManager.NETWORK_STATE_CHANGED_ACTION);
+        filter.addAction(WifiManager.SUPPLICANT_CONNECTION_CHANGE_ACTION);
+        filter.addAction(WifiManager.SUPPLICANT_STATE_CHANGED_ACTION);
+        filter.addAction(WifiManager.WIFI_STATE_CHANGED_ACTION);
+        HandlerThread wifiReceiverThread = new HandlerThread("WifiReceiverThread");
+        wifiReceiverThread.start();
+        Handler wifiReceiverHandler = new Handler(wifiReceiverThread.getLooper());
+        BroadcastReceiver wifiReceiver = new WifiManagerReceiver(getApplicationContext());
+        this.registerReceiver(wifiReceiver, filter, "", wifiReceiverHandler);
 
         this.checkFirstTimeUse();
 
@@ -129,6 +145,21 @@ public class MainActivity extends Activity {
         initLocationManager();
         initSensorManager();
         initWifiManager();
+
+        TelephonyManager tel = (TelephonyManager) this.getSystemService(Context.TELEPHONY_SERVICE);
+        List<NeighboringCellInfo> towers = tel.getNeighboringCellInfo();
+        Log.v(TAG, "neighbor info: " + towers.size() + " crap");
+        CdmaCellLocation cellLoc = (CdmaCellLocation) tel.getCellLocation();
+        Log.v(TAG,
+                "stationId: " + cellLoc.getBaseStationId() + " statLat: "
+                        + cellLoc.getBaseStationLatitude() + " statLong: "
+                        + cellLoc.getBaseStationLongitude());
+        for (NeighboringCellInfo info : towers) {
+            Log.v(TAG,
+                    "cid: " + info.getCid() + " lac: " + info.getLac() + " ntype: "
+                            + info.getNetworkType() + " psc: " + info.getPsc() + " rssi: "
+                            + info.getRssi());
+        }
     }
 
     @Override
@@ -221,8 +252,9 @@ public class MainActivity extends Activity {
                     }
 
                 });
-                // TODO: This seems like a good point to update the Wifi scan results
-                
+                // TODO: This seems like a good point to update the Wifi scan
+                // results
+
             }
 
             @Override
@@ -266,15 +298,17 @@ public class MainActivity extends Activity {
         mWifiManager = (WifiManager) this.getSystemService(Context.WIFI_SERVICE);
         List<ScanResult> networks = mWifiManager.getScanResults();
         Log.v(TAG, "Networks: " + networks);
-        mockScanResultManager.addScanResults(mWifiManager.getScanResults());
+        // mockScanResultManager.enableGrouping();
+        // mockScanResultManager.addScanResults(mWifiManager.getScanResults());
+        // mockScanResultManager.disableGrouping();
     }
-    
+
     private void displayNewObjectiveDialog() {
         NewObjectiveDialog dialog = new NewObjectiveDialog();
         dialog.show(getFragmentManager(), TAG);
     }
 
-    private void checkFirstTimeUse() {  
+    private void checkFirstTimeUse() {
         // No existing objectives besides the mock, so we can assume it's the
         // first time the user is using the app.
         if (objectivesManager.getObjectives().size() == 1) {
@@ -400,6 +434,12 @@ public class MainActivity extends Activity {
         recordReplayManager.setIsRecording(true);
         app.setIsRecording(true);
         this.toggleRecordingButton();
+    }
+
+    public void insertWifiScanResults(View view) {
+        mockScanResultManager.enableGrouping();
+        mockScanResultManager.addScanResults(mWifiManager.getScanResults());
+        mockScanResultManager.disableGrouping();
     }
 
     public void openTestMockerServiceActivity(View view) {

@@ -21,5 +21,6 @@
     <string name="stop_replaying">Stop Replaying</string>
     <string name="empty_objective_name">Please enter a name for the new objective!</string>
     <string name="empty"></string>
+    <string name="scan_and_insert_wifi">Scan &amp; Insert Wifi</string>
 
 </resources>
