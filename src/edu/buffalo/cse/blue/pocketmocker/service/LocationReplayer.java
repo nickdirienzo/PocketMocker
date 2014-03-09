@@ -15,7 +15,7 @@ import java.util.ArrayList;
 
 public class LocationReplayer implements Runnable {
 
-    private static final String TAG = MockerService.TAG + MockerService.PACKAGE_SUFFIX_DELIM
+    public static final String TAG = MockerService.TAG + MockerService.PACKAGE_SUFFIX_DELIM
             + MockerService.LOCATION_SUFFIX;
 
     private MockerService mMockerService;
@@ -25,6 +25,7 @@ public class LocationReplayer implements Runnable {
         mMockerService = m;
         mMockLocationManager = MockLocationManager.getInstance(mMockerService
                 .getApplicationContext());
+        mMockerService.signalAlive(TAG);
     }
 
     /**
@@ -77,12 +78,12 @@ public class LocationReplayer implements Runnable {
                     Thread.sleep(timeDelta);
                 } catch (InterruptedException e) {
                     // Just to be safe
-                    mMockerService.signalDeathAndMaybeBroadcastTermination();
+                    mMockerService.signalDeathAndMaybeBroadcastTermination(TAG);
                     e.printStackTrace();
                 }
             }
         }
-        mMockerService.signalDeathAndMaybeBroadcastTermination();
+        mMockerService.signalDeathAndMaybeBroadcastTermination(TAG);
     }
 
 }

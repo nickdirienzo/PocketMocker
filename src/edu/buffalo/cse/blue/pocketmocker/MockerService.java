@@ -43,6 +43,7 @@ public class MockerService extends Service {
     private Thread mLocationReplayThread;
     private Thread mSensorReplayThread;
     private Thread mWifiReplayThread;
+    private final HashMap<String, Boolean> mDeadThreadMap = new HashMap<String, Boolean>();
 
     @Override
     public void onCreate() {
@@ -67,15 +68,26 @@ public class MockerService extends Service {
     }
 
     /**
+     * Mark the replayer thread id'ed by tag as being alive in our dead map.
+     * @param tag
+     */
+    public synchronized void signalAlive(String tag) {
+        mDeadThreadMap.put(tag, false);
+    }
+    
+    /**
      * Called by our replay threads before they die. Once all are dead, we send
      * a termination message to all of our clients to signal the end of the
      * replay session.
      */
-    public void signalDeathAndMaybeBroadcastTermination() {
-        if (!mLocationReplayThread.isAlive() && !mSensorReplayThread.isAlive()
-                && !mWifiReplayThread.isAlive()) {
-            broadcastTermination();
+    public synchronized void signalDeathAndMaybeBroadcastTermination(String tag) {
+        mDeadThreadMap.put(tag, true);
+        for (Boolean b : mDeadThreadMap.values()) {
+            if (!b) {
+                return;
+            }
         }
+        broadcastTermination();
     }
 
     private void broadcastMessage(Message msg) {

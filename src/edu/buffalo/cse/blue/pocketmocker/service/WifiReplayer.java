@@ -15,7 +15,7 @@ import java.util.ArrayList;
 
 public class WifiReplayer implements Runnable {
 
-    private static final String TAG = MockerService.TAG + MockerService.PACKAGE_SUFFIX_DELIM
+    public static final String TAG = MockerService.TAG + MockerService.PACKAGE_SUFFIX_DELIM
             + MockerService.WIFI_SUFFIX;
 
     private MockerService mMockerService;
@@ -24,6 +24,7 @@ public class WifiReplayer implements Runnable {
     public WifiReplayer(MockerService m) {
         mMockerService = m;
         mMockWifiManager = MockWifiManager.getInstance(mMockerService.getApplicationContext());
+        mMockerService.signalAlive(TAG);
     }
 
     private void sendMockScanResults(ArrayList<MockScanResult> result, Messenger m) {
@@ -69,11 +70,11 @@ public class WifiReplayer implements Runnable {
                     Thread.sleep(timeDelta);
                 } catch (InterruptedException e) {
                     // Just to be safe...
-                    mMockerService.signalDeathAndMaybeBroadcastTermination();
+                    mMockerService.signalDeathAndMaybeBroadcastTermination(TAG);
                     e.printStackTrace();
                 }
             }
         }
-        mMockerService.signalDeathAndMaybeBroadcastTermination();
+        mMockerService.signalDeathAndMaybeBroadcastTermination(TAG);
     }
 }

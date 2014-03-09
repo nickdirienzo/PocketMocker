@@ -15,7 +15,7 @@ import java.util.ArrayList;
 
 public class SensorReplayer implements Runnable {
 
-    private static final String TAG = MockerService.TAG + MockerService.PACKAGE_SUFFIX_DELIM
+    public static final String TAG = MockerService.TAG + MockerService.PACKAGE_SUFFIX_DELIM
             + MockerService.SENSOR_SUFFIX;
 
     private MockerService mMockerService;
@@ -24,6 +24,7 @@ public class SensorReplayer implements Runnable {
     public SensorReplayer(MockerService m) {
         mMockerService = m;
         mMockSensorEventManager = MockSensorEventManager.getInstance(m.getApplicationContext());
+        mMockerService.signalAlive(TAG);
     }
 
     private void sendMockSensorEvent(MockSensorEvent e, Messenger m) {
@@ -65,12 +66,12 @@ public class SensorReplayer implements Runnable {
                 try {
                     Thread.sleep(timeDelta);
                 } catch (InterruptedException e) {
-                    mMockerService.signalDeathAndMaybeBroadcastTermination();
+                    mMockerService.signalDeathAndMaybeBroadcastTermination(TAG);
                     e.printStackTrace();
                 }
             }
         }
-        mMockerService.signalDeathAndMaybeBroadcastTermination();
+        mMockerService.signalDeathAndMaybeBroadcastTermination(TAG);
     }
 
 }
