@@ -135,6 +135,10 @@ public class MockLocationManager extends ModelManager {
 		return mockLocations;
 	}
 	
+	public ArrayList<MockLocation> getMockLocationsForCurrentRecording() {
+	    return this.getMockLocationsForRecording(recordingManager.getCurrentRecordingId());
+	}
+	
 	public void init() {
 		if (mockLocations.size() == 0) {
 			Log.v("REC", "getting locations for rec_id: " + recordingManager.getCurrentRecordingId());

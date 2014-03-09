@@ -1,16 +1,13 @@
 
 package edu.buffalo.cse.blue.pocketmocker.models;
 
-import android.content.ContentValues;
 import android.content.Context;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 import android.hardware.Sensor;
 import android.hardware.SensorEvent;
-import android.util.Log;
 
-import edu.buffalo.cse.blue.pocketmocker.MainActivity;
-
+import java.util.ArrayList;
 import java.util.LinkedList;
 import java.util.List;
 
@@ -37,7 +34,7 @@ public class MockSensorEventManager extends ModelManager {
         mSensorEvents = new LinkedList<MockSensorEvent>();
     }
 
-    private void insertMockSensorEvent(MockSensorEvent mockEvent) {        
+    private void insertMockSensorEvent(MockSensorEvent mockEvent) {
         insert(mockEvent.toContentValues(), MockSensorEvent.TABLE_NAME);
     }
 
@@ -54,8 +51,8 @@ public class MockSensorEventManager extends ModelManager {
         insertMockSensorEvent(m);
     }
 
-    public List<MockSensorEvent> getMockSensorEventsForRecording(long id) {
-        List<MockSensorEvent> sensorEvents = new LinkedList<MockSensorEvent>();
+    public ArrayList<MockSensorEvent> getMockSensorEventsForRecording(long id) {
+        ArrayList<MockSensorEvent> sensorEvents = new ArrayList<MockSensorEvent>();
         SQLiteDatabase db = manager.openDatabase();
         Cursor c = db.query(MockSensorEvent.TABLE_NAME, null, MockSensorEvent.COL_RECORDING + "=?",
                 new String[] {
@@ -77,24 +74,28 @@ public class MockSensorEventManager extends ModelManager {
         return sensorEvents;
     }
 
+    public ArrayList<MockSensorEvent> getMockSensorEventsForCurrentRecording() {
+        return this.getMockSensorEventsForRecording(recordingManager.getCurrentRecordingId());
+    }
+
     public void init() {
         if (mSensorEvents.size() == 0) {
             mSensorEvents = getMockSensorEventsForRecording(recordingManager
                     .getCurrentRecordingId());
         }
     }
-    
+
     public MockSensorEvent getNext() {
-        if(hasNext()) {
+        if (hasNext()) {
             return mSensorEvents.remove(0);
         }
         return null;
     }
-    
+
     public boolean hasNext() {
         return mSensorEvents.size() != 0;
     }
-    
+
     public boolean isReady() {
         return hasNext();
     }
