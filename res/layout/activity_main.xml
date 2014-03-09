@@ -78,6 +78,12 @@
         android:id="@+id/log_scrollview"
         android:layout_width="wrap_content"
         android:layout_height="fill_parent" >
+
+        <TextView
+            android:id="@+id/log"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content" >
+        </TextView>
     </ScrollView>
 
 </LinearLayout>

@@ -5,8 +5,8 @@ import android.app.Activity;
 import android.app.AlertDialog;
 import android.content.BroadcastReceiver;
 import android.content.Context;
-import android.content.Intent;
 import android.content.IntentFilter;
+import android.graphics.Color;
 import android.hardware.Sensor;
 import android.hardware.SensorEvent;
 import android.hardware.SensorEventListener;
@@ -29,6 +29,7 @@ import android.view.View;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.Button;
+import android.widget.ScrollView;
 import android.widget.Spinner;
 import android.widget.TextView;
 
@@ -44,14 +45,19 @@ import edu.buffalo.cse.blue.pocketmocker.models.RecordingManager;
 import java.util.Arrays;
 import java.util.Date;
 import java.util.List;
+import java.util.Random;
 
 public class MainActivity extends Activity {
 
     public static final String TAG = "PM";
 
+    private static final String LOCATION = "#FF0000";
+    private static final String SENSOR = "#00FF00";
+    private static final String NETWORK = "#0000FF";
+
     private PocketMockerApplication app;
 
-    private TextView locationText;
+    private TextView mLog;
     private Button recordButton;
     private String locationPrefix;
 
@@ -63,7 +69,7 @@ public class MainActivity extends Activity {
     private MockLocationManager mockLocationManager;
     private RecordReplayManager recordReplayManager;
     private MockSensorEventManager mockSensorEventManager;
-    private MockWifiManager mockScanResultManager;
+    private MockWifiManager mockWifiManager;
 
     private LocationManager locationManager;
     private HandlerThread locationHandlerThread;
@@ -78,18 +84,22 @@ public class MainActivity extends Activity {
 
     private WifiManager mWifiManager;
 
+    private Random random;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
         app = (PocketMockerApplication) getApplicationContext();
+        random = new Random();
+        mLog = (TextView) findViewById(R.id.log);
 
         objectivesManager = ObjectivesManager.getInstance(getApplicationContext());
         recordingManager = RecordingManager.getInstance(getApplicationContext());
         mockLocationManager = MockLocationManager.getInstance(getApplicationContext());
         recordReplayManager = RecordReplayManager.getInstance(getApplicationContext());
         mockSensorEventManager = MockSensorEventManager.getInstance(getApplicationContext());
-        mockScanResultManager = MockWifiManager.getInstance(getApplicationContext());
+        mockWifiManager = MockWifiManager.getInstance(getApplicationContext());
         recordReplayManager.setIsRecording(false);
         app.setIsRecording(false);
 
@@ -146,7 +156,7 @@ public class MainActivity extends Activity {
 
         initLocationManager();
         initSensorManager();
-        initWifiManager();
+        mWifiManager = (WifiManager) this.getSystemService(Context.WIFI_SERVICE);
 
         TelephonyManager tel = (TelephonyManager) this.getSystemService(Context.TELEPHONY_SERVICE);
         List<NeighboringCellInfo> towers = tel.getNeighboringCellInfo();
@@ -195,16 +205,20 @@ public class MainActivity extends Activity {
         }
     }
 
-    private void updateSensorText(final String s) {
-        // findViewById(R.id.sensorText).post(new Runnable() {
-        //
-        // @Override
-        // public void run() {
-        // TextView t = (TextView) findViewById(R.id.sensorText);
-        // t.setText(s);
-        // }
-        //
-        // });
+    private void updateLog(final String s) {
+        final ScrollView sv = (ScrollView) findViewById(R.id.log_scrollview);
+        mLog.post(new Runnable() {
+            @Override
+            public void run() {
+                mLog.append(s + "\n");
+            }
+        });
+        sv.post(new Runnable() {
+           @Override
+           public void run() {
+               sv.fullScroll(ScrollView.FOCUS_DOWN);
+           }
+        });
     }
 
     private void initSensorManager() {
@@ -221,9 +235,7 @@ public class MainActivity extends Activity {
                 if (lastLocation != null) {
                     Log.v(TAG, "Accuracy change: " + accuracy);
                     mockSensorEventManager.addAccuracyChange(sensor, accuracy);
-                    updateSensorText("Accuracy changed!");
-                } else {
-                    updateSensorText("Waiting for location updates.");
+                    updateLog(sensor.getName() + " sensor accuracy changed: " + accuracy);
                 }
             }
 
@@ -234,10 +246,11 @@ public class MainActivity extends Activity {
                 if (lastLocation != null) {
                     Log.v(TAG, "Sensor changed: " + Arrays.toString(event.values));
                     mockSensorEventManager.addSensorEvent(event);
-                    updateSensorText("Recording sensorChanged...");
-
-                } else {
-                    updateSensorText("Waiting for location updates.");
+                    // Only going to record a 1/4 of all sensor updates because
+                    // there's A LOT
+                    if (random.nextInt(8) == 0) {
+                        updateLog(event.sensor.getName() + " sensor event");
+                    }
                 }
             }
         };
@@ -254,7 +267,7 @@ public class MainActivity extends Activity {
 
     public void stopSensorListener() {
         Log.v(TAG, "Stopping listening for sensor updates.");
-        updateSensorText("Not listenting for sensor updates.");
+        updateLog("Stopping sensor listeners.");
         // Unregister our listener for all sensors
         sensorManager.unregisterListener(sensorEventListener);
     }
@@ -270,17 +283,8 @@ public class MainActivity extends Activity {
                 lastLocation = loc;
                 mockLocationManager.addLocation(loc, "onLocationChanged", -1);
                 final String displayLoc = app.buildLocationDisplayString(loc);
-                locationText.post(new Runnable() {
-
-                    @Override
-                    public void run() {
-                        locationText.setText(locationPrefix + displayLoc);
-                    }
-
-                });
-                // TODO: This seems like a good point to update the Wifi scan
-                // results
-
+                updateLog("Recorded: " + displayLoc);
+                new Thread(new WifiScanResultTask(mockWifiManager, mWifiManager, mLog)).start();
             }
 
             @Override
@@ -311,22 +315,13 @@ public class MainActivity extends Activity {
 
     public void startLocationListener() {
         Log.v(TAG, "Listening for location updates.");
-        locationManager.requestSingleUpdate(LocationManager.GPS_PROVIDER, locationListener,
-                locationHandlerThread.getLooper());
+        locationManager.requestLocationUpdates(LocationManager.GPS_PROVIDER, 1000, -1,
+                locationListener, locationHandlerThread.getLooper());
     }
 
     public void stopLocationListener() {
         Log.v(TAG, "Stopping listening for location updates.");
         locationManager.removeUpdates(locationListener);
-    }
-
-    private void initWifiManager() {
-        mWifiManager = (WifiManager) this.getSystemService(Context.WIFI_SERVICE);
-        List<ScanResult> networks = mWifiManager.getScanResults();
-        Log.v(TAG, "Networks: " + networks);
-        // mockScanResultManager.enableGrouping();
-        // mockScanResultManager.addScanResults(mWifiManager.getScanResults());
-        // mockScanResultManager.disableGrouping();
     }
 
     private void displayNewObjectiveDialog() {
@@ -358,36 +353,13 @@ public class MainActivity extends Activity {
         return objectivesSpinner.getSelectedItem().toString();
     }
 
-    public TextView getLocationText() {
-        return locationText;
-    }
-
-    public String getLocationPrefix() {
-        return locationPrefix;
-    }
-
-    public void updateLocationText(Location loc) {
-        String displayLoc = app.buildLocationDisplayString(loc);
-        locationText.setText(getLocationPrefix() + displayLoc);
-    }
-
-    public void updateLocationText(String s) {
-        locationText.setText(s);
-    }
-
-    public void resetLocationText() {
-        locationText.setText(this.getString(R.string.loc_placeholder));
-    }
-
     public void toggleRecordingButton() {
         if (app.isRecording()) {
             recordButton.setText(R.string.stop_record);
-            // LOLWAT
             startSensorListener();
             startLocationListener();
         } else {
             recordButton.setText(R.string.record);
-            // LOLWAT
             stopSensorListener();
             stopLocationListener();
         }
@@ -400,15 +372,17 @@ public class MainActivity extends Activity {
         if (app.isRecording()) {
             Location lastLoc = locationManager.getLastKnownLocation(LocationManager.GPS_PROVIDER);
             if (lastLoc == null) {
-                updateLocationText("Waiting for location...");
+                updateLog("Waiting for location...");
+                // updateLocationText("Waiting for location...");
             } else {
                 lastLocation = lastLoc;
                 mockLocationManager.addLocation(lastLoc, "onLocationChanged", -1);
-                updateLocationText(lastLoc);
+                updateLog(app.buildLocationDisplayString(lastLoc));
+                // updateLocationText(lastLoc);
             }
         } else {
-            resetLocationText();
-            updateSensorText("Not listenting for sensor updates.");
+            // resetLocationText();
+            // updateSensorText("Not listenting for sensor updates.");
         }
     }
 
@@ -463,9 +437,9 @@ public class MainActivity extends Activity {
     }
 
     public void insertWifiScanResults(View view) {
-        mockScanResultManager.enableGrouping();
-        mockScanResultManager.addScanResults(mWifiManager.getScanResults());
-        mockScanResultManager.disableGrouping();
+        mockWifiManager.enableGrouping();
+        mockWifiManager.addScanResults(mWifiManager.getScanResults());
+        mockWifiManager.disableGrouping();
     }
 
 }
