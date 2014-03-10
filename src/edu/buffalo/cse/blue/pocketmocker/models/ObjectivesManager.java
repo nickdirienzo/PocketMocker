@@ -80,6 +80,7 @@ public class ObjectivesManager extends ModelManager {
         }
         objective = new Objective();
         objective.setId(Long.parseLong(cursor.getString(Objective.COL_ID_INDEX)));
+        objective.setRecordingId(Long.parseLong(cursor.getString(Objective.COL_RECORDING_INDEX)));
         objective.setName(cursor.getString(Objective.COL_NAME_INDEX));
         objective.setCreationDate(cursor.getString(Objective.COL_CREATION_DATE_INDEX));
         objective.setLastModifiedDate(cursor.getString(Objective.COL_LAST_MODIFIED_DATE_INDEX));
@@ -96,6 +97,7 @@ public class ObjectivesManager extends ModelManager {
             do {
                 Objective objective = new Objective();
                 objective.setId(Long.parseLong(cursor.getString(Objective.COL_ID_INDEX)));
+                objective.setRecordingId(Long.parseLong(cursor.getString(Objective.COL_RECORDING_INDEX)));
                 objective.setName(cursor.getString(Objective.COL_NAME_INDEX));
                 objective.setCreationDate(cursor.getString(Objective.COL_CREATION_DATE_INDEX));
                 objective.setLastModifiedDate(cursor

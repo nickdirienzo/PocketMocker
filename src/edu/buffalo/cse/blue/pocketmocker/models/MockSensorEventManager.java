@@ -58,7 +58,7 @@ public class MockSensorEventManager extends ModelManager {
                 new String[] {
                     String.valueOf(recid)
                 }, null,
-                null, MockSensorEvent.COL_EVENT_TIMESTAMP);
+                null, MockSensorEvent.COL_CREATION_TIMESTAMP);
         if (c.moveToFirst()) {
             do {
                 MockSensorEvent e = new MockSensorEvent(c);

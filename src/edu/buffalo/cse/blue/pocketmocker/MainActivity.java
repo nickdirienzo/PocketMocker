@@ -168,8 +168,8 @@ public class MainActivity extends Activity {
         this.populateObjectivesSpinner();
         List<Objective> objectives = objectivesManager.getObjectives();
         if (objectives.size() > 1) {
-            Log.v(TAG, "Setting current rec id to: " + objectives.get(0).getId());
-            recordingManager.setCurrentRecordingId(objectives.get(0).getId());
+            Log.v(TAG, "Setting current rec id to: " + objectives.get(0).getRecordingId());
+            recordingManager.setCurrentRecordingId(objectives.get(0).getRecordingId());
         }
 
         recordButton = (Button) this.findViewById(R.id.record_button);
