@@ -28,5 +28,7 @@
     <string name="about">About</string>
     <string name="about_detail">PocketMocker is an experiment to protect your privacy through mocking your behavior. After recording initial data, you are free to replay that data as much as you want. When replaying, apps that request that data will see the recorded data instead of the actual data provided by the hardware.\n\nPocketMocker can record and replay the following data:\n&#8226;Location\n&#8226;All sensors\n&#8226;Wifi and Network\n\nMade with &lt;3 in Buffalo, NY.</string>
     <string name="log">Log</string>
+    <string name="no_replay_while_record">You cannot replay while you are recording!</string>
+    <string name="no_record_while_replay">You cannot record while you are replaying!</string>
 
 </resources>

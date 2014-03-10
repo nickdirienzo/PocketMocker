@@ -89,12 +89,12 @@ public class MainActivity extends Activity {
     private Messenger mMockerMessenger;
     private ServiceConnection mMockerServiceConnection;
     private Messenger mIncomingMessenger;
-    
+
     class ReplayStateHandler extends Handler {
         @Override
         public void handleMessage(Message msg) {
             Bundle data = msg.getData();
-            if(data.containsKey(MockerService.IS_REPLAYING)) {
+            if (data.containsKey(MockerService.IS_REPLAYING)) {
                 boolean isReplaying = data.getBoolean(MockerService.IS_REPLAYING);
                 recordReplayManager.setIsReplaying(isReplaying);
                 app.setIsReplaying(isReplaying);
@@ -177,18 +177,31 @@ public class MainActivity extends Activity {
         initMockerServiceMessenger();
 
         TelephonyManager tel = (TelephonyManager) this.getSystemService(Context.TELEPHONY_SERVICE);
-        List<NeighboringCellInfo> towers = tel.getNeighboringCellInfo();
-        Log.v(TAG, "neighbor info: " + towers.size() + " crap");
         CdmaCellLocation cellLoc = (CdmaCellLocation) tel.getCellLocation();
         Log.v(TAG,
                 "stationId: " + cellLoc.getBaseStationId() + " statLat: "
                         + cellLoc.getBaseStationLatitude() + " statLong: "
                         + cellLoc.getBaseStationLongitude());
-        for (NeighboringCellInfo info : towers) {
-            Log.v(TAG,
-                    "cid: " + info.getCid() + " lac: " + info.getLac() + " ntype: "
-                            + info.getNetworkType() + " psc: " + info.getPsc() + " rssi: "
-                            + info.getRssi());
+        new Thread(new SubscribeTask()).start();
+    }
+
+    private class SubscribeTask implements Runnable {
+        @Override
+        public void run() {
+            Message subMsg = Message.obtain();
+            Bundle data = new Bundle();
+            data.putString(MockerService.PACKAGE, getPackageName());
+            data.putInt(MockerService.PM_ACTION_KEY, MockerService.PM_ACTION_SUB);
+            subMsg.replyTo = mIncomingMessenger;
+            subMsg.setData(data);
+            try {
+                while (mMockerMessenger == null) {
+                } // it takes a while to connect to the service
+                mMockerMessenger.send(subMsg);
+            } catch (RemoteException e) {
+                Log.v(TAG, "Unable to send sub message to MockerService!");
+            }
+            Log.v(TAG, "SENT MSG");
         }
     }
 
@@ -198,6 +211,7 @@ public class MainActivity extends Activity {
             @Override
             public void onServiceConnected(ComponentName className, IBinder service) {
                 mMockerMessenger = new Messenger(service);
+                Log.v(TAG, "mMockerMessenger: " + mMockerMessenger);
             }
 
             @Override
@@ -209,7 +223,7 @@ public class MainActivity extends Activity {
         doBindService();
         mIncomingMessenger = new Messenger(new ReplayStateHandler());
     }
-    
+
     private void doBindService() {
         this.bindService(new Intent(this, MockerService.class), mMockerServiceConnection,
                 Context.BIND_AUTO_CREATE);
@@ -419,46 +433,58 @@ public class MainActivity extends Activity {
     }
 
     public void recordButtonClicked(View v) {
-        Log.v(MainActivity.TAG, "Checking if objective (" + getSelectedObjectiveName()
-                + ") already has a recording.");
-        if (!app.isRecording()) {
-            if (objectivesManager.hasMocks(getSelectedObjectiveName())) {
-                showOverwriteRecordingDialog();
+        if (!recordReplayManager.isReplaying()) {
+            Log.v(MainActivity.TAG, "Checking if objective (" + getSelectedObjectiveName()
+                    + ") already has a recording.");
+            if (!app.isRecording()) {
+                if (objectivesManager.hasMocks(getSelectedObjectiveName())) {
+                    showOverwriteRecordingDialog();
+                } else {
+                    recordReplayManager.toggleRecording();
+                    app.toggleIsRecording();
+                }
             } else {
-                recordReplayManager.toggleRecording();
-                app.toggleIsRecording();
+                recordReplayManager.setIsRecording(false);
+                app.setIsRecording(false);
             }
+            prepareToRecord();
         } else {
-            recordReplayManager.setIsRecording(false);
-            app.setIsRecording(false);
+            AlertDialog.Builder builder = new AlertDialog.Builder(this);
+            builder.setMessage(R.string.no_record_while_replay);
+            builder.create().show();
         }
-        prepareToRecord();
     }
 
     public void replayButtonClicked(View v) {
-        Message m = Message.obtain();
-        m.replyTo = this.mIncomingMessenger;
-        Bundle b = new Bundle();
-        b.putString(MockerService.PACKAGE, this.getPackageName());
-        Button replayButton = (Button) v;
-        Log.v(TAG, "replayButton: " + replayButton.getText());
-        if (replayButton.getText().equals(this.getString(R.string.replay))) {
-            Log.v(TAG, "Stop replaying.");
-            replayButton.setText(R.string.stop_replaying);
-            b.putInt(MockerService.PM_ACTION_KEY, MockerService.PM_ACTION_START_REPLAY);
+        if (!recordReplayManager.isRecording()) {
+            Message m = Message.obtain();
+            m.replyTo = this.mIncomingMessenger;
+            Bundle b = new Bundle();
+            b.putString(MockerService.PACKAGE, this.getPackageName());
+            Button replayButton = (Button) v;
+            Log.v(TAG, "replayButton: " + replayButton.getText());
+            if (replayButton.getText().equals(this.getString(R.string.replay))) {
+                Log.v(TAG, "Stop replaying.");
+                replayButton.setText(R.string.stop_replaying);
+                b.putInt(MockerService.PM_ACTION_KEY, MockerService.PM_ACTION_START_REPLAY);
+            } else {
+                Log.v(TAG, "Start replaying.");
+                replayButton.setText(R.string.replay);
+                b.putInt(MockerService.PM_ACTION_KEY, MockerService.PM_ACTION_STOP_REPLAY);
+            }
+            m.setData(b);
+            try {
+                mMockerMessenger.send(m);
+            } catch (RemoteException e) {
+                Log.v(TAG, "RemoteException", e);
+                e.printStackTrace();
+            }
+            recordReplayManager.toggleReplaying();
         } else {
-            Log.v(TAG, "Start replaying.");
-            replayButton.setText(R.string.replay);
-            b.putInt(MockerService.PM_ACTION_KEY, MockerService.PM_ACTION_STOP_REPLAY);
+            AlertDialog.Builder builder = new AlertDialog.Builder(this);
+            builder.setMessage(R.string.no_replay_while_record);
+            builder.create().show();
         }
-        m.setData(b);
-        try {
-            mMockerMessenger.send(m);
-        } catch (RemoteException e) {
-            Log.v(TAG, "RemoteException", e);
-            e.printStackTrace();
-        }
-        recordReplayManager.toggleReplaying();
     }
 
     public void showOverwriteRecordingDialog() {
