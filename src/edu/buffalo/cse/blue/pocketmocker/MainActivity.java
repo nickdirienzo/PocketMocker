@@ -24,7 +24,6 @@ import android.os.IBinder;
 import android.os.Message;
 import android.os.Messenger;
 import android.os.RemoteException;
-import android.telephony.NeighboringCellInfo;
 import android.telephony.TelephonyManager;
 import android.telephony.cdma.CdmaCellLocation;
 import android.util.Log;
@@ -38,6 +37,7 @@ import android.widget.ScrollView;
 import android.widget.Spinner;
 import android.widget.TextView;
 
+import edu.buffalo.cse.blue.pocketmocker.models.MockCellLocationManager;
 import edu.buffalo.cse.blue.pocketmocker.models.MockLocationManager;
 import edu.buffalo.cse.blue.pocketmocker.models.MockSensorEventManager;
 import edu.buffalo.cse.blue.pocketmocker.models.MockWifiManager;
@@ -70,6 +70,7 @@ public class MainActivity extends Activity {
     private RecordReplayManager recordReplayManager;
     private MockSensorEventManager mockSensorEventManager;
     private MockWifiManager mockWifiManager;
+    private MockCellLocationManager mockCellLocationManager;
 
     private LocationManager locationManager;
     private HandlerThread locationHandlerThread;
@@ -83,6 +84,7 @@ public class MainActivity extends Activity {
     private SensorEventListener sensorEventListener;
 
     private WifiManager mWifiManager;
+    private TelephonyManager telephonyManager;
 
     private Random random;
 
@@ -119,6 +121,7 @@ public class MainActivity extends Activity {
         recordReplayManager = RecordReplayManager.getInstance(getApplicationContext());
         mockSensorEventManager = MockSensorEventManager.getInstance(getApplicationContext());
         mockWifiManager = MockWifiManager.getInstance(getApplicationContext());
+        mockCellLocationManager = MockCellLocationManager.getInstance(getApplicationContext());
         recordReplayManager.setIsRecording(false);
         app.setIsRecording(false);
 
@@ -174,14 +177,9 @@ public class MainActivity extends Activity {
         initLocationManager();
         initSensorManager();
         mWifiManager = (WifiManager) this.getSystemService(Context.WIFI_SERVICE);
+        telephonyManager = (TelephonyManager) this.getSystemService(Context.TELEPHONY_SERVICE);
         initMockerServiceMessenger();
 
-        TelephonyManager tel = (TelephonyManager) this.getSystemService(Context.TELEPHONY_SERVICE);
-        CdmaCellLocation cellLoc = (CdmaCellLocation) tel.getCellLocation();
-        Log.v(TAG,
-                "stationId: " + cellLoc.getBaseStationId() + " statLat: "
-                        + cellLoc.getBaseStationLatitude() + " statLong: "
-                        + cellLoc.getBaseStationLongitude());
         new Thread(new SubscribeTask()).start();
     }
 
@@ -331,6 +329,10 @@ public class MainActivity extends Activity {
                 final String displayLoc = app.buildLocationDisplayString(loc);
                 updateLog("Recorded: " + displayLoc);
                 new Thread(new WifiScanResultTask(mockWifiManager, mWifiManager, mLog)).start();
+                // Since we're only on GNexus on Sprint, this is okay
+                CdmaCellLocation cellLoc = (CdmaCellLocation)telephonyManager.getCellLocation();
+                mockCellLocationManager.addCellLocation(cellLoc);
+                updateLog("CellLocation: " + cellLoc.getBaseStationId());
             }
 
             @Override
@@ -448,6 +450,8 @@ public class MainActivity extends Activity {
                 app.setIsRecording(false);
             }
             prepareToRecord();
+            // also acts as a reset when we're not recording
+            mockWifiManager.enableGrouping();
         } else {
             AlertDialog.Builder builder = new AlertDialog.Builder(this);
             builder.setMessage(R.string.no_record_while_replay);

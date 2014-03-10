@@ -16,7 +16,7 @@ import android.database.sqlite.SQLiteOpenHelper;
  */
 public class Database extends SQLiteOpenHelper {
 
-	private static final int DB_VERSION = 4;
+	private static final int DB_VERSION = 5;
 	private static final String DB_NAME = "PocketMocker.db";
 
 	private static Database sInstance;
@@ -57,6 +57,7 @@ public class Database extends SQLiteOpenHelper {
 		db.execSQL(RecordReplayManager.CREATE_TABLE_CMD);
 		db.execSQL(MockSensorEvent.CREATE_TABLE_CMD);
 		db.execSQL(MockScanResult.CREATE_TABLE_CMD);
+		db.execSQL(MockCellLocation.CREATE_TABLE_CMD);
 	}
 
 	@Override
@@ -69,6 +70,7 @@ public class Database extends SQLiteOpenHelper {
 		db.execSQL(RecordReplayManager.DROP_TABLE_CMD);
 		db.execSQL(MockSensorEvent.DROP_TABLE_CMD);
 		db.execSQL(MockScanResult.DROP_TABLE_CMD);
+		db.execSQL(MockCellLocation.DROP_TABLE_CMD);
 		onCreate(db);
 	}
 
