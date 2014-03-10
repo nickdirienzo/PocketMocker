@@ -30,5 +30,7 @@
     <string name="log">Log</string>
     <string name="no_replay_while_record">You cannot replay while you are recording!</string>
     <string name="no_record_while_replay">You cannot record while you are replaying!</string>
+    <string name="settings_detail">Check the apps that you would like to mock, then click the button below.</string>
+    <string name="save">Save</string>
 
 </resources>

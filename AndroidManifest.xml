@@ -27,8 +27,8 @@
             </intent-filter>
         </activity>
         <activity
-            android:name="edu.buffalo.cse.blue.pocketmocker.RecordActivity"
-            android:label="edu.buffalo.cse.blue.pocketmocker.TestMockerServiceActivity"
+            android:name="edu.buffalo.cse.blue.pocketmocker.SettingsActivity"
+            android:label="Settings"
             android:screenOrientation="portrait"
             android:parentActivityName="edu.buffalo.cse.blue.pocketmocker.MainActivity" >
             <meta-data
