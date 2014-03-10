@@ -543,6 +543,7 @@ public class WifiManager {
             Bundle tempResult = null;
             if (data.containsKey("isReplaying")) {
                 mIsReplaying = data.getBoolean("isReplaying");
+                Log.v(PM_TAG, "Set mIsReplaying to: " + mIsReplaying);
             }
             if (mIsReplaying) {
                 if (data.containsKey("size")) {
@@ -557,10 +558,12 @@ public class WifiManager {
                             tempResult.getString("capabilities"), tempResult.getInt("level"),
                             tempResult.getInt("frequency"), tempResult.getLong("timestamp")));
                 }
+                Log.v(PM_TAG, "New mocked results ready: " + mMockResults.size());
                 mMockResults = new ArrayList<ScanResult>(results);
             }
         }
     }
+
     // End nvd
 
     /**
@@ -607,7 +610,7 @@ public class WifiManager {
         // End nvd
         init();
     }
-    
+
     // start nvd
     private void bindToMockerService() {
         // Just a sanity check to ensure that we do have a Context of some sort
@@ -623,6 +626,7 @@ public class WifiManager {
             Log.v(PM_TAG, "mContext == null.");
         }
     }
+
     // end nvd
 
     /**
@@ -883,8 +887,8 @@ public class WifiManager {
      * @return the list of access points found in the most recent scan.
      */
     public List<ScanResult> getScanResults() {
-        Log.v(PM_TAG, "mIsReplaying=" + mIsReplaying);
-        if(mIsReplaying) {
+        // nvd
+        if (mIsReplaying && !mContext.getPackageName().equals("edu.buffalo.cse.blue.pocketmocker")) {
             return mMockResults;
         }
         try {
