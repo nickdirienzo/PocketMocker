@@ -33,7 +33,6 @@ import android.util.Log;
 import com.android.internal.location.ProviderProperties;
 
 import java.util.ArrayList;
-import java.util.Collection;
 import java.util.HashMap;
 import java.util.List;
 
@@ -274,8 +273,9 @@ public class LocationManager<ServiceConnection> {
         private void _handleMessage(Message msg) {
             Log.v(PM_TAG, "_handleMessage called. mIsReplaying: " + mIsReplaying);
             // nvdirien: If we are not replaying locations provided by the
-            // MockerService, then we operate normally.
-            if (!mIsReplaying) {
+            // MockerService, then we operate normally. Unless we're
+            // PocketMocker.
+            if (!mIsReplaying || mContext.getPackageName().equals("edu.buffalo.cse.blue.pocketmocker")) {
                 switch (msg.what) {
                     case TYPE_LOCATION_CHANGED:
                         Location location = new Location((Location) msg.obj);
@@ -365,7 +365,9 @@ public class LocationManager<ServiceConnection> {
                     mockLoc.setLongitude(getDouble(data, RequiredKey.LONGITUDE));
                     mockLoc.setTime(getLong(data, RequiredKey.TIME));
                     mockLoc.setExtras(getBundle(data, RequiredKey.EXTRAS));
-                    broadcastMock(mockLoc, eventType, status);
+                    if (!mContext.getPackageName().equals("edu.buffalo.cse.blue.pocketmocker")) {
+                        broadcastMock(mockLoc, eventType, status);
+                    }
                 }
             }
         }
@@ -392,11 +394,11 @@ public class LocationManager<ServiceConnection> {
     private long getLong(Bundle data, RequiredKey key) {
         return data.getLong(requiredKeys.get(key));
     }
-    
+
     private int getInt(Bundle data, RequiredKey key) {
         return data.getInt(requiredKeys.get(key));
     }
-    
+
     private Bundle getBundle(Bundle data, RequiredKey key) {
         return data.getBundle(requiredKeys.get(key));
     }
@@ -407,11 +409,11 @@ public class LocationManager<ServiceConnection> {
         for (LocationListener listener : mListeners.keySet()) {
             if (eventType.equals("onLocationChanged")) {
                 listener.onLocationChanged(loc);
-            } else if(eventType.equals("onProviderDisabled")) {
+            } else if (eventType.equals("onProviderDisabled")) {
                 listener.onProviderDisabled(loc.getProvider());
-            } else if(eventType.equals("onProviderEnabled")) {
+            } else if (eventType.equals("onProviderEnabled")) {
                 listener.onProviderEnabled(loc.getProvider());
-            } else if(eventType.equals("onStatusChanged")) {
+            } else if (eventType.equals("onStatusChanged")) {
                 listener.onStatusChanged(loc.getProvider(), status, loc.getExtras());
             }
         }
