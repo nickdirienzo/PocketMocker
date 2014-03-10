@@ -70,32 +70,35 @@ public class SystemSensorManager extends SensorManager {
     private Messenger mMockListener;
     private ServiceConnection mMockServiceConnection;
     private Messenger mMockSubscriber;
-    private boolean mIsReplaying;
+    private boolean mIsReplaying = false;
 
     private class MockSensorEventListener extends Handler {
         @Override
         public void handleMessage(Message msg) {
-            Bundle data = msg.getData();
-            if (data.containsKey("isReplaying")) {
-                mIsReplaying = data.getBoolean("isReplaying");
-            }
-            if (mIsReplaying) {
-                float[] values = data.getFloatArray("values");
-                Sensor sensor = getDefaultSensor(data.getInt("sensorType"));
-                int accuracy = data.getInt("accuracy");
-                long timestamp = data.getLong("timestamp");
-                String eventType = data.getString("eventType");
-                for (ListenerDelegate delegate : sListeners) {
-                    if (eventType.equals("onSensorChanged")) {
-                        SensorEvent sensorEvent = new SensorEvent(values, sensor, accuracy,
-                                timestamp);
-                        Log.v(PM_TAG, "Sending " + sensorEvent.toString() + " to "
-                                + delegate.mSensorEventListener.toString());
-                        delegate.mSensorEventListener.onSensorChanged(sensorEvent);
-                    } else if (eventType.equals("onAccuracyChanged")) {
-                        Log.v(PM_TAG, "Sending accuracy change for " + sensor.toString() + " of "
-                                + accuracy + " to " + delegate.mSensorEventListener.toString());
-                        delegate.mSensorEventListener.onAccuracyChanged(sensor, accuracy);
+            if (!mContext.getPackageName().equals("edu.buffalo.cse.blue.pocketmocker")) {
+                Bundle data = msg.getData();
+                if (data.containsKey("isReplaying")) {
+                    mIsReplaying = data.getBoolean("isReplaying");
+                }
+                if (mIsReplaying) {
+                    float[] values = data.getFloatArray("values");
+                    Sensor sensor = getDefaultSensor(data.getInt("sensorType"));
+                    int accuracy = data.getInt("accuracy");
+                    long timestamp = data.getLong("timestamp");
+                    String eventType = data.getString("eventType");
+                    for (ListenerDelegate delegate : sListeners) {
+                        if (eventType.equals("onSensorChanged")) {
+                            SensorEvent sensorEvent = new SensorEvent(values, sensor, accuracy,
+                                    timestamp);
+                            Log.v(PM_TAG, "Sending " + sensorEvent.toString() + " to "
+                                    + delegate.mSensorEventListener.toString());
+                            delegate.mSensorEventListener.onSensorChanged(sensorEvent);
+                        } else if (eventType.equals("onAccuracyChanged")) {
+                            Log.v(PM_TAG, "Sending accuracy change for " + sensor.toString()
+                                    + " of "
+                                    + accuracy + " to " + delegate.mSensorEventListener.toString());
+                            delegate.mSensorEventListener.onAccuracyChanged(sensor, accuracy);
+                        }
                     }
                 }
             }
@@ -242,7 +245,9 @@ public class SystemSensorManager extends SensorManager {
                             final int accuracy = mSensorAccuracies.get(handle);
                             if ((t.accuracy >= 0) && (accuracy != t.accuracy)) {
                                 mSensorAccuracies.put(handle, t.accuracy);
-                                if (!mIsReplaying) {
+                                if (!mIsReplaying
+                                        || mContext.getPackageName().equals(
+                                                "edu.buffalo.cse.blue.pocketmocker")) {
                                     mSensorEventListener.onAccuracyChanged(t.sensor, t.accuracy);
                                 }
                             }
@@ -256,7 +261,9 @@ public class SystemSensorManager extends SensorManager {
                             }
                             break;
                     }
-                    if (!mIsReplaying) {
+                    if (!mIsReplaying
+                            || mContext.getPackageName()
+                                    .equals("edu.buffalo.cse.blue.pocketmocker")) {
                         mSensorEventListener.onSensorChanged(t);
                     }
                     sPool.returnToPool(t);
