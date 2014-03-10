@@ -69,12 +69,13 @@ public class MockerService extends Service {
 
     /**
      * Mark the replayer thread id'ed by tag as being alive in our dead map.
+     * 
      * @param tag
      */
     public synchronized void signalAlive(String tag) {
         mDeadThreadMap.put(tag, false);
     }
-    
+
     /**
      * Called by our replay threads before they die. Once all are dead, we send
      * a termination message to all of our clients to signal the end of the
@@ -82,6 +83,7 @@ public class MockerService extends Service {
      */
     public synchronized void signalDeathAndMaybeBroadcastTermination(String tag) {
         mDeadThreadMap.put(tag, true);
+        Log.v(TAG, "signal death: " + mDeadThreadMap.toString());
         for (Boolean b : mDeadThreadMap.values()) {
             if (!b) {
                 return;
@@ -95,27 +97,28 @@ public class MockerService extends Service {
             try {
                 m.send(msg);
             } catch (RemoteException e) {
-                Log.w(TAG, "One of our location clients is dead and gone. Oh well.");
+                Log.v(TAG, "One of our location clients is dead and gone. Oh well.");
             }
         }
         for (Messenger m : sensorClients.values()) {
             try {
                 m.send(msg);
             } catch (RemoteException e) {
-                Log.w(TAG, "One of our sensor clients is dead and gone. Oh well.");
+                Log.v(TAG, "One of our sensor clients is dead and gone. Oh well.");
             }
         }
         for (Messenger m : wifiClients.values()) {
             try {
                 m.send(msg);
             } catch (RemoteException e) {
-                Log.w(TAG, "One of our wifi clients is dead and gone. Oh well.");
+                Log.v(TAG, "One of our wifi clients is dead and gone. Oh well.");
             }
         }
         try {
             mActivityMessenger.send(msg);
+            Log.v(TAG, "sent msg to activity");
         } catch (RemoteException e) {
-            Log.w(TAG, "Out activity messenger is dead and gone. Oh well.");
+            Log.v(TAG, "Out activity messenger is dead and gone. Oh well.");
         }
     }
 
@@ -148,11 +151,16 @@ public class MockerService extends Service {
         @Override
         public void handleMessage(Message msg) {
             Bundle data = msg.getData();
+            Log.v(TAG, "Received message from: " + data.getString(PACKAGE));
             // Initiate pub-sub between PM Activity and the Service so we don't
             // have to busy way
             if (validActivityObserver(data)) {
+                if (mActivityMessenger == null) {
+                    mActivityMessenger = msg.replyTo;
+                }
                 // The initiating connection will contain a replyTo. All other
                 // commands will not.
+                Log.v(TAG, "Action from PM: " + data.getInt(PM_ACTION_KEY));
                 switch (data.getInt(PM_ACTION_KEY)) {
                     case PM_ACTION_SUB:
                         mActivityMessenger = msg.replyTo;

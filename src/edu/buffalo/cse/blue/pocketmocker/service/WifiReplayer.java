@@ -61,7 +61,6 @@ public class WifiReplayer implements Runnable {
         // We only need to run for as long as we have scan results to send
         for (int i = 0; i < groupStartTimestamps.length; i++) {
             scanResults = mMockWifiManager.getCurrentRecordingScanResultsForGroup(i);
-            Log.v(TAG, "Sending results: " + scanResults.toString());
             broadcast(scanResults);
             if (i != groupStartTimestamps.length - 1) {
                 timeDelta = groupStartTimestamps[i + 1] - groupStartTimestamps[i];
@@ -69,12 +68,12 @@ public class WifiReplayer implements Runnable {
                 try {
                     Thread.sleep(timeDelta);
                 } catch (InterruptedException e) {
-                    // Just to be safe...
                     mMockerService.signalDeathAndMaybeBroadcastTermination(TAG);
-                    e.printStackTrace();
+                    break;
                 }
             }
         }
+        Log.v(TAG, "Died.");
         mMockerService.signalDeathAndMaybeBroadcastTermination(TAG);
     }
 }

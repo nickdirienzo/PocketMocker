@@ -51,23 +51,18 @@ public class MockSensorEventManager extends ModelManager {
         insertMockSensorEvent(m);
     }
 
-    public ArrayList<MockSensorEvent> getMockSensorEventsForRecording(long id) {
+    public ArrayList<MockSensorEvent> getMockSensorEventsForRecording(long recid) {
         ArrayList<MockSensorEvent> sensorEvents = new ArrayList<MockSensorEvent>();
         SQLiteDatabase db = manager.openDatabase();
         Cursor c = db.query(MockSensorEvent.TABLE_NAME, null, MockSensorEvent.COL_RECORDING + "=?",
                 new String[] {
-                    String.valueOf(id)
+                    String.valueOf(recid)
                 }, null,
                 null, MockSensorEvent.COL_EVENT_TIMESTAMP);
         if (c.moveToFirst()) {
             do {
-                String eventType = getString(c, MockSensorEvent.COL_EVENT_TYPE_INDEX);
-                int accuracy = getInt(c, MockSensorEvent.COL_EVENT_ACCURACY_INDEX);
-                int sensorType = getInt(c, MockSensorEvent.COL_EVENT_SENSOR_INDEX);
-                long timestamp = getLong(c, MockSensorEvent.COL_EVENT_TIMESTAMP_INDEX);
-                float[] values = deserialize(c.getString(MockSensorEvent.COL_EVENT_VALUES_INDEX));
-                sensorEvents.add(new MockSensorEvent(accuracy, sensorType,
-                        timestamp, values, id, eventType));
+                MockSensorEvent e = new MockSensorEvent(c);
+                sensorEvents.add(e);
             } while (c.moveToNext());
         }
         manager.closeDatabase();

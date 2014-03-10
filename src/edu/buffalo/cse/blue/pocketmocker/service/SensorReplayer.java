@@ -60,17 +60,20 @@ public class SensorReplayer implements Runnable {
         for (int i = 0; i < sensorEvents.size(); i++) {
             broadcastMockSensorEvent(sensorEvents.get(i));
             if (i != sensorEvents.size() - 1) {
-                timeDelta = sensorEvents.get(i + 1).getEventTimestamp()
-                        - sensorEvents.get(i).getEventTimestamp();
+                Log.v(TAG, "Next: " + sensorEvents.get(i + 1).getId() + " " + "Current: "
+                        + sensorEvents.get(i).getId());
+                timeDelta = sensorEvents.get(i + 1).getCreationTimestamp()
+                        - sensorEvents.get(i).getCreationTimestamp();
                 Log.v(TAG, "Waiting for: " + timeDelta);
                 try {
                     Thread.sleep(timeDelta);
                 } catch (InterruptedException e) {
                     mMockerService.signalDeathAndMaybeBroadcastTermination(TAG);
-                    e.printStackTrace();
+                    break;
                 }
             }
         }
+        Log.v(TAG, "Died .");
         mMockerService.signalDeathAndMaybeBroadcastTermination(TAG);
     }
 

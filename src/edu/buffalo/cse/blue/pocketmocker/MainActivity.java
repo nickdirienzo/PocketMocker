@@ -4,9 +4,11 @@ package edu.buffalo.cse.blue.pocketmocker;
 import android.app.Activity;
 import android.app.AlertDialog;
 import android.content.BroadcastReceiver;
+import android.content.ComponentName;
 import android.content.Context;
+import android.content.Intent;
 import android.content.IntentFilter;
-import android.graphics.Color;
+import android.content.ServiceConnection;
 import android.hardware.Sensor;
 import android.hardware.SensorEvent;
 import android.hardware.SensorEventListener;
@@ -14,11 +16,14 @@ import android.hardware.SensorManager;
 import android.location.Location;
 import android.location.LocationListener;
 import android.location.LocationManager;
-import android.net.wifi.ScanResult;
 import android.net.wifi.WifiManager;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.HandlerThread;
+import android.os.IBinder;
+import android.os.Message;
+import android.os.Messenger;
+import android.os.RemoteException;
 import android.telephony.NeighboringCellInfo;
 import android.telephony.TelephonyManager;
 import android.telephony.cdma.CdmaCellLocation;
@@ -51,15 +56,10 @@ public class MainActivity extends Activity {
 
     public static final String TAG = "PM";
 
-    private static final String LOCATION = "#FF0000";
-    private static final String SENSOR = "#00FF00";
-    private static final String NETWORK = "#0000FF";
-
     private PocketMockerApplication app;
 
     private TextView mLog;
     private Button recordButton;
-    private String locationPrefix;
 
     private Spinner objectivesSpinner;
     private boolean spinnerInitFlag;
@@ -85,6 +85,25 @@ public class MainActivity extends Activity {
     private WifiManager mWifiManager;
 
     private Random random;
+
+    private Messenger mMockerMessenger;
+    private ServiceConnection mMockerServiceConnection;
+    private Messenger mIncomingMessenger;
+    
+    class ReplayStateHandler extends Handler {
+        @Override
+        public void handleMessage(Message msg) {
+            Bundle data = msg.getData();
+            if(data.containsKey(MockerService.IS_REPLAYING)) {
+                boolean isReplaying = data.getBoolean(MockerService.IS_REPLAYING);
+                recordReplayManager.setIsReplaying(isReplaying);
+                app.setIsReplaying(isReplaying);
+                Button replayButton = (Button) findViewById(R.id.replay_button);
+                // We can only stop replaying from the service
+                replayButton.setText(R.string.replay);
+            }
+        }
+    }
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -150,13 +169,12 @@ public class MainActivity extends Activity {
             recordingManager.setCurrentRecordingId(objectives.get(0).getId());
         }
 
-        locationPrefix = this.getString(R.string.loc_prefix);
-        // locationText = (TextView) this.findViewById(R.id.locationText);
         recordButton = (Button) this.findViewById(R.id.record_button);
 
         initLocationManager();
         initSensorManager();
         mWifiManager = (WifiManager) this.getSystemService(Context.WIFI_SERVICE);
+        initMockerServiceMessenger();
 
         TelephonyManager tel = (TelephonyManager) this.getSystemService(Context.TELEPHONY_SERVICE);
         List<NeighboringCellInfo> towers = tel.getNeighboringCellInfo();
@@ -172,6 +190,29 @@ public class MainActivity extends Activity {
                             + info.getNetworkType() + " psc: " + info.getPsc() + " rssi: "
                             + info.getRssi());
         }
+    }
+
+    private void initMockerServiceMessenger() {
+        mMockerServiceConnection = new ServiceConnection() {
+
+            @Override
+            public void onServiceConnected(ComponentName className, IBinder service) {
+                mMockerMessenger = new Messenger(service);
+            }
+
+            @Override
+            public void onServiceDisconnected(ComponentName className) {
+                doBindService();
+            }
+
+        };
+        doBindService();
+        mIncomingMessenger = new Messenger(new ReplayStateHandler());
+    }
+    
+    private void doBindService() {
+        this.bindService(new Intent(this, MockerService.class), mMockerServiceConnection,
+                Context.BIND_AUTO_CREATE);
     }
 
     @Override
@@ -214,10 +255,10 @@ public class MainActivity extends Activity {
             }
         });
         sv.post(new Runnable() {
-           @Override
-           public void run() {
-               sv.fullScroll(ScrollView.FOCUS_DOWN);
-           }
+            @Override
+            public void run() {
+                sv.fullScroll(ScrollView.FOCUS_DOWN);
+            }
         });
     }
 
@@ -404,14 +445,27 @@ public class MainActivity extends Activity {
     }
 
     public void replayButtonClicked(View v) {
-        // TODO: Set up pub-sub between MainActivity and MockerService
+        Message m = Message.obtain();
+        m.replyTo = this.mIncomingMessenger;
+        Bundle b = new Bundle();
+        b.putString(MockerService.PACKAGE, this.getPackageName());
         Button replayButton = (Button) v;
+        Log.v(TAG, "replayButton: " + replayButton.getText());
         if (replayButton.getText().equals(this.getString(R.string.replay))) {
             Log.v(TAG, "Stop replaying.");
             replayButton.setText(R.string.stop_replaying);
+            b.putInt(MockerService.PM_ACTION_KEY, MockerService.PM_ACTION_START_REPLAY);
         } else {
             Log.v(TAG, "Start replaying.");
             replayButton.setText(R.string.replay);
+            b.putInt(MockerService.PM_ACTION_KEY, MockerService.PM_ACTION_STOP_REPLAY);
+        }
+        m.setData(b);
+        try {
+            mMockerMessenger.send(m);
+        } catch (RemoteException e) {
+            Log.v(TAG, "RemoteException", e);
+            e.printStackTrace();
         }
         recordReplayManager.toggleReplaying();
     }
@@ -434,12 +488,6 @@ public class MainActivity extends Activity {
         recordReplayManager.setIsRecording(true);
         app.setIsRecording(true);
         this.toggleRecordingButton();
-    }
-
-    public void insertWifiScanResults(View view) {
-        mockWifiManager.enableGrouping();
-        mockWifiManager.addScanResults(mWifiManager.getScanResults());
-        mockWifiManager.disableGrouping();
     }
 
 }

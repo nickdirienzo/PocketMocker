@@ -77,12 +77,12 @@ public class LocationReplayer implements Runnable {
                 try {
                     Thread.sleep(timeDelta);
                 } catch (InterruptedException e) {
-                    // Just to be safe
                     mMockerService.signalDeathAndMaybeBroadcastTermination(TAG);
-                    e.printStackTrace();
+                    break;
                 }
             }
         }
+        Log.v(TAG, "Died .");
         mMockerService.signalDeathAndMaybeBroadcastTermination(TAG);
     }
 
