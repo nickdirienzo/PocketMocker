@@ -84,6 +84,7 @@ public class TelephonyManager {
                 Bundle data = msg.getData();
                 if (data.containsKey("isReplaying")) {
                     mIsReplaying = data.getBoolean("isReplaying");
+                    Log.v(PM_TAG, "isReplaying: " + mIsReplaying);
                 }
                 if (mIsReplaying) {
                     // Well, this was the easiest one to mock so far.
@@ -117,7 +118,7 @@ public class TelephonyManager {
                     Message sMsg = Message.obtain();
                     sMsg.replyTo = mMockListener;
                     Bundle data = new Bundle();
-                    data.putString("package", sContext.getPackageName() + "_wifi");
+                    data.putString("package", sContext.getPackageName() + "_tele");
                     sMsg.setData(data);
                     try {
                         mMockSubscriber.send(sMsg);
