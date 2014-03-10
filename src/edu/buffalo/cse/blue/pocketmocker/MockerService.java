@@ -12,6 +12,7 @@ import android.os.Messenger;
 import android.os.RemoteException;
 import android.util.Log;
 
+import edu.buffalo.cse.blue.pocketmocker.service.CellLocationReplayer;
 import edu.buffalo.cse.blue.pocketmocker.service.LocationReplayer;
 import edu.buffalo.cse.blue.pocketmocker.service.SensorReplayer;
 import edu.buffalo.cse.blue.pocketmocker.service.WifiReplayer;
@@ -31,6 +32,7 @@ public class MockerService extends Service {
     public static final String LOCATION_SUFFIX = "location";
     public static final String SENSOR_SUFFIX = "sensor";
     public static final String WIFI_SUFFIX = "wifi";
+    public static final String TELE_SUFFIX = "tele";
     public static final String IS_REPLAYING = "isReplaying";
 
     private final Messenger messenger = new Messenger(new SubscriberHandler(this));
@@ -38,11 +40,13 @@ public class MockerService extends Service {
     private final HashMap<String, Messenger> locationClients = new HashMap<String, Messenger>();
     private final HashMap<String, Messenger> sensorClients = new HashMap<String, Messenger>();
     private final HashMap<String, Messenger> wifiClients = new HashMap<String, Messenger>();
+    private final HashMap<String, Messenger> teleClients = new HashMap<String, Messenger>();
 
     private Messenger mActivityMessenger;
     private Thread mLocationReplayThread;
     private Thread mSensorReplayThread;
     private Thread mWifiReplayThread;
+    private Thread mCellLocationReplayThread;
     private final HashMap<String, Boolean> mDeadThreadMap = new HashMap<String, Boolean>();
 
     @Override
@@ -65,6 +69,10 @@ public class MockerService extends Service {
 
     public HashMap<String, Messenger> getWifiClients() {
         return wifiClients;
+    }
+
+    public HashMap<String, Messenger> getTeleClients() {
+        return teleClients;
     }
 
     /**
@@ -112,6 +120,13 @@ public class MockerService extends Service {
                 m.send(msg);
             } catch (RemoteException e) {
                 Log.v(TAG, "One of our wifi clients is dead and gone. Oh well.");
+            }
+        }
+        for (Messenger m : teleClients.values()) {
+            try {
+                m.send(msg);
+            } catch (RemoteException e) {
+                Log.v(TAG, "One of our tele clients is dead and gone. Oh well.");
             }
         }
         try {
@@ -169,15 +184,19 @@ public class MockerService extends Service {
                         mLocationReplayThread = new Thread(new LocationReplayer(mMockerService));
                         mSensorReplayThread = new Thread(new SensorReplayer(mMockerService));
                         mWifiReplayThread = new Thread(new WifiReplayer(mMockerService));
+                        mCellLocationReplayThread = new Thread(new CellLocationReplayer(
+                                mMockerService));
                         mLocationReplayThread.start();
                         mSensorReplayThread.start();
                         mWifiReplayThread.start();
+                        mCellLocationReplayThread.start();
                         break;
                     case PM_ACTION_STOP_REPLAY:
                         // User prematurely stops replaying
                         mLocationReplayThread.interrupt();
                         mSensorReplayThread.interrupt();
                         mWifiReplayThread.interrupt();
+                        mCellLocationReplayThread.interrupt();
                         break;
                 }
             } else { // Assume it's a platform subscriber
@@ -193,6 +212,9 @@ public class MockerService extends Service {
                         } else if (packageParts[1].equals(WIFI_SUFFIX)) {
                             Log.v(TAG, "wifi client: " + clientPackage);
                             wifiClients.put(clientPackage, msg.replyTo);
+                        } else if (packageParts[1].equals(TELE_SUFFIX)) {
+                            Log.v(TAG, "tele client: " + clientPackage);
+                            teleClients.put(clientPackage, msg.replyTo);
                         }
                     }
                 }

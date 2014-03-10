@@ -31,7 +31,7 @@ public class SensorReplayer implements Runnable {
         Bundle data = new Bundle();
         Log.v(TAG, "We have a sensor event to mock.");
         data = e.toBundle(System.currentTimeMillis());
-        data.putBoolean("isReplaying", true);
+        data.putBoolean(MockerService.IS_REPLAYING, true);
         long id = e.getId();
         data.putLong("mockId", id);
         Message mockMessage = Message.obtain();

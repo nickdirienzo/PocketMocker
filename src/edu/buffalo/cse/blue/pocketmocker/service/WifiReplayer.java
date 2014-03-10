@@ -30,7 +30,7 @@ public class WifiReplayer implements Runnable {
     private void sendMockScanResults(ArrayList<MockScanResult> result, Messenger m) {
         Bundle data = new Bundle();
         data.putInt("size", result.size());
-        data.putBoolean("isReplaying", true);
+        data.putBoolean(MockerService.IS_REPLAYING, true);
         for (int i = 0; i < result.size(); i++) {
             data.putBundle(String.valueOf(i), result.get(i)
                     .toBundle(System.currentTimeMillis()));

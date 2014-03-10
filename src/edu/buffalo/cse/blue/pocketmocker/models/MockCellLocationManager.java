@@ -45,5 +45,9 @@ public class MockCellLocationManager extends ModelManager {
         manager.closeDatabase();
         return cellLocations;
     }
+    
+    public ArrayList<MockCellLocation> getCellLocationsForCurrentRecording() {
+        return getCellLocationsForRecording(recordingManager.getCurrentRecordingId());
+    }
 
 }

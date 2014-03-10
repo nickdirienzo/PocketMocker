@@ -42,7 +42,7 @@ public class LocationReplayer implements Runnable {
         Log.v(TAG, "We have a location to mock!");
         data = mLoc.toBundle(System.currentTimeMillis());
         data.putBoolean("hasLocation", true);
-        data.putBoolean("isReplaying", true);
+        data.putBoolean(MockerService.IS_REPLAYING, true);
         long id = mLoc.getId();
         data.putLong("mockId", id);
         Message reply = Message.obtain();
