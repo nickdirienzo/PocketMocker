@@ -11,6 +11,7 @@ import android.os.Message;
 import android.os.Messenger;
 import android.os.RemoteException;
 import android.util.Log;
+import android.widget.Toast;
 
 import edu.buffalo.cse.blue.pocketmocker.service.CellLocationReplayer;
 import edu.buffalo.cse.blue.pocketmocker.service.LocationReplayer;
@@ -98,6 +99,7 @@ public class MockerService extends Service {
             }
         }
         broadcastTermination();
+        // TODO: Hide the notifcation tray item
     }
 
     private void broadcastMessage(Message msg) {
@@ -181,6 +183,9 @@ public class MockerService extends Service {
                         mActivityMessenger = msg.replyTo;
                         break;
                     case PM_ACTION_START_REPLAY:
+                        Toast.makeText(getApplicationContext(), "Start mocking!", Toast.LENGTH_LONG)
+                                .show();
+                        // TODO: Create a notification tray item
                         mLocationReplayThread = new Thread(new LocationReplayer(mMockerService));
                         mSensorReplayThread = new Thread(new SensorReplayer(mMockerService));
                         mWifiReplayThread = new Thread(new WifiReplayer(mMockerService));
