@@ -2,6 +2,7 @@
 package edu.buffalo.cse.blue.pocketmocker.models;
 
 import android.content.ContentValues;
+import android.database.Cursor;
 import android.os.Bundle;
 import android.telephony.cdma.CdmaCellLocation;
 
@@ -71,6 +72,17 @@ public class MockCellLocation extends TimestampModel {
         baseStationLong = loc.getBaseStationLongitude();
         systemId = loc.getSystemId();
         networkId = loc.getNetworkId();
+    }
+
+    public MockCellLocation(Cursor c) {
+        id = ModelManager.getLong(c, COL_ID_INDEX);
+        creationTimestamp = ModelManager.getLong(c, COL_CREATION_TIMESTAMP_INDEX);
+        recId = ModelManager.getLong(c, COL_RECORDING_INDEX);
+        baseStationId = ModelManager.getInt(c, COL_STATION_ID_INDEX);
+        baseStationLat = ModelManager.getInt(c, COL_STATION_LAT_INDEX);
+        baseStationLong = ModelManager.getInt(c, COL_STATION_LONG_INDEX);
+        systemId = ModelManager.getInt(c, COL_SYSTEM_ID_INDEX);
+        networkId = ModelManager.getInt(c, COL_NETWORK_ID_INDEX);
     }
 
     public long getId() {

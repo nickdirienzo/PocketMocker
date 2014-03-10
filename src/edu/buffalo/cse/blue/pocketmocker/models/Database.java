@@ -37,6 +37,10 @@ public class Database extends SQLiteOpenHelper {
 		return database;
 	}
 	
+	/**
+	 * CALL THIS METHOD TO CLOSE YOUR DATABASE CONNECTION. 
+	 * DO NOT USE CLOSE().
+	 */
 	public synchronized void closeDatabase() {
 		if(dbRefCount.decrementAndGet() == 0) {
 			database.close();
