@@ -216,15 +216,6 @@ public class MainActivity extends Activity {
     }
 
     @Override
-    protected void onResume() {
-        super.onResume();
-        // This is safe. We shouldn't record if the RecordActivity isn't in the
-        // foreground.
-        this.stopLocationListener();
-        this.stopSensorListener();
-    }
-
-    @Override
     public boolean onCreateOptionsMenu(Menu menu) {
         // Inflate the menu; this adds items to the action bar if it is present.
         getMenuInflater().inflate(R.menu.main, menu);
